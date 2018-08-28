@@ -1,0 +1,17 @@
+{
+  "name": "lightonlinejudge",
+  "version": "1.0.0",
+  "description": "Light-weight Online Judge Platform",
+  "main": "dist/index.js",
+  "repository": "https://github.com/ZhangZisu/LightOnlineJudge",
+  "author": "ZhangZisu",
+  "license": "Apache-2.0",
+  "private": false,
+  "dependencies": {
+    "@types/express": "^4.16.0",
+    "@types/mongodb": "^3.1.4",
+    "@types/mongoose": "^5.2.7",
+    "express": "^4.16.3",
+    "mongoose": "^5.2.10"
+  }
+}
