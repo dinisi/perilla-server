@@ -1,6 +1,6 @@
 import { Document, Schema, Model, model } from 'mongoose';
 import * as access from './problemAccess';
-import * as vr from '../interfaces/verifyResult';
+import { verifyResult } from '../interfaces/verifyResult';
 
 export interface ProblemModel extends Document {
     title: string,
@@ -8,7 +8,7 @@ export interface ProblemModel extends Document {
     data: any,
     tags: string[],
     owner: string,
-    verifyAccess(roleID: string, request: string): Promise<vr.verifyResult>
+    verifyAccess(roleID: string, request: string): Promise<verifyResult>
 };
 
 export let ProblemSchema: Schema = new Schema(
@@ -24,11 +24,11 @@ export let ProblemSchema: Schema = new Schema(
 ProblemSchema.methods.verifyAccess = async function (roleID: string, request: string) {
     try {
         let data: access.ProblemAccessModel = await access.ProblemAccess.findOne().where('roleID').equals(roleID).exec();
-        if (!data) return vr.verifyResult.Deny;
-        if (data.config[request]) return vr.verifyResult.Approve;
-        return vr.verifyResult.Deny;
+        if (!data) return verifyResult.Deny;
+        if (data.config[request]) return verifyResult.Approve;
+        return verifyResult.Deny;
     } catch (e) {
-        return vr.verifyResult.Deny;
+        return verifyResult.Deny;
     }
 }
 
