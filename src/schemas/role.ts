@@ -1,42 +1,34 @@
-import { Document, Schema, Model, model } from 'mongoose';
-import { verifyResult } from '../definitions/verifyResult';
+import { Document, Model, model, Schema } from "mongoose";
+import { ICommonAccess } from "../definitions/access/common";
 
-export interface CommonAccess {
-    createUser: boolean,
-    modifyUser: boolean,
-    deleteUser: boolean,
-    createRole: boolean,
-    modifyRole: boolean,
-    deleteRole: boolean
-}
-
-export let defaultCommonAccess: CommonAccess = {
-    createUser: false,
-    modifyUser: false,
-    deleteUser: false,
+export let defaultCommonAccess: ICommonAccess = {
     createRole: false,
-    modifyRole: false,
+    createUser: false,
     deleteRole: false,
+    deleteUser: false,
+    modifyRole: false,
+    modifyUser: false,
 };
 
-export interface RoleModel extends Document {
-    rolename: string,
-    description: string,
-    config: CommonAccess,
-    verifyAccess(request: string): verifyResult
-};
+export interface IRoleModel extends Document {
+    rolename: string;
+    description: string;
+    config: ICommonAccess;
+    _protected: boolean;
+}
 
 export let RoleSchema: Schema = new Schema(
     {
-        rolename: { type: String, unique: true, required: true },
+        _protected: { type: Boolean, required: true, default: false },
+        config: { type: Object, required: true, default: defaultCommonAccess },
         description: { type: String, required: true, default: "" },
-        config: { type: Object, required: true, default: defaultCommonAccess }
-    }
+        rolename: { type: String, unique: true, required: true },
+    },
 );
 
-RoleSchema.methods.verifyAccess = function (request: string) {
-    if (this.config[request]) return verifyResult.Approve;
-    return verifyResult.Deny;
-}
+RoleSchema.pre("remove", function(next) {
+    if ((this as any)._protected) { return; }
+    next();
+});
 
-export const Role: Model<RoleModel> = model<RoleModel>('Role', RoleSchema);
+export const Role: Model<IRoleModel> = model<IRoleModel>("Role", RoleSchema);

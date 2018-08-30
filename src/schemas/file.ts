@@ -1,21 +1,56 @@
-import { Document, Schema, Model, model } from 'mongoose';
-import { verifyResult } from '../definitions/verifyResult';
-import { FileAccessModel, FileAccess } from './fileAccess';
+import { ensureDirSync } from "fs-extra";
+import { Document, Model, model, Schema } from "mongoose";
+import { join } from "path";
+import { config } from "../config";
+import { FileAccess } from "./fileAccess";
+ensureDirSync("files/managed");
 
-export interface FileModel extends Document {
-    filename: string,
-    path: string,
-    hash: string,
-    owner: string
+export interface IBFileModel extends Document {
+    hash: string;
+    owner: string;
+    created?: Date;
+    contentType?: string;
+    permaLink?: string;
+    getPath(): string;
 }
 
-export let FileSchema = new Schema(
+export let BFileSchema = new Schema(
     {
-        filename: String,
-        path: String,
-        hash: String,
-        owner: String
-    }
+        contentType: String,
+        created: Date,
+        hash: { type: String, required: true },
+        owner: { type: String, required: true },
+        permaLink: String,
+    },
 );
 
-export const File: Model<FileModel> = model<FileModel>('File', FileSchema);
+BFileSchema.methods.getPath = function() {
+    return join("files/managed", this._id.toString());
+};
+
+BFileSchema.pre("save", async function(next) {
+    if (!(this as IBFileModel).created) {
+        (this as IBFileModel).created = new Date();
+        const adminAccess = new FileAccess();
+        adminAccess.roleID = config.defaultAdminRoleID;
+        adminAccess.fileID = this._id;
+        adminAccess.config = { read: true, modify: true };
+        adminAccess._protected = true;
+        await adminAccess.save();
+
+        const judgerAccess = new FileAccess();
+        judgerAccess.roleID = config.defaultJudgerRoleID;
+        judgerAccess.fileID = this._id;
+        judgerAccess.config = { read: true, modify: false };
+        judgerAccess._protected = true;
+        await judgerAccess.save();
+    }
+    next();
+});
+
+BFileSchema.pre("remove", async function(next) {
+    await FileAccess.remove({ fileID: this._id }).exec();
+    next();
+});
+
+export const BFile: Model<IBFileModel> = model<IBFileModel>("File", BFileSchema);

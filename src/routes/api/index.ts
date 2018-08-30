@@ -3,4 +3,4 @@ import { FileRouter } from "./file";
 
 export let APIRouter = Router();
 
-APIRouter.use('/file', FileRouter);
+APIRouter.use("/file", FileRouter);
