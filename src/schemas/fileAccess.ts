@@ -1,5 +1,4 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { runInNewContext } from "vm";
 
 export interface IFileAccessConfig {
     read: boolean;

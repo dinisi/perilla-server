@@ -1,5 +1,5 @@
 import { Response, Router } from "express";
-import { ensureDirSync, exists, existsSync, move, unlink, unlinkSync } from "fs-extra";
+import { ensureDirSync, existsSync, move, unlink } from "fs-extra";
 import * as path from "path";
 import { ServerError } from "../../definitions/errors";
 import { IAuthorizedRequest, IFileRequest } from "../../definitions/requests";

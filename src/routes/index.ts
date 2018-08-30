@@ -14,7 +14,7 @@ MainRouter.get("/rolesof", async (req, res) => {
     try {
         const username: string = req.query.username;
         const user = await User.findOne({ username });
-        if (!user) { throw new ServerError("Not found", 403); }
+        if (!user) { throw new ServerError("Not found", 404); }
         const roles = await Role.find().where("_id").in(user.roles).select("-_id rolename description").exec();
         res.send(roles);
     } catch (e) {
@@ -30,11 +30,11 @@ MainRouter.post("/login", async (req, res) => {
     try {
         if (req.headers.authorization) { throw new ServerError("Already logged in", 403); }
         const user = await User.findOne().where("username").equals(req.body.username).exec();
-        if (!user) { throw new ServerError("Not found", 403); }
+        if (!user) { throw new ServerError("Not found", 404); }
         // 防止傻逼爆密码
         if (!user.validPassword(req.body.password)) { throw new ServerError("Unknow Error", 500); }
         const role = await Role.findOne().where("rolename").equals(req.body.rolename).where("_id").in(user.roles).exec();
-        if (!role) { throw new ServerError("Not found", 403); }
+        if (!role) { throw new ServerError("Not found", 404); }
         const client: IClient = {
             RoleID: role._id.toString(),
             UserID: user._id.toString(),
