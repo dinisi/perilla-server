@@ -21,3 +21,5 @@ export let SolutionSchema: Schema = new Schema(
         status: { type: String, required: true, default: "Waiting" },
     },
 );
+
+export const Solution: Model<ISolutionModel> = model<ISolutionModel>("Solution", SolutionSchema);
