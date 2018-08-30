@@ -1,5 +1,5 @@
 import { Document, Schema, Model, model } from 'mongoose';
-import { verifyResult } from '../interfaces/verifyResult';
+import { verifyResult } from '../definitions/verifyResult';
 import { FileAccessModel, FileAccess } from './fileAccess';
 
 export interface FileModel extends Document {
