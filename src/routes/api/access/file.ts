@@ -8,7 +8,7 @@ export let FileAccessRouter = Router();
 
 FileAccessRouter.use("/:id", async (req, res, next) => {
     try {
-        if (!(await BFile.count({ _id: req.params.id }))) { throw new ServerError("Not found", 404); }
+        if (!(await BFile.countDocuments({ _id: req.params.id }))) { throw new ServerError("Not found", 404); }
         next();
     } catch (e) {
         if (e instanceof ServerError) {
@@ -34,7 +34,7 @@ FileAccessRouter.get("/:id", async (req, res) => {
 
 FileAccessRouter.use("/:id/:role", async (req, res, next) => {
     try {
-        if (!(await Role.count({ _id: req.params.role }))) { throw new ServerError("Not found", 404); }
+        if (!(await Role.countDocuments({ _id: req.params.role }))) { throw new ServerError("Not found", 404); }
         next();
     } catch (e) {
         if (e instanceof ServerError) {
