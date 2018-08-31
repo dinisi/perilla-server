@@ -15,7 +15,7 @@ MainRouter.get("/rolesof", async (req, res) => {
         const username: string = req.query.username;
         const user = await User.findOne({ username });
         if (!user) { throw new ServerError("Not found", 404); }
-        const roles = await Role.find().where("_id").in(user.roles).select("-_id rolename description").exec();
+        const roles = await Role.find().where("_id").in(user.roles).select("_id rolename description").exec();
         res.send(roles);
     } catch (e) {
         if (e instanceof ServerError) {

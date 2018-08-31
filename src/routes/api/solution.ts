@@ -28,7 +28,7 @@ SolutionRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
 
 SolutionRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const solutions = await Solution.find().select("owner problemID status").exec();
+        const solutions = await Solution.find().select("_id owner problemID created").exec();
         res.send(solutions);
     } catch (e) {
         if (e instanceof ServerError) {

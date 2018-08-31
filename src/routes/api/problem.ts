@@ -27,7 +27,7 @@ ProblemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
 
 ProblemRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const problems = await Problem.find().select("_id title tags").exec();
+        const problems = await Problem.find().select("_id title tags owner created").exec();
         res.send(problems);
     } catch (e) {
         if (e instanceof ServerError) {
