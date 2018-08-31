@@ -5,10 +5,15 @@ import { Role } from "../../schemas/role";
 
 export let RoleRouter = Router();
 
-RoleRouter.post("/generate", async (req: IAuthorizedRequest, res: Response) => {
+RoleRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
         if (!req.commonAccess.createRole) { throw new ServerError("No access", 403); }
-        // TODO
+        const role = new Role();
+        role.rolename = req.body.rolename;
+        role.description = req.body.description;
+        role.config = req.body.config;
+        await role.save();
+        res.send(role._id);
     } catch (e) {
         if (e instanceof ServerError) {
             res.status(e.code).send(e.message);

@@ -1,6 +1,7 @@
 import { Response, Router } from "express";
 import { ServerError } from "../../definitions/errors";
 import { IAuthorizedRequest } from "../../definitions/requests";
+import { Role } from "../../schemas/role";
 import { User } from "../../schemas/user";
 
 export let UserRouter = Router();
@@ -50,7 +51,18 @@ UserRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
         const user = await User.findOne({ _id: req.params.id });
         if (!user) { throw new ServerError("Not found", 404); }
         if (user._protected) { throw new ServerError("Object is protected", 403); }
-        // TODO
+        user.realname = req.body.realname;
+        user.email = req.body.email;
+        user.bio = req.body.bio;
+        if (req.commonAccess.modifyUser) {
+            user.roles.splice(0, user.roles.length);
+            for (const id of req.body.roles) {
+                if (Role.countDocuments({ _id: id })) {
+                    user.roles.push(id);
+                }
+            }
+        }
+        await user.save();
         res.send("success");
     } catch (e) {
         if (e instanceof ServerError) {
