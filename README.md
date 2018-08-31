@@ -31,8 +31,8 @@ Light-weight Online Judge Platform
 |用户生成|`/api/user/generate`|`POST`|NO|`ICommonAccess.createUser`|
 |用户列表|`/api/user/list`|`GET`|NO|`login`|
 |用户信息|`/api/user/:id`|`GET`|NO|`login`|
-|用户修改|`/api/user/:id`|`POST`|NO|`ICommonAccess.modifyUser || ID match`|
-|用户删除|`/api/user/:id`|`DELETE`|NO|`ICommonAccess.modifyUser || ID match`|
+|用户修改|`/api/user/:id`|`POST`|NO|`ICommonAccess.modifyUser or ID match`|
+|用户删除|`/api/user/:id`|`DELETE`|NO|`ICommonAccess.modifyUser or ID match`|
 |角色生成|`/api/role/generate`|`POST`|NO|`ICommonAccess.createRole`|
 |角色列表|`/api/role/list`|`GET`|NO|`login`|
 |角色信息|`/api/role/:id`|`GET`|NO|`login`|
