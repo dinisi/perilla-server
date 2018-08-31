@@ -21,6 +21,6 @@ export const setClient = async (client: IClient, expire: number) => {
     if (expire >= 0) { await instance.expireAsync(client.accessToken, expire); }
 };
 
-export const addJudgeTask = async (taskID: string, priority: number) => {
-    await instance.zadd("judgeTask", priority, taskID);
+export const addJudgeTask = async (taskID: string) => {
+    await instance.lpush("judgeTask", taskID);
 };
