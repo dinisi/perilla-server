@@ -1,14 +1,6 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { ICommonAccess } from "../definitions/access/common";
-
-export let defaultCommonAccess: ICommonAccess = {
-    createRole: false,
-    createUser: false,
-    deleteRole: false,
-    deleteUser: false,
-    modifyRole: false,
-    modifyUser: false,
-};
+import { config } from "../config";
+import { ICommonAccess } from "../definitions/access";
 
 export interface IRoleModel extends Document {
     rolename: string;
@@ -20,7 +12,7 @@ export interface IRoleModel extends Document {
 export let RoleSchema: Schema = new Schema(
     {
         _protected: { type: Boolean, required: true, default: false },
-        config: { type: Object, required: true, default: defaultCommonAccess },
+        config: { type: Object, required: true, default: config.defaultCommonAccess },
         description: { type: String, required: true, default: "" },
         rolename: { type: String, unique: true, required: true },
     },

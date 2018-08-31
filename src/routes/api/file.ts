@@ -14,6 +14,7 @@ export let FileRouter = Router();
 
 FileRouter.post("/upload", upload.array("files", 128), async (req: IAuthorizedRequest, res: Response) => {
     try {
+        if (!req.commonAccess.createFile) { throw new ServerError("Access denied", 403); }
         const result = [];
         for (const file of req.files as Express.Multer.File[]) {
             const bfile = new BFile();

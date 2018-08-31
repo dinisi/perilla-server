@@ -9,6 +9,8 @@ import { IUserModel, User } from "./schemas/user";
 (async () => {
     const defaultConfig: ISystemConfig = {} as ISystemConfig;
     defaultConfig.defaultCommonAccess = {
+        createFile: true,
+        createProblem: true,
         createRole: false,
         createUser: false,
         deleteRole: false,
@@ -16,6 +18,9 @@ import { IUserModel, User } from "./schemas/user";
         modifyRole: false,
         modifyUser: false,
     };
+    defaultConfig.defaultFileAccess = { read: false, modify: false };
+    defaultConfig.defaultProblemAccess = { read: false, modifyContent: false, modifyData: false, modifyTag: false, remove: false, submit: false };
+    defaultConfig.defaultSolutionAccess = { readStatus: false, readResult: false, rejudge: false, remove: false };
     fs.writeFileSync("config.json", JSON.stringify(defaultConfig));
     reloadConfig();
 
@@ -23,6 +28,8 @@ import { IUserModel, User } from "./schemas/user";
     defaultAdminRole.rolename = "Administrators";
     defaultAdminRole.description = "System administrators";
     defaultAdminRole.config = {
+        createFile: true,
+        createProblem: true,
         createRole: true,
         createUser: true,
         deleteRole: true,
@@ -38,6 +45,8 @@ import { IUserModel, User } from "./schemas/user";
     defaultJudgerRole.rolename = "Judgers";
     defaultJudgerRole.description = "System judgers";
     defaultJudgerRole.config = {
+        createFile: false,
+        createProblem: false,
         createRole: false,
         createUser: false,
         deleteRole: false,
@@ -52,14 +61,6 @@ import { IUserModel, User } from "./schemas/user";
     const defaultUserRole: IRoleModel = new Role();
     defaultUserRole.rolename = "Users";
     defaultUserRole.description = "System users";
-    defaultUserRole.config = {
-        createRole: false,
-        createUser: false,
-        deleteRole: false,
-        deleteUser: false,
-        modifyRole: false,
-        modifyUser: false,
-    };
     defaultUserRole._protected = true;
     await defaultUserRole.save();
     defaultConfig.defaultUserRoleID = defaultUserRole._id;

@@ -1,4 +1,4 @@
-import { ICommonAccess } from "./access/common";
+import { ICommonAccess, IFileAccessConfig, IProblemAccessConfig, ISolutionAccessConfig } from "./access";
 
 export interface ISystemConfig {
     defaultAdminUserID: string;
@@ -7,4 +7,7 @@ export interface ISystemConfig {
     defaultJudgerRoleID: string;
     defaultUserRoleID: string;
     defaultCommonAccess: ICommonAccess;
+    defaultFileAccess: IFileAccessConfig;
+    defaultProblemAccess: IProblemAccessConfig;
+    defaultSolutionAccess: ISolutionAccessConfig;
 }

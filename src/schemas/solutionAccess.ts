@@ -1,11 +1,6 @@
 import { Document, Model, model, Schema } from "mongoose";
-
-export interface ISolutionAccessConfig {
-    readStatus: boolean;
-    readResult: boolean;
-    rejudge: boolean;
-    remove: boolean;
-}
+import { config } from "../config";
+import { ISolutionAccessConfig } from "../definitions/access";
 
 export interface ISolutionAccessModel extends Document {
     roleID: string;
@@ -17,7 +12,7 @@ export interface ISolutionAccessModel extends Document {
 export let SolutionAccessSchema = new Schema(
     {
         _protected: { type: Boolean, required: true, default: false },
-        config: { type: Object, required: true, default: { readStatus: false, readResult: false, rejudge: false, remove: false } },
+        config: { type: Object, required: true, default: config.defaultSolutionAccess },
         roleID: { type: String, required: true },
         solutionID: { type: String, required: true },
     },

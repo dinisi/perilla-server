@@ -63,6 +63,8 @@ MainRouter.use(
             if (!(valid === req.query.v)) { throw new ServerError("Access denied", 403); }
             req.userID = client.UserID;
             req.roleID = client.RoleID;
+            const role = await Role.findOne({ _id: client.RoleID });
+            req.commonAccess = role.config;
             next();
         } catch (e) {
             if (e instanceof ServerError) {

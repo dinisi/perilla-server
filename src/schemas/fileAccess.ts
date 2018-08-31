@@ -1,9 +1,6 @@
 import { Document, Model, model, Schema } from "mongoose";
-
-export interface IFileAccessConfig {
-    read: boolean;
-    modify: boolean;
-}
+import { config } from "../config";
+import { IFileAccessConfig } from "../definitions/access";
 
 export interface IFileAccessModel extends Document {
     roleID: string;
@@ -15,7 +12,7 @@ export interface IFileAccessModel extends Document {
 export let FileAccessSchema = new Schema(
     {
         _protected: { type: Boolean, required: true, default: false },
-        config: { type: Object, required: true, default: { read: false, modify: false } },
+        config: { type: Object, required: true, default: config.defaultFileAccess },
         fileID: { type: String, required: true },
         roleID: { type: String, required: true },
     },

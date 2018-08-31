@@ -21,7 +21,7 @@ FileAccessRouter.use("/:id", async (req, res, next) => {
 
 FileAccessRouter.get("/:id", async (req, res) => {
     try {
-        const accesses = await FileAccess.find({ fileID: req.params.id }).select("config roleID").exec();
+        const accesses = await FileAccess.find({ fileID: req.params.id }).select("-_id config roleID").exec();
         res.send(accesses);
     } catch (e) {
         if (e instanceof ServerError) {
