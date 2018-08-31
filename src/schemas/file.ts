@@ -8,9 +8,9 @@ ensureDirSync("files/managed");
 export interface IBFileModel extends Document {
     hash: string;
     owner: string;
+    description: string;
     created?: Date;
     contentType?: string;
-    permaLink?: string;
     getPath(): string;
 }
 
@@ -18,9 +18,9 @@ export let BFileSchema = new Schema(
     {
         contentType: String,
         created: Date,
+        description: {type: String, required: true, default: "No description"},
         hash: { type: String, required: true },
         owner: { type: String, required: true },
-        permaLink: String,
     },
 );
 
