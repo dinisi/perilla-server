@@ -5,6 +5,8 @@ Light-weight Online Judge Platform
 - MEVN Full javascript stack
 - RESTFul API Design
 
+Status: under development
+
 ## API List
 |描述|路径|方法|实现状态|权限|
 |-|-|-|-|-|
