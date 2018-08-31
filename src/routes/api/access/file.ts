@@ -49,7 +49,6 @@ FileAccessRouter.get("/:id/:role", async (req, res) => {
     try {
         const access = await FileAccess.findOne({ fileID: req.params.id, roleID: req.params.role });
         if (!access) { throw new ServerError("Not found", 404); }
-        if (access._protected) { throw new ServerError("Object is protected", 403); }
         res.send(access);
     } catch (e) {
         if (e instanceof ServerError) {

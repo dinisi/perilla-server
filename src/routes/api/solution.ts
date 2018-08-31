@@ -15,6 +15,7 @@ SolutionRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
         solution.problemID = req.body.problemID;
         solution.files = req.body.files;
         await solution.save();
+        await solution.judge();
         res.send(solution._id);
     } catch (e) {
         if (e instanceof ServerError) {
@@ -90,7 +91,7 @@ SolutionRouter.delete("/:id/rejudge", async (req: ISolutionRequest, res: Respons
     try {
         if (!req.access.rejudge) { throw new ServerError("No access", 403); }
         const solution = await Solution.findOne({ _id: req.solutionID });
-        // TODO impl
+        await solution.judge();
         res.send("success");
     } catch (e) {
         if (e instanceof ServerError) {

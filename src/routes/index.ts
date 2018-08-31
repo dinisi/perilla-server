@@ -53,6 +53,24 @@ MainRouter.post("/login", async (req, res) => {
     }
 });
 
+MainRouter.post("/register", async (req, res) => {
+    try {
+        if (req.headers.authorization) { throw new ServerError("Already logged in", 403); }
+        const user = new User();
+        user.username = req.body.username;
+        user.realname = req.body.realname;
+        user.email = req.body.email;
+        user.setPassword(req.body.password);
+        res.send(user._id);
+    } catch (e) {
+        if (e instanceof ServerError) {
+            res.status(e.code).send(e.message);
+        } else {
+            res.status(500).send(e.message);
+        }
+    }
+});
+
 MainRouter.use(
     "/api",
     async (req: IAuthorizedRequest, res: Response, next) => {

@@ -1,6 +1,7 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
 import { ProblemAccess } from "./problemAccess";
+import { Solution } from "./solution";
 
 export interface IProblemModel extends Document {
     title: string;
@@ -25,7 +26,7 @@ export let ProblemSchema: Schema = new Schema(
 );
 
 ProblemSchema.pre("save", async function(next) {
-    if ((this as IProblemModel).created) {
+    if (!(this as IProblemModel).created) {
         (this as IProblemModel).created = new Date();
         const adminAccess = new ProblemAccess();
         adminAccess.roleID = config.defaultAdminRoleID;
@@ -41,10 +42,12 @@ ProblemSchema.pre("save", async function(next) {
         judgerAccess._protected = true;
         await judgerAccess.save();
     }
+    next();
 });
 
 ProblemSchema.pre("remove", async function(next) {
-    await ProblemAccess.remove({problemID: this._id}).exec();
+    await ProblemAccess.remove({ problemID: this._id });
+    await Solution.remove({ problemID: this._id });
     next();
 });
 
