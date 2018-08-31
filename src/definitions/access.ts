@@ -5,6 +5,7 @@ export interface ICommonAccess {
     modifyRole: boolean;
     createProblem: boolean;
     createFile: boolean;
+    manageAccess: boolean;
 }
 
 export interface IFileAccessConfig {

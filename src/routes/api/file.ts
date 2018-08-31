@@ -35,6 +35,19 @@ FileRouter.post("/upload", upload.array("files", 128), async (req: IAuthorizedRe
     }
 });
 
+FileRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
+    try {
+        const files = await BFile.find({});
+        res.send(files);
+    } catch (e) {
+        if (e instanceof ServerError) {
+            res.status(e.code).send(e.message);
+        } else {
+            res.status(500).send(e.message);
+        }
+    }
+});
+
 FileRouter.use("/:id", async (req: IFileRequest, res: Response, next) => {
     try {
         const fileID = req.params.id;

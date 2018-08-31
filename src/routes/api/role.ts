@@ -25,7 +25,8 @@ RoleRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
 
 RoleRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        // TODO
+        const roles = await Role.find();
+        res.send(roles);
     } catch (e) {
         if (e instanceof ServerError) {
             res.status(e.code).send(e.message);

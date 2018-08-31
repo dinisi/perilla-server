@@ -1,5 +1,4 @@
 import "./config";
-import "./messageQueue";
 import "./redis";
 import "./schemas";
 

@@ -13,6 +13,7 @@ import { IUserModel, User } from "./schemas/user";
         createProblem: true,
         createRole: false,
         createUser: false,
+        manageAccess: false,
         modifyRole: false,
         modifyUser: false,
     };
@@ -30,6 +31,7 @@ import { IUserModel, User } from "./schemas/user";
         createProblem: true,
         createRole: true,
         createUser: true,
+        manageAccess: true,
         modifyRole: true,
         modifyUser: true,
     };
@@ -45,6 +47,7 @@ import { IUserModel, User } from "./schemas/user";
         createProblem: false,
         createRole: false,
         createUser: false,
+        manageAccess: false,
         modifyRole: false,
         modifyUser: false,
     };

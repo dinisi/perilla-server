@@ -14,6 +14,7 @@ Status: under development
 |登陆|`/login`|`POST`|YES|`public`|
 |注册|`/register`|`POST`|YES|`public`|
 |上传文件|`/api/file/upload`|`POST`|YES|`ICommonAccess.createFile`|
+|查看文件列表|`/api/file/list`|`GET`|YES|`login`|
 |下载文件|`/api/file/:id`|`GET`|YES|`IFileAccessConfig.read`|
 |更新文件|`/api/file/:id`|`POST`|YES|`IFileAccessConfig.modify`|
 |删除文件|`/api/file/:id`|`DELETE`|YES|`IFileAccessConfig.modify`|
@@ -37,7 +38,7 @@ Status: under development
 |用户修改|`/api/user/:id`|`POST`|YES|`# ICommonAccess.modifyUser`|
 |用户删除|`/api/user/:id`|`DELETE`|YES|`# ICommonAccess.modifyUser`|
 |新建角色|`/api/role/new`|`POST`|PART|`ICommonAccess.createRole`|
-|角色列表|`/api/role/list`|`GET`|PART|`login`|
+|角色列表|`/api/role/list`|`GET`|YES|`login`|
 |角色信息|`/api/role/:id`|`GET`|YES|`login`|
 |角色修改|`/api/role/:id`|`POST`|YES|`ICommonAccess.modifyRole`|
 |角色删除|`/api/role/:id`|`DELETE`|YES|`ICommonAccess.modifyRole`|

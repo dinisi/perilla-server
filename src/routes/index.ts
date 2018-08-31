@@ -43,7 +43,7 @@ MainRouter.post("/login", async (req, res) => {
         };
         const expire = 2 * 24 * 60 * 60;
         await setClient(client, expire);
-        res.send({ authorization: client.accessToken });
+        res.send(client.accessToken);
     } catch (e) {
         if (e instanceof ServerError) {
             res.status(e.code).send(e.message);

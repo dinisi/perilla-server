@@ -39,5 +39,9 @@ process.on("SIGTERM", () => {
 
 import "./file";
 import "./fileAccess";
+import "./problem";
+import "./problemAccess";
 import "./role";
+import "./solution";
+import "./solutionAccess";
 import "./user";
