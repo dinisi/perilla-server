@@ -15,6 +15,20 @@ ProblemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
         problem.data = req.body.data;
         problem.owner = req.userID;
         await problem.save();
+        res.send(problem._id);
+    } catch (e) {
+        if (e instanceof ServerError) {
+            res.status(e.code).send(e.message);
+        } else {
+            res.status(500).send(e.message);
+        }
+    }
+});
+
+ProblemRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
+    try {
+        const problems = await Problem.find().select("_id title tags").exec();
+        res.send(problems);
     } catch (e) {
         if (e instanceof ServerError) {
             res.status(e.code).send(e.message);
@@ -82,6 +96,7 @@ ProblemRouter.post("/:id", async (req: IProblemRequest, res: Response) => {
             problem.tags = req.body.tags;
         }
         await problem.save();
+        res.send("success");
     } catch (e) {
         if (e instanceof ServerError) {
             res.status(e.code).send(e.message);
@@ -96,6 +111,7 @@ ProblemRouter.delete("/:id", async (req: IProblemRequest, res: Response) => {
         if (!req.access.remove) { throw new ServerError("No access", 403); }
         const problem = await Problem.findOne({ _id: req.problemID });
         await problem.remove();
+        res.send("success");
     } catch (e) {
         if (e instanceof ServerError) {
             res.status(e.code).send(e.message);

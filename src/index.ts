@@ -1,4 +1,6 @@
 import "./config";
+import "./messageQueue";
+import "./redis";
 import "./schemas";
 
 import { json, urlencoded } from "body-parser";

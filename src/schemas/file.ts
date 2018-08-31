@@ -10,13 +10,11 @@ export interface IBFileModel extends Document {
     owner: string;
     description: string;
     created?: Date;
-    contentType?: string;
     getPath(): string;
 }
 
 export let BFileSchema = new Schema(
     {
-        contentType: String,
         created: Date,
         description: {type: String, required: true, default: "No description"},
         hash: { type: String, required: true },

@@ -55,7 +55,7 @@ FileRouter.use("/:id", async (req: IFileRequest, res: Response, next) => {
 FileRouter.get("/:id", async (req: IFileRequest, res: Response) => {
     try {
         if (!req.access.read) { throw new ServerError("No access", 403); }
-        res.sendFile(path.resolve("files/managed/" + req.fileID));
+        res.download(path.resolve("files/managed/" + req.fileID));
     } catch (e) {
         if (e instanceof ServerError) {
             res.status(e.code).send(e.message);
@@ -91,6 +91,49 @@ FileRouter.delete("/:id", async (req: IFileRequest, res: Response) => {
         await unlink(bfile.getPath());
         await bfile.remove();
         res.send("success");
+    } catch (e) {
+        if (e instanceof ServerError) {
+            res.status(e.code).send(e.message);
+        } else {
+            res.status(500).send(e.message);
+        }
+    }
+});
+
+FileRouter.get("/:id/meta", async (req: IFileRequest, res: Response) => {
+    try {
+        if (!req.access.read) { throw new ServerError("No access", 403); }
+        const bfile = await BFile.findOne({ _id: req.fileID });
+        res.send(bfile);
+    } catch (e) {
+        if (e instanceof ServerError) {
+            res.status(e.code).send(e.message);
+        } else {
+            res.status(500).send(e.message);
+        }
+    }
+});
+
+FileRouter.post("/:id/meta", async (req: IFileRequest, res: Response) => {
+    try {
+        if (!req.access.modify) { throw new ServerError("No access", 403); }
+        const bfile = await BFile.findOne({ _id: req.fileID });
+        bfile.description = req.body.description;
+        await bfile.save();
+        res.send("success");
+    } catch (e) {
+        if (e instanceof ServerError) {
+            res.status(e.code).send(e.message);
+        } else {
+            res.status(500).send(e.message);
+        }
+    }
+});
+
+FileRouter.get("/:id/raw", async (req: IFileRequest, res: Response) => {
+    try {
+        if (!req.access.read) { throw new ServerError("No access", 403); }
+        res.sendFile(path.resolve("files/managed/" + req.fileID));
     } catch (e) {
         if (e instanceof ServerError) {
             res.status(e.code).send(e.message);

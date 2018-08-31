@@ -1,8 +1,8 @@
 import { Response, Router } from "express";
-import { generateAccessToken, getClient, setClient } from "../cache";
 import { IClient } from "../definitions/client";
 import { ServerError } from "../definitions/errors";
 import { IAuthorizedRequest } from "../definitions/requests";
+import { generateAccessToken, getClient, setClient } from "../redis";
 import { Role } from "../schemas/role";
 import { User } from "../schemas/user";
 import { getVerificationCode } from "../verify";
