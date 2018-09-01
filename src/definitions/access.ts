@@ -25,6 +25,7 @@ export interface IProblemAccessConfig {
 export interface ISolutionAccessConfig {
     readStatus: boolean;
     readResult: boolean;
+    modify: boolean;
     rejudge: boolean;
     remove: boolean;
 }

@@ -72,6 +72,23 @@ SolutionRouter.get("/:id", async (req: ISolutionRequest, res: Response) => {
     }
 });
 
+SolutionRouter.post("/:id", async (req: ISolutionRequest, res: Response) => {
+    try {
+        if (!req.access.modify) { throw new ServerError("No access", 403); }
+        const solution = await Solution.findOne({ _id: req.solutionID });
+        solution.result = req.body.result;
+        solution.status = req.body.status;
+        await solution.save();
+        res.send("success");
+    } catch (e) {
+        if (e instanceof ServerError) {
+            res.status(e.code).send(e.message);
+        } else {
+            res.status(500).send(e.message);
+        }
+    }
+});
+
 SolutionRouter.delete("/:id", async (req: ISolutionRequest, res: Response) => {
     try {
         if (!req.access.remove) { throw new ServerError("No access", 403); }
@@ -87,7 +104,7 @@ SolutionRouter.delete("/:id", async (req: ISolutionRequest, res: Response) => {
     }
 });
 
-SolutionRouter.delete("/:id/rejudge", async (req: ISolutionRequest, res: Response) => {
+SolutionRouter.post("/:id/rejudge", async (req: ISolutionRequest, res: Response) => {
     try {
         if (!req.access.rejudge) { throw new ServerError("No access", 403); }
         const solution = await Solution.findOne({ _id: req.solutionID });

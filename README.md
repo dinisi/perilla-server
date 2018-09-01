@@ -30,6 +30,7 @@ Status: under development
 |新建提交|`/api/solution/new`|`POST`|YES|`login`|
 |获取提交列表|`/api/solution/list`|`GET`|PART|`login`|
 |获取提交|`/api/solution/:id`|`GET`|YES|`ISolutionAccessConfig.read*`|
+|更新提交|`/api/solution/:id`|`POST`|YES|`ISolutionAccessConfig.modify`|
 |删除提交|`/api/solution/:id`|`DELETE`|YES|`ISolutionAccessConfig.remove`|
 |重测提交|`/api/solution/:id/rejudge`|`POST`|YES|`ISolutionAccessConfig.rejudge`|
 |用户生成|`/api/user/generate`|`POST`|PART|`ICommonAccess.createUser`|

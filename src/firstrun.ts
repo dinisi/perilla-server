@@ -19,7 +19,7 @@ import { IUserModel, User } from "./schemas/user";
     };
     defaultConfig.defaultFileAccess = { read: false, modify: false };
     defaultConfig.defaultProblemAccess = { read: false, modifyContent: false, modifyData: false, modifyTag: false, remove: false, submit: false };
-    defaultConfig.defaultSolutionAccess = { readStatus: false, readResult: false, rejudge: false, remove: false };
+    defaultConfig.defaultSolutionAccess = { readStatus: false, readResult: false, modify: false, rejudge: false, remove: false };
     fs.writeFileSync("config.json", JSON.stringify(defaultConfig));
     reloadConfig();
 
