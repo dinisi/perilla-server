@@ -9,6 +9,7 @@ export interface IBFileModel extends Document {
     hash: string;
     owner: string;
     description: string;
+    type: string;
     created?: Date;
     getPath(): string;
 }
@@ -16,9 +17,10 @@ export interface IBFileModel extends Document {
 export let BFileSchema = new Schema(
     {
         created: Date,
-        description: {type: String, required: true, default: "No description"},
+        description: { type: String, required: true, default: "No description" },
         hash: { type: String, required: true },
         owner: { type: String, required: true },
+        type: { type: String, required: true, default: "TXT" },
     },
 );
 
