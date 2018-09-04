@@ -21,6 +21,10 @@ FileRouter.post("/upload", upload.array("files", 128), async (req: IAuthorizedRe
             const md5 = await MD5(file.path);
             bfile.hash = md5;
             bfile.owner = req.userID;
+            const splitter = file.originalname.lastIndexOf(".");
+            if (splitter !== -1 && splitter !== file.originalname.length - 1) {
+                bfile.type = file.originalname.substring(splitter + 1, file.originalname.length);
+            }
             await bfile.save();
             await move(file.path, bfile.getPath());
             result.push(bfile._id);

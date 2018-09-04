@@ -27,7 +27,7 @@ export let SolutionSchema: Schema = new Schema(
 );
 
 SolutionSchema.methods.judge = function() {
-    return addJudgeTask(this._id);
+    return addJudgeTask(this._id.toString());
 };
 
 SolutionSchema.pre("save", async function(next) {
