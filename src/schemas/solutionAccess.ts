@@ -4,7 +4,6 @@ import { config } from "../config";
 export interface ISolutionAccessModel extends Document {
     roleID: string;
     solutionID: string;
-    RStatus: boolean;
     RResult: boolean;
     MContent: boolean;
     DRejudge: boolean;
@@ -18,7 +17,6 @@ export let SolutionAccessSchema = new Schema(
         DRemove: { type: Boolean, required: true, default: false },
         MContent: { type: Boolean, required: true, default: false },
         RResult: { type: Boolean, required: true, default: false },
-        RStatus: { type: Boolean, required: true, default: false },
         _protected: { type: Boolean, required: true, default: false },
         roleID: { type: String, required: true },
         solutionID: { type: String, required: true },

@@ -36,7 +36,6 @@ SolutionSchema.pre("save", async function(next) {
         const adminAccess = new SolutionAccess();
         adminAccess.roleID = config.defaultAdminRoleID;
         adminAccess.solutionID = this._id;
-        adminAccess.RStatus = true;
         adminAccess.RResult = true;
         adminAccess.MContent = true;
         adminAccess.DRejudge = true;
@@ -47,7 +46,6 @@ SolutionSchema.pre("save", async function(next) {
         const judgerAccess = new SolutionAccess();
         judgerAccess.roleID = config.defaultJudgerRoleID;
         judgerAccess.solutionID = this._id;
-        judgerAccess.RStatus = true;
         judgerAccess.RResult = true;
         judgerAccess.MContent = true;
         judgerAccess._protected = true;

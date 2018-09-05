@@ -34,7 +34,12 @@ ProblemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
 
 ProblemRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const problems = await Problem.find().select("_id title tags owner created").exec();
+        const AllowedProblems = await ProblemAccess.find({ roleID: req.roleID }).select("problemID").exec();
+        const problems = [];
+        for (const pa of AllowedProblems) {
+            const problem = await Problem.findById(pa.problemID).select("_id title tags created");
+            problems.push(problem);
+        }
         res.send(problems);
     } catch (e) {
         if (e instanceof ServerError) {

@@ -1,4 +1,5 @@
 import { Response, Router } from "express";
+import { config } from "../../config";
 import { ServerError } from "../../definitions/errors";
 import { IAuthorizedRequest, ISolutionRequest } from "../../definitions/requests";
 import { Problem } from "../../schemas/problem";
@@ -15,6 +16,12 @@ SolutionRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
         solution.problemID = req.body.problemID;
         solution.files = req.body.files;
         await solution.save();
+        if (req.roleID !== config.defaultAdminRoleID && req.roleID !== config.defaultJudgerRoleID) {
+            const defaultAccess = new SolutionAccess();
+            defaultAccess.solutionID = solution._id;
+            defaultAccess.roleID = req.roleID;
+            await defaultAccess.save();
+        }
         await solution.judge();
         res.send(solution._id);
     } catch (e) {
@@ -28,7 +35,12 @@ SolutionRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
 
 SolutionRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const solutions = await Solution.find().select("_id owner problemID created").exec();
+        const allowedSolutions = await SolutionAccess.find({ roleID: req.roleID }).select("solutionID").exec();
+        const solutions = [];
+        for (const sa of allowedSolutions) {
+            const solution = await Solution.findById(sa.solutionID).select("problemID status created");
+            solutions.push(solution);
+        }
         res.send(solutions);
     } catch (e) {
         if (e instanceof ServerError) {
@@ -59,7 +71,6 @@ SolutionRouter.use("/:id", async (req: ISolutionRequest, res: Response, next) =>
 SolutionRouter.get("/:id", async (req: ISolutionRequest, res: Response) => {
     try {
         let select = "";
-        if (!req.access.RStatus) { select += " -status"; }
         if (!req.access.RResult) { select += " -result"; }
         const solution = await Solution.findOne({ _id: req.solutionID }).select(select).exec();
         res.send(solution);
