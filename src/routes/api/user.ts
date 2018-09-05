@@ -6,10 +6,18 @@ import { User } from "../../schemas/user";
 
 export let UserRouter = Router();
 
-UserRouter.post("/generate", async (req: IAuthorizedRequest, res: Response) => {
+UserRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.commonAccess.createUser) { throw new ServerError("No access", 403); }
-        // TODO
+        if (!req.role.MUser) { throw new ServerError("No access", 403); }
+        const user = new User();
+        user.username = req.body.username;
+        user.realname = req.body.realname;
+        user.email = req.body.email;
+        user.bio = req.body.bio;
+        user.roles = req.body.roles;
+        user.setPassword(req.body.password);
+        await user.save();
+        res.send(user.id);
     } catch (e) {
         if (e instanceof ServerError) {
             res.status(e.code).send(e.message);
@@ -21,7 +29,8 @@ UserRouter.post("/generate", async (req: IAuthorizedRequest, res: Response) => {
 
 UserRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        // TODO
+        const users = await User.find();
+        res.send(users);
     } catch (e) {
         if (e instanceof ServerError) {
             res.status(e.code).send(e.message);
@@ -47,14 +56,14 @@ UserRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
 
 UserRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (req.params.id !== req.userID && !req.commonAccess.modifyUser) { throw new ServerError("No access", 403); }
+        if (req.params.id !== req.userID && !req.role.MUser) { throw new ServerError("No access", 403); }
         const user = await User.findOne({ _id: req.params.id });
         if (!user) { throw new ServerError("Not found", 404); }
         if (user._protected) { throw new ServerError("Object is protected", 403); }
         user.realname = req.body.realname;
         user.email = req.body.email;
         user.bio = req.body.bio;
-        if (req.commonAccess.modifyUser) {
+        if (req.role.MUser) {
             user.roles.splice(0, user.roles.length);
             for (const id of req.body.roles) {
                 if (Role.countDocuments({ _id: id })) {
@@ -75,7 +84,7 @@ UserRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
 
 UserRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (req.params.id !== req.userID && !req.commonAccess.modifyUser) { throw new ServerError("No access", 403); }
+        if (req.params.id !== req.userID && !req.role.MUser) { throw new ServerError("No access", 403); }
         const user = await User.findOne({ _id: req.params.id });
         if (!user) { throw new ServerError("Not found", 404); }
         if (user._protected) { throw new ServerError("Object is protected", 403); }

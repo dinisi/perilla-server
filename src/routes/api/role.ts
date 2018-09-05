@@ -7,11 +7,15 @@ export let RoleRouter = Router();
 
 RoleRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.commonAccess.createRole) { throw new ServerError("No access", 403); }
+        if (!req.role.MRole) { throw new ServerError("No access", 403); }
         const role = new Role();
         role.rolename = req.body.rolename;
         role.description = req.body.description;
-        role.config = req.body.config;
+        role.MUser = req.body.MUser;
+        role.MRole = req.body.MRole;
+        role.CProblem = req.body.CProblem;
+        role.CFile = req.body.CFile;
+        role.MAccess = req.body.MAccess;
         await role.save();
         res.send(role._id);
     } catch (e) {
@@ -52,13 +56,17 @@ RoleRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
 
 RoleRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.commonAccess.modifyRole) { throw new ServerError("No access", 403); }
+        if (!req.role.MRole) { throw new ServerError("No access", 403); }
         const role = await Role.findOne({ _id: req.params.id });
         if (!role) { throw new ServerError("Not found", 404); }
         if (role._protected) { throw new ServerError("Object is protected", 403); }
         role.rolename = req.body.rolename;
         role.description = req.body.description;
-        role.config = req.body.config;
+        role.MUser = req.body.MUser;
+        role.MRole = req.body.MRole;
+        role.CProblem = req.body.CProblem;
+        role.CFile = req.body.CFile;
+        role.MAccess = req.body.MAccess;
         await role.save();
         res.send("success");
     } catch (e) {
@@ -72,7 +80,7 @@ RoleRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
 
 RoleRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.commonAccess.modifyRole) { throw new ServerError("No access", 403); }
+        if (!req.role.MRole) { throw new ServerError("No access", 403); }
         const role = await Role.findOne({ _id: req.params.id });
         if (!role) { throw new ServerError("Not found", 404); }
         if (role._protected) { throw new ServerError("Object is protected", 403); }

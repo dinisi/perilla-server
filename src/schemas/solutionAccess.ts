@@ -1,18 +1,25 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
-import { ISolutionAccessConfig } from "../definitions/access";
 
 export interface ISolutionAccessModel extends Document {
     roleID: string;
     solutionID: string;
-    config: ISolutionAccessConfig;
+    RStatus: boolean;
+    RResult: boolean;
+    MContent: boolean;
+    DRejudge: boolean;
+    DRemove: boolean;
     _protected: boolean;
 }
 
 export let SolutionAccessSchema = new Schema(
     {
+        DRejudge: { type: Boolean, required: true, default: false },
+        DRemove: { type: Boolean, required: true, default: false },
+        MContent: { type: Boolean, required: true, default: false },
+        RResult: { type: Boolean, required: true, default: false },
+        RStatus: { type: Boolean, required: true, default: false },
         _protected: { type: Boolean, required: true, default: false },
-        config: { type: Object, required: true, default: config.defaultSolutionAccess },
         roleID: { type: String, required: true },
         solutionID: { type: String, required: true },
     },

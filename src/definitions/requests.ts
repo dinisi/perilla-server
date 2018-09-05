@@ -1,23 +1,26 @@
 import { Request } from "express";
-import { ICommonAccess, IFileAccessConfig, IProblemAccessConfig, ISolutionAccessConfig } from "./access";
+import { IFileAccessModel } from "../schemas/fileAccess";
+import { IProblemAccessModel } from "../schemas/problemAccess";
+import { IRoleModel } from "../schemas/role";
+import { ISolutionAccessModel } from "../schemas/solutionAccess";
 
 export interface IAuthorizedRequest extends Request {
     userID: string;
     roleID: string;
-    commonAccess: ICommonAccess;
+    role: IRoleModel;
 }
 
 export interface IFileRequest extends IAuthorizedRequest {
     fileID: string;
-    access: IFileAccessConfig;
+    access: IFileAccessModel;
 }
 
 export interface IProblemRequest extends IAuthorizedRequest {
     problemID: string;
-    access: IProblemAccessConfig;
+    access: IProblemAccessModel;
 }
 
 export interface ISolutionRequest extends IAuthorizedRequest {
     solutionID: string;
-    access: ISolutionAccessConfig;
+    access: ISolutionAccessModel;
 }

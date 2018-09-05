@@ -6,6 +6,7 @@ import { IAuthorizedRequest, IFileRequest } from "../../definitions/requests";
 import { FileAccess } from "../../schemas/fileAccess";
 ensureDirSync("files/uploads/");
 import * as multer from "multer";
+import { config } from "../../config";
 import { MD5 } from "../../md5";
 import { BFile } from "../../schemas/file";
 const upload = multer({ dest: "files/uploads/" });
@@ -14,7 +15,7 @@ export let FileRouter = Router();
 
 FileRouter.post("/upload", upload.array("files", 128), async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.commonAccess.createFile) { throw new ServerError("Access denied", 403); }
+        if (!req.role.CFile) { throw new ServerError("Access denied", 403); }
         const result = [];
         for (const file of req.files as Express.Multer.File[]) {
             const bfile = new BFile();
@@ -26,6 +27,12 @@ FileRouter.post("/upload", upload.array("files", 128), async (req: IAuthorizedRe
                 bfile.type = file.originalname.substring(splitter + 1, file.originalname.length);
             }
             await bfile.save();
+            if (req.roleID !== config.defaultAdminRoleID && req.roleID !== config.defaultJudgerRoleID) {
+                const fileAccess = new FileAccess();
+                fileAccess.fileID = bfile._id;
+                fileAccess.roleID = req.roleID;
+                await fileAccess.save();
+            }
             await move(file.path, bfile.getPath());
             result.push(bfile._id);
         }
@@ -58,7 +65,7 @@ FileRouter.use("/:id", async (req: IFileRequest, res: Response, next) => {
         const access = await FileAccess.findOne({ roleID: req.roleID, fileID });
         if (!access) { throw new ServerError("Not found", 404); }
         req.fileID = fileID;
-        req.access = access.config;
+        req.access = access;
         next();
     } catch (e) {
         if (e instanceof ServerError) {
@@ -71,7 +78,6 @@ FileRouter.use("/:id", async (req: IFileRequest, res: Response, next) => {
 
 FileRouter.get("/:id", async (req: IFileRequest, res: Response) => {
     try {
-        if (!req.access.read) { throw new ServerError("No access", 403); }
         res.download(path.resolve("files/managed/" + req.fileID));
     } catch (e) {
         if (e instanceof ServerError) {
@@ -84,7 +90,7 @@ FileRouter.get("/:id", async (req: IFileRequest, res: Response) => {
 
 FileRouter.post("/:id", upload.single("file"), async (req: IFileRequest, res: Response) => {
     try {
-        if (!req.access.modify) { throw new ServerError("No access", 403); }
+        if (!req.access.MContent) { throw new ServerError("No access", 403); }
         const bfile = await BFile.findOne({ _id: req.fileID });
         const md5 = await MD5(req.file.path);
         bfile.hash = md5;
@@ -103,7 +109,7 @@ FileRouter.post("/:id", upload.single("file"), async (req: IFileRequest, res: Re
 
 FileRouter.delete("/:id", async (req: IFileRequest, res: Response) => {
     try {
-        if (!req.access.modify) { throw new ServerError("No access", 403); }
+        if (!req.access.MContent) { throw new ServerError("No access", 403); }
         const bfile = await BFile.findOne({ _id: req.fileID });
         await unlink(bfile.getPath());
         await bfile.remove();
@@ -119,7 +125,6 @@ FileRouter.delete("/:id", async (req: IFileRequest, res: Response) => {
 
 FileRouter.get("/:id/meta", async (req: IFileRequest, res: Response) => {
     try {
-        if (!req.access.read) { throw new ServerError("No access", 403); }
         const bfile = await BFile.findOne({ _id: req.fileID });
         res.send(bfile);
     } catch (e) {
@@ -133,7 +138,7 @@ FileRouter.get("/:id/meta", async (req: IFileRequest, res: Response) => {
 
 FileRouter.post("/:id/meta", async (req: IFileRequest, res: Response) => {
     try {
-        if (!req.access.modify) { throw new ServerError("No access", 403); }
+        if (!req.access.MContent) { throw new ServerError("No access", 403); }
         const bfile = await BFile.findOne({ _id: req.fileID });
         bfile.description = req.body.description;
         await bfile.save();
@@ -149,7 +154,6 @@ FileRouter.post("/:id/meta", async (req: IFileRequest, res: Response) => {
 
 FileRouter.get("/:id/raw", async (req: IFileRequest, res: Response) => {
     try {
-        if (!req.access.read) { throw new ServerError("No access", 403); }
         res.sendFile(path.resolve("files/managed/" + req.fileID));
     } catch (e) {
         if (e instanceof ServerError) {

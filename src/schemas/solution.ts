@@ -36,14 +36,20 @@ SolutionSchema.pre("save", async function(next) {
         const adminAccess = new SolutionAccess();
         adminAccess.roleID = config.defaultAdminRoleID;
         adminAccess.solutionID = this._id;
-        adminAccess.config = { readStatus: true, readResult: true, modify: true, rejudge: true, remove: true };
+        adminAccess.RStatus = true;
+        adminAccess.RResult = true;
+        adminAccess.MContent = true;
+        adminAccess.DRejudge = true;
+        adminAccess.DRemove = true;
         adminAccess._protected = true;
         await adminAccess.save();
 
         const judgerAccess = new SolutionAccess();
         judgerAccess.roleID = config.defaultJudgerRoleID;
         judgerAccess.solutionID = this._id;
-        judgerAccess.config = { readStatus: true, readResult: true, modify: true, rejudge: true, remove: false };
+        judgerAccess.RStatus = true;
+        judgerAccess.RResult = true;
+        judgerAccess.MContent = true;
         judgerAccess._protected = true;
         await judgerAccess.save();
     }

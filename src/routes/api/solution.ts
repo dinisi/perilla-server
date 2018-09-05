@@ -45,7 +45,7 @@ SolutionRouter.use("/:id", async (req: ISolutionRequest, res: Response, next) =>
         const access = await SolutionAccess.findOne({ roleID: req.roleID, solutionID });
         if (!access) { throw new ServerError("Not found", 404); }
         req.solutionID = solutionID;
-        req.access = access.config;
+        req.access = access;
         next();
     } catch (e) {
         if (e instanceof ServerError) {
@@ -58,10 +58,10 @@ SolutionRouter.use("/:id", async (req: ISolutionRequest, res: Response, next) =>
 
 SolutionRouter.get("/:id", async (req: ISolutionRequest, res: Response) => {
     try {
-        const select = [];
-        if (!req.access.readStatus) { select.push("-status"); }
-        if (!req.access.readResult) { select.push("-result"); }
-        const solution = await Solution.findOne({ _id: req.solutionID }).select(select.join(" ")).exec();
+        let select = "";
+        if (!req.access.RStatus) { select += " -status"; }
+        if (!req.access.RResult) { select += " -result"; }
+        const solution = await Solution.findOne({ _id: req.solutionID }).select(select).exec();
         res.send(solution);
     } catch (e) {
         if (e instanceof ServerError) {
@@ -74,7 +74,7 @@ SolutionRouter.get("/:id", async (req: ISolutionRequest, res: Response) => {
 
 SolutionRouter.post("/:id", async (req: ISolutionRequest, res: Response) => {
     try {
-        if (!req.access.modify) { throw new ServerError("No access", 403); }
+        if (!req.access.MContent) { throw new ServerError("No access", 403); }
         const solution = await Solution.findOne({ _id: req.solutionID });
         solution.result = req.body.result;
         solution.status = req.body.status;
@@ -91,7 +91,7 @@ SolutionRouter.post("/:id", async (req: ISolutionRequest, res: Response) => {
 
 SolutionRouter.delete("/:id", async (req: ISolutionRequest, res: Response) => {
     try {
-        if (!req.access.remove) { throw new ServerError("No access", 403); }
+        if (!req.access.DRemove) { throw new ServerError("No access", 403); }
         const solution = await Solution.findOne({ _id: req.solutionID });
         await solution.remove();
         res.send("success");
@@ -106,7 +106,7 @@ SolutionRouter.delete("/:id", async (req: ISolutionRequest, res: Response) => {
 
 SolutionRouter.post("/:id/rejudge", async (req: ISolutionRequest, res: Response) => {
     try {
-        if (!req.access.rejudge) { throw new ServerError("No access", 403); }
+        if (!req.access.DRejudge) { throw new ServerError("No access", 403); }
         const solution = await Solution.findOne({ _id: req.solutionID });
         await solution.judge();
         res.send("success");

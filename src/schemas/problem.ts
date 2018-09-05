@@ -31,14 +31,17 @@ ProblemSchema.pre("save", async function(next) {
         const adminAccess = new ProblemAccess();
         adminAccess.roleID = config.defaultAdminRoleID;
         adminAccess.problemID = this._id;
-        adminAccess.config = { read: true, modifyContent: true, modifyData: true, modifyTag: true, remove: true, submit: true };
+        adminAccess.MContent = true;
+        adminAccess.MData = true;
+        adminAccess.MTag = true;
+        adminAccess.DRemove = true;
+        adminAccess.DSubmit = true;
         adminAccess._protected = true;
         await adminAccess.save();
 
         const judgerAccess = new ProblemAccess();
         judgerAccess.roleID = config.defaultJudgerRoleID;
         judgerAccess.problemID = this._id;
-        judgerAccess.config = { read: false, modifyContent: false, modifyData: false, modifyTag: false, remove: false, submit: false };
         judgerAccess._protected = true;
         await judgerAccess.save();
     }

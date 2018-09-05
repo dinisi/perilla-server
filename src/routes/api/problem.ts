@@ -1,4 +1,5 @@
 import { Request, Response, Router } from "express";
+import { config } from "../../config";
 import { ServerError } from "../../definitions/errors";
 import { IAuthorizedRequest, IProblemRequest } from "../../definitions/requests";
 import { Problem } from "../../schemas/problem";
@@ -8,13 +9,19 @@ export let ProblemRouter = Router();
 
 ProblemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.commonAccess.createProblem) { throw new ServerError("Access denied", 403); }
+        if (!req.role.CProblem) { throw new ServerError("Access denied", 403); }
         const problem = new Problem();
         problem.title = req.body.title;
         problem.content = req.body.content;
         problem.data = req.body.data;
         problem.owner = req.userID;
         await problem.save();
+        if (req.roleID !== config.defaultAdminRoleID && req.roleID !== config.defaultJudgerRoleID) {
+            const defaultAccess = new ProblemAccess();
+            defaultAccess.problemID = problem._id;
+            defaultAccess.roleID = req.roleID;
+            await defaultAccess.save();
+        }
         res.send(problem._id);
     } catch (e) {
         if (e instanceof ServerError) {
@@ -44,7 +51,7 @@ ProblemRouter.use("/:id", async (req: IProblemRequest, res: Response, next) => {
         const access = await ProblemAccess.findOne({ roleID: req.roleID, problemID });
         if (!access) { throw new ServerError("Not found", 404); }
         req.problemID = problemID;
-        req.access = access.config;
+        req.access = access;
         next();
     } catch (e) {
         if (e instanceof ServerError) {
@@ -57,7 +64,6 @@ ProblemRouter.use("/:id", async (req: IProblemRequest, res: Response, next) => {
 
 ProblemRouter.get("/:id", async (req: IProblemRequest, res: Response) => {
     try {
-        if (!req.access.read) { throw new ServerError("No access", 403); }
         const problem = await Problem.findOne({ _id: req.problemID });
         res.send(problem);
     } catch (e) {
@@ -84,15 +90,15 @@ ProblemRouter.get("/:id/access", async (req: IProblemRequest, res: Response) => 
 ProblemRouter.post("/:id", async (req: IProblemRequest, res: Response) => {
     try {
         const problem = await Problem.findOne({ _id: req.problemID });
-        if (req.access.modifyContent) {
+        if (req.access.MContent) {
             problem.title = req.body.title;
             problem.content = req.body.content;
         }
-        if (req.access.modifyData) {
+        if (req.access.MData) {
             problem.data = req.body.data;
             problem.meta = req.body.meta;
         }
-        if (req.access.modifyTag) {
+        if (req.access.MTag) {
             problem.tags = req.body.tags;
         }
         await problem.save();
@@ -108,7 +114,7 @@ ProblemRouter.post("/:id", async (req: IProblemRequest, res: Response) => {
 
 ProblemRouter.delete("/:id", async (req: IProblemRequest, res: Response) => {
     try {
-        if (!req.access.remove) { throw new ServerError("No access", 403); }
+        if (!req.access.DRemove) { throw new ServerError("No access", 403); }
         const problem = await Problem.findOne({ _id: req.problemID });
         await problem.remove();
         res.send("success");

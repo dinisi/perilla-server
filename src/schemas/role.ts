@@ -1,6 +1,5 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
-import { ICommonAccess } from "../definitions/access";
 import { FileAccess } from "./fileAccess";
 import { ProblemAccess } from "./problemAccess";
 import { SolutionAccess } from "./solutionAccess";
@@ -9,14 +8,22 @@ import { User } from "./user";
 export interface IRoleModel extends Document {
     rolename: string;
     description: string;
-    config: ICommonAccess;
+    MUser: boolean;
+    MRole: boolean;
+    CProblem: boolean;
+    CFile: boolean;
+    MAccess: boolean;
     _protected: boolean;
 }
 
 export let RoleSchema: Schema = new Schema(
     {
+        CFile: { type: Boolean, required: true, default: false },
+        CProblem: { type: Boolean, required: true, default: false },
+        MAccess: { type: Boolean, required: true, default: false },
+        MRole: { type: Boolean, required: true, default: false },
+        MUser: { type: Boolean, required: true, default: false },
         _protected: { type: Boolean, required: true, default: false },
-        config: { type: Object, required: true, default: config.defaultCommonAccess },
         description: { type: String, required: true, default: "" },
         rolename: { type: String, unique: true, required: true },
     },

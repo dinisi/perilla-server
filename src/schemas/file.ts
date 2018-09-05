@@ -1,4 +1,4 @@
-import { ensureDirSync } from "fs-extra";
+import { ensureDirSync, unlinkSync } from "fs-extra";
 import { Document, Model, model, Schema } from "mongoose";
 import { join } from "path";
 import { config } from "../config";
@@ -34,14 +34,14 @@ BFileSchema.pre("save", async function(next) {
         const adminAccess = new FileAccess();
         adminAccess.roleID = config.defaultAdminRoleID;
         adminAccess.fileID = this._id;
-        adminAccess.config = { read: true, modify: true };
+        adminAccess.MContent = true;
+        adminAccess.DRemove = true;
         adminAccess._protected = true;
         await adminAccess.save();
 
         const judgerAccess = new FileAccess();
         judgerAccess.roleID = config.defaultJudgerRoleID;
         judgerAccess.fileID = this._id;
-        judgerAccess.config = { read: true, modify: false };
         judgerAccess._protected = true;
         await judgerAccess.save();
     }
@@ -50,6 +50,7 @@ BFileSchema.pre("save", async function(next) {
 
 BFileSchema.pre("remove", async function(next) {
     await FileAccess.remove({ fileID: this._id }).exec();
+    unlinkSync((this as IBFileModel).getPath());
     next();
 });
 

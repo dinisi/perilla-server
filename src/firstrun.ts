@@ -8,33 +8,18 @@ import { IUserModel, User } from "./schemas/user";
 
 (async () => {
     const defaultConfig: ISystemConfig = {} as ISystemConfig;
-    defaultConfig.defaultCommonAccess = {
-        createFile: true,
-        createProblem: true,
-        createRole: false,
-        createUser: false,
-        manageAccess: false,
-        modifyRole: false,
-        modifyUser: false,
-    };
-    defaultConfig.defaultFileAccess = { read: false, modify: false };
-    defaultConfig.defaultProblemAccess = { read: false, modifyContent: false, modifyData: false, modifyTag: false, remove: false, submit: false };
-    defaultConfig.defaultSolutionAccess = { readStatus: false, readResult: false, modify: false, rejudge: false, remove: false };
     fs.writeFileSync("config.json", JSON.stringify(defaultConfig));
     reloadConfig();
 
     const defaultAdminRole: IRoleModel = new Role();
     defaultAdminRole.rolename = "Administrators";
     defaultAdminRole.description = "System administrators";
-    defaultAdminRole.config = {
-        createFile: true,
-        createProblem: true,
-        createRole: true,
-        createUser: true,
-        manageAccess: true,
-        modifyRole: true,
-        modifyUser: true,
-    };
+    defaultAdminRole.CFile = true;
+    defaultAdminRole.CProblem = true;
+    defaultAdminRole.MAccess = true;
+    defaultAdminRole.MRole = true;
+    defaultAdminRole.MUser = true;
+
     defaultAdminRole._protected = true;
     await defaultAdminRole.save();
     defaultConfig.defaultAdminRoleID = defaultAdminRole._id;
@@ -42,15 +27,6 @@ import { IUserModel, User } from "./schemas/user";
     const defaultJudgerRole: IRoleModel = new Role();
     defaultJudgerRole.rolename = "Judgers";
     defaultJudgerRole.description = "System judgers";
-    defaultJudgerRole.config = {
-        createFile: false,
-        createProblem: false,
-        createRole: false,
-        createUser: false,
-        manageAccess: false,
-        modifyRole: false,
-        modifyUser: false,
-    };
     defaultJudgerRole._protected = true;
     await defaultJudgerRole.save();
     defaultConfig.defaultJudgerRoleID = defaultJudgerRole._id;
