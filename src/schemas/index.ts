@@ -32,7 +32,7 @@ process.on("SIGINT", () => {
     });
 });
 process.on("SIGTERM", () => {
-    gracefulShutdown("Heroku app termination", () => {
+    gracefulShutdown("system termination", () => {
         process.exit(0);
     });
 });

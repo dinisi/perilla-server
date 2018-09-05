@@ -1,14 +1,54 @@
 import { Router } from "express";
 import { ServerError } from "../../../definitions/errors";
+import { IProblemAccessRequest } from "../../../definitions/requests";
 import { Problem } from "../../../schemas/problem";
 import { ProblemAccess } from "../../../schemas/problemAccess";
 import { Role } from "../../../schemas/role";
 
 export let ProblemAccessRouter = Router();
 
-ProblemAccessRouter.use("/:id", async (req, res, next) => {
+ProblemAccessRouter.post("/new", async (req, res) => {
     try {
-        if (!(await Problem.countDocuments({ _id: req.params.id }))) { throw new ServerError("Not found", 404); }
+        if (await ProblemAccess.findOne({ roleID: req.body.roleID, problemID: req.body.problemID })) { throw new ServerError("Already exists", 403); }
+        if (!await Role.findById(req.body.roleID)) { throw new ServerError("Not found", 404); }
+        if (!await Problem.findById(req.body.problemID)) { throw new ServerError("Not found", 404); }
+
+        const problemAccess = new ProblemAccess();
+        problemAccess.roleID = req.body.roleID;
+        problemAccess.problemID = req.body.problemID;
+        problemAccess.MContent = req.body.MContent;
+        problemAccess.MData = req.body.MData;
+        problemAccess.MTag = req.body.MTag;
+        problemAccess.DRemove = req.body.DRemove;
+        problemAccess.DSubmit = req.body.DSubmit;
+        await problemAccess.save();
+        res.send(problemAccess._id);
+    } catch (e) {
+        if (e instanceof ServerError) {
+            res.status(e.code).send(e.message);
+        } else {
+            res.status(500).send(e.message);
+        }
+    }
+});
+
+ProblemAccessRouter.get("/list", async (req, res) => {
+    try {
+        const problemAccesses = await ProblemAccess.find();
+        res.send(problemAccesses);
+    } catch (e) {
+        if (e instanceof ServerError) {
+            res.status(e.code).send(e.message);
+        } else {
+            res.status(500).send(e.message);
+        }
+    }
+});
+
+ProblemAccessRouter.use("/:id", async (req: IProblemAccessRequest, res, next) => {
+    try {
+        req.problemAccess = await ProblemAccess.findById(req.params.id);
+        if (!req.problemAccess) { throw new ServerError("Not found", 404); }
         next();
     } catch (e) {
         if (e instanceof ServerError) {
@@ -19,10 +59,9 @@ ProblemAccessRouter.use("/:id", async (req, res, next) => {
     }
 });
 
-ProblemAccessRouter.get("/:id", async (req, res) => {
+ProblemAccessRouter.get("/:id", async (req: IProblemAccessRequest, res) => {
     try {
-        const accesses = await ProblemAccess.find({ problemID: req.params.id }).select("-_id config roleID").exec();
-        res.send(accesses);
+        res.send(req.problemAccess);
     } catch (e) {
         if (e instanceof ServerError) {
             res.status(e.code).send(e.message);
@@ -32,48 +71,15 @@ ProblemAccessRouter.get("/:id", async (req, res) => {
     }
 });
 
-ProblemAccessRouter.use("/:id/:role", async (req, res, next) => {
+ProblemAccessRouter.post("/:id", async (req: IProblemAccessRequest, res) => {
     try {
-        if (!(await Role.countDocuments({ _id: req.params.role }))) { throw new ServerError("Not found", 404); }
-        next();
-    } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
-    }
-});
-
-ProblemAccessRouter.get("/:id/:role", async (req, res) => {
-    try {
-        const access = await ProblemAccess.findOne({ problemID: req.params.id, roleID: req.params.role });
-        if (!access) { throw new ServerError("Not found", 404); }
-        res.send(access);
-    } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
-    }
-});
-
-ProblemAccessRouter.post("/:id/:role", async (req, res) => {
-    try {
-        let access = await ProblemAccess.findOne({ problemID: req.params.id, roleID: req.params.role });
-        if (access && access._protected) { throw new ServerError("Object is protected", 403); }
-        if (!access) {
-            access = new ProblemAccess();
-            access.roleID = req.params.role;
-            access.problemID = req.params.id;
-        }
-        access.MContent = req.body.MContent;
-        access.MData = req.body.MData;
-        access.MTag = req.body.MTag;
-        access.DRemove = req.body.DRemove;
-        access.DSubmit = req.body.DSubmit;
-        await access.save();
+        if (req.problemAccess._protected) { throw new ServerError("Object is protected", 403); }
+        req.problemAccess.MContent = req.body.MContent;
+        req.problemAccess.MData = req.body.MData;
+        req.problemAccess.MTag = req.body.MTag;
+        req.problemAccess.DRemove = req.body.DRemove;
+        req.problemAccess.DSubmit = req.body.DSubmit;
+        await req.problemAccess.save();
         res.send("success");
     } catch (e) {
         if (e instanceof ServerError) {
@@ -84,12 +90,10 @@ ProblemAccessRouter.post("/:id/:role", async (req, res) => {
     }
 });
 
-ProblemAccessRouter.delete("/:id/:role", async (req, res) => {
+ProblemAccessRouter.delete("/:id", async (req: IProblemAccessRequest, res) => {
     try {
-        const access = await ProblemAccess.findOne({ problemID: req.params.id, roleID: req.params.role });
-        if (!access) { throw new ServerError("Not found", 404); }
-        if (access._protected) { throw new ServerError("Object is protected", 403); }
-        await access.remove();
+        if (req.problemAccess._protected) { throw new ServerError("Object is protected", 403); }
+        await req.problemAccess.remove();
         res.send("success");
     } catch (e) {
         if (e instanceof ServerError) {

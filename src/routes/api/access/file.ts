@@ -1,14 +1,51 @@
 import { Router } from "express";
 import { ServerError } from "../../../definitions/errors";
+import { IFileAccessRequest } from "../../../definitions/requests";
 import { BFile } from "../../../schemas/file";
 import { FileAccess } from "../../../schemas/fileAccess";
 import { Role } from "../../../schemas/role";
 
 export let FileAccessRouter = Router();
 
-FileAccessRouter.use("/:id", async (req, res, next) => {
+FileAccessRouter.post("/new", async (req, res) => {
     try {
-        if (!(await BFile.countDocuments({ _id: req.params.id }))) { throw new ServerError("Not found", 404); }
+        if (await FileAccess.findOne({ roleID: req.body.roleID, fileID: req.body.fileID })) { throw new ServerError("Already exists", 403); }
+        if (!await Role.findById(req.body.roleID)) { throw new ServerError("Not found", 404); }
+        if (!await BFile.findById(req.body.fileID)) { throw new ServerError("Not found", 404); }
+
+        const fileAccess = new FileAccess();
+        fileAccess.roleID = req.body.roleID;
+        fileAccess.fileID = req.body.fileID;
+        fileAccess.MContent = req.body.MContent;
+        fileAccess.DRemove = req.body.DRemove;
+        await fileAccess.save();
+        res.send(fileAccess._id);
+    } catch (e) {
+        if (e instanceof ServerError) {
+            res.status(e.code).send(e.message);
+        } else {
+            res.status(500).send(e.message);
+        }
+    }
+});
+
+FileAccessRouter.get("/list", async (req, res) => {
+    try {
+        const fileAccesses = await FileAccess.find();
+        res.send(fileAccesses);
+    } catch (e) {
+        if (e instanceof ServerError) {
+            res.status(e.code).send(e.message);
+        } else {
+            res.status(500).send(e.message);
+        }
+    }
+});
+
+FileAccessRouter.use("/:id", async (req: IFileAccessRequest, res, next) => {
+    try {
+        req.fileAccess = await FileAccess.findById(req.params.id);
+        if (!req.fileAccess) { throw new ServerError("Not found", 404); }
         next();
     } catch (e) {
         if (e instanceof ServerError) {
@@ -19,10 +56,9 @@ FileAccessRouter.use("/:id", async (req, res, next) => {
     }
 });
 
-FileAccessRouter.get("/:id", async (req, res) => {
+FileAccessRouter.get("/:id", async (req: IFileAccessRequest, res) => {
     try {
-        const accesses = await FileAccess.find({ fileID: req.params.id }).select("-_id config roleID").exec();
-        res.send(accesses);
+        res.send(req.fileAccess);
     } catch (e) {
         if (e instanceof ServerError) {
             res.status(e.code).send(e.message);
@@ -32,45 +68,12 @@ FileAccessRouter.get("/:id", async (req, res) => {
     }
 });
 
-FileAccessRouter.use("/:id/:role", async (req, res, next) => {
+FileAccessRouter.post("/:id", async (req: IFileAccessRequest, res) => {
     try {
-        if (!(await Role.countDocuments({ _id: req.params.role }))) { throw new ServerError("Not found", 404); }
-        next();
-    } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
-    }
-});
-
-FileAccessRouter.get("/:id/:role", async (req, res) => {
-    try {
-        const access = await FileAccess.findOne({ fileID: req.params.id, roleID: req.params.role });
-        if (!access) { throw new ServerError("Not found", 404); }
-        res.send(access);
-    } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
-    }
-});
-
-FileAccessRouter.post("/:id/:role", async (req, res) => {
-    try {
-        let access = await FileAccess.findOne({ fileID: req.params.id, roleID: req.params.role });
-        if (access && access._protected) { throw new ServerError("Object is protected", 403); }
-        if (!access) {
-            access = new FileAccess();
-            access.roleID = req.params.role;
-            access.fileID = req.params.id;
-        }
-        access.DRemove = req.body.DRemove;
-        access.MContent = req.body.MContent;
-        await access.save();
+        if (req.fileAccess._protected) { throw new ServerError("Object is protected", 403); }
+        req.fileAccess.MContent = req.body.MContent;
+        req.fileAccess.DRemove = req.body.DRemove;
+        await req.fileAccess.save();
         res.send("success");
     } catch (e) {
         if (e instanceof ServerError) {
@@ -81,12 +84,10 @@ FileAccessRouter.post("/:id/:role", async (req, res) => {
     }
 });
 
-FileAccessRouter.delete("/:id/:role", async (req, res) => {
+FileAccessRouter.delete("/:id", async (req: IFileAccessRequest, res) => {
     try {
-        const access = await FileAccess.findOne({ fileID: req.params.id, roleID: req.params.role });
-        if (!access) { throw new ServerError("Not found", 404); }
-        if (access._protected) { throw new ServerError("Object is protected", 403); }
-        await access.remove();
+        if (req.fileAccess._protected) { throw new ServerError("Object is protected", 403); }
+        await req.fileAccess.remove();
         res.send("success");
     } catch (e) {
         if (e instanceof ServerError) {

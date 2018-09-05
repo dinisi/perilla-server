@@ -91,7 +91,7 @@ FileRouter.get("/:id", async (req: IFileRequest, res: Response) => {
 FileRouter.post("/:id", upload.single("file"), async (req: IFileRequest, res: Response) => {
     try {
         if (!req.access.MContent) { throw new ServerError("No access", 403); }
-        const bfile = await BFile.findOne({ _id: req.fileID });
+        const bfile = await BFile.findById(req.fileID);
         const md5 = await MD5(req.file.path);
         bfile.hash = md5;
         await bfile.save();
@@ -110,7 +110,7 @@ FileRouter.post("/:id", upload.single("file"), async (req: IFileRequest, res: Re
 FileRouter.delete("/:id", async (req: IFileRequest, res: Response) => {
     try {
         if (!req.access.MContent) { throw new ServerError("No access", 403); }
-        const bfile = await BFile.findOne({ _id: req.fileID });
+        const bfile = await BFile.findById(req.fileID);
         await unlink(bfile.getPath());
         await bfile.remove();
         res.send("success");
@@ -125,7 +125,7 @@ FileRouter.delete("/:id", async (req: IFileRequest, res: Response) => {
 
 FileRouter.get("/:id/meta", async (req: IFileRequest, res: Response) => {
     try {
-        const bfile = await BFile.findOne({ _id: req.fileID });
+        const bfile = await BFile.findById(req.fileID);
         res.send(bfile);
     } catch (e) {
         if (e instanceof ServerError) {
@@ -139,8 +139,9 @@ FileRouter.get("/:id/meta", async (req: IFileRequest, res: Response) => {
 FileRouter.post("/:id/meta", async (req: IFileRequest, res: Response) => {
     try {
         if (!req.access.MContent) { throw new ServerError("No access", 403); }
-        const bfile = await BFile.findOne({ _id: req.fileID });
+        const bfile = await BFile.findById(req.fileID);
         bfile.description = req.body.description;
+        bfile.type = req.body.type;
         await bfile.save();
         res.send("success");
     } catch (e) {

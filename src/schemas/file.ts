@@ -10,7 +10,7 @@ export interface IBFileModel extends Document {
     owner: string;
     description: string;
     type: string;
-    created?: Date;
+    created: Date;
     getPath(): string;
 }
 

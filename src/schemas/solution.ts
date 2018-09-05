@@ -8,9 +8,9 @@ export interface ISolutionModel extends Document {
     problemID: string;
     files: string[];
     status: string;
-    result?: any;
-    meta?: any;
-    created?: Date;
+    result: object;
+    meta: object;
+    created: Date;
     judge(): Promise<void>;
 }
 
@@ -18,10 +18,10 @@ export let SolutionSchema: Schema = new Schema(
     {
         created: Date,
         files: { type: [String], required: true },
-        meta: Object,
+        meta: { type: Object, required: true, default: {} },
         owner: { type: String, required: true },
         problemID: { type: String, required: true },
-        result: Object,
+        result: { type: Object, required: true, default: {} },
         status: { type: String, required: true, default: "Waiting" },
     },
 );

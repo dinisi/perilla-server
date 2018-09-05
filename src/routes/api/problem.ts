@@ -11,15 +11,23 @@ ProblemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
         if (!req.role.CProblem) { throw new ServerError("Access denied", 403); }
         const problem = new Problem();
+
         problem.title = req.body.title;
         problem.content = req.body.content;
         problem.data = req.body.data;
+        problem.meta = req.body.meta;
+        problem.tags = req.body.tags;
+
         problem.owner = req.userID;
         await problem.save();
         if (req.roleID !== config.defaultAdminRoleID && req.roleID !== config.defaultJudgerRoleID) {
             const defaultAccess = new ProblemAccess();
             defaultAccess.problemID = problem._id;
             defaultAccess.roleID = req.roleID;
+            defaultAccess.MContent = true;
+            defaultAccess.MData = true;
+            defaultAccess.MTag = true;
+            defaultAccess.DSubmit = true;
             await defaultAccess.save();
         }
         res.send(problem._id);
@@ -69,7 +77,7 @@ ProblemRouter.use("/:id", async (req: IProblemRequest, res: Response, next) => {
 
 ProblemRouter.get("/:id", async (req: IProblemRequest, res: Response) => {
     try {
-        const problem = await Problem.findOne({ _id: req.problemID });
+        const problem = await Problem.findById(req.problemID);
         res.send(problem);
     } catch (e) {
         if (e instanceof ServerError) {
@@ -94,7 +102,7 @@ ProblemRouter.get("/:id/access", async (req: IProblemRequest, res: Response) => 
 
 ProblemRouter.post("/:id", async (req: IProblemRequest, res: Response) => {
     try {
-        const problem = await Problem.findOne({ _id: req.problemID });
+        const problem = await Problem.findById(req.problemID);
         if (req.access.MContent) {
             problem.title = req.body.title;
             problem.content = req.body.content;
@@ -120,7 +128,7 @@ ProblemRouter.post("/:id", async (req: IProblemRequest, res: Response) => {
 ProblemRouter.delete("/:id", async (req: IProblemRequest, res: Response) => {
     try {
         if (!req.access.DRemove) { throw new ServerError("No access", 403); }
-        const problem = await Problem.findOne({ _id: req.problemID });
+        const problem = await Problem.findById(req.problemID);
         await problem.remove();
         res.send("success");
     } catch (e) {

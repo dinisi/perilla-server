@@ -24,3 +24,15 @@ export interface ISolutionRequest extends IAuthorizedRequest {
     solutionID: string;
     access: ISolutionAccessModel;
 }
+
+export interface IFileAccessRequest extends IAuthorizedRequest {
+    fileAccess: IFileAccessModel;
+}
+
+export interface IProblemAccessRequest extends IAuthorizedRequest {
+    problemAccess: IProblemAccessModel;
+}
+
+export interface ISolutionAccessRequest extends IAuthorizedRequest {
+    solutionAccess: ISolutionAccessModel;
+}

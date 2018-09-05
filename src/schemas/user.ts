@@ -12,7 +12,7 @@ export interface IUserModel extends Document {
     bio: string;
     hash: string;
     salt: string;
-    roles: [string];
+    roles: string[];
     _protected: boolean;
     setPassword(password: string): string;
     validPassword(password: string): boolean;

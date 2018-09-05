@@ -1,5 +1,4 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { config } from "../config";
 
 export interface IFileAccessModel extends Document {
     roleID: string;

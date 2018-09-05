@@ -29,7 +29,7 @@ RoleRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
 
 RoleRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const roles = await Role.find();
+        const roles = await Role.find().select("_id rolename description").exec();
         res.send(roles);
     } catch (e) {
         if (e instanceof ServerError) {
@@ -42,7 +42,7 @@ RoleRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
 
 RoleRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const role = await Role.findOne({ _id: req.params.id });
+        const role = await Role.findById(req.params.id);
         if (!role) { throw new ServerError("Not found", 404); }
         res.send(role);
     } catch (e) {
@@ -57,7 +57,7 @@ RoleRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
 RoleRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
         if (!req.role.MRole) { throw new ServerError("No access", 403); }
-        const role = await Role.findOne({ _id: req.params.id });
+        const role = await Role.findById(req.params.id);
         if (!role) { throw new ServerError("Not found", 404); }
         if (role._protected) { throw new ServerError("Object is protected", 403); }
         role.rolename = req.body.rolename;
@@ -81,7 +81,7 @@ RoleRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
 RoleRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
         if (!req.role.MRole) { throw new ServerError("No access", 403); }
-        const role = await Role.findOne({ _id: req.params.id });
+        const role = await Role.findById(req.params.id);
         if (!role) { throw new ServerError("Not found", 404); }
         if (role._protected) { throw new ServerError("Object is protected", 403); }
         await role.remove();

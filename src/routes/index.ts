@@ -79,7 +79,7 @@ MainRouter.use(
             const client = await getClient(req.headers.authorization);
             const valid = getVerificationCode(client.accessToken, client.clientID);
             if (!(valid === req.query.v)) { throw new ServerError("Access denied", 403); }
-            const role = await Role.findOne({ _id: client.RoleID });
+            const role = await Role.findById(client.RoleID);
             if (!role) { throw new ServerError("No such role", 403); }
             req.userID = client.UserID;
             req.roleID = client.RoleID;

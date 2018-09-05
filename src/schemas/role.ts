@@ -1,5 +1,4 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { config } from "../config";
 import { FileAccess } from "./fileAccess";
 import { ProblemAccess } from "./problemAccess";
 import { SolutionAccess } from "./solutionAccess";
