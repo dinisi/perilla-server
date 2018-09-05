@@ -68,7 +68,11 @@ ProblemAccessRouter.post("/:id/:role", async (req, res) => {
             access.roleID = req.params.role;
             access.problemID = req.params.id;
         }
-        access.config = req.body.config;
+        access.MContent = req.body.MContent;
+        access.MData = req.body.MData;
+        access.MTag = req.body.MTag;
+        access.DRemove = req.body.DRemove;
+        access.DSubmit = req.body.DSubmit;
         await access.save();
         res.send("success");
     } catch (e) {

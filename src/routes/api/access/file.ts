@@ -68,7 +68,8 @@ FileAccessRouter.post("/:id/:role", async (req, res) => {
             access.roleID = req.params.role;
             access.fileID = req.params.id;
         }
-        access.config = req.body.config;
+        access.DRemove = req.body.DRemove;
+        access.MContent = req.body.MContent;
         await access.save();
         res.send("success");
     } catch (e) {

@@ -68,7 +68,10 @@ SolutionAccessRouter.post("/:id/:role", async (req, res) => {
             access.roleID = req.params.role;
             access.solutionID = req.params.id;
         }
-        access.config = req.body.config;
+        access.RResult = req.body.RResult;
+        access.MContent = req.body.MContent;
+        access.DRejudge = req.body.DRejudge;
+        access.DRemove = req.body.DRemove;
         await access.save();
         res.send("success");
     } catch (e) {

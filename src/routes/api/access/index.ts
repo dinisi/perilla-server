@@ -9,7 +9,7 @@ export let AccessRouter = Router();
 
 AccessRouter.use((req: IAuthorizedRequest, res: Response, next) => {
     try {
-        if (!req.commonAccess.manageAccess) { throw new ServerError("Access denied", 403); }
+        if (!req.role.MAccess) { throw new ServerError("Access denied", 403); }
         next();
     } catch (e) {
         if (e instanceof ServerError) {
