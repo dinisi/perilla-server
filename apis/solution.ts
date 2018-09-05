@@ -11,3 +11,8 @@ export interface ISolutionFull extends ISolutionSimple {
     result: object;
     meta: object;
 }
+
+export interface ISolutionNewPayload {
+    problemID: string;
+    files: string[];
+}

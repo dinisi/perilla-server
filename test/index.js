@@ -12,7 +12,7 @@ const request = require('request');
 const rs = require("randomstring");
 
 const username = "Administrator";
-const password = "Ogin9wHWvn";
+const password = "ZlkPRyBzwT";
 const rolename = "Administrators";
 const clientID = "TEST";
 
