@@ -20,7 +20,7 @@ export let BFileSchema = new Schema(
         description: { type: String, required: true, default: "No description" },
         hash: { type: String, required: true },
         owner: { type: String, required: true },
-        type: { type: String, required: true, default: "TXT" },
+        type: { type: String, required: true, default: "txt" },
     },
 );
 
