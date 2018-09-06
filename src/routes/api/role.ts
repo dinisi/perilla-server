@@ -2,6 +2,7 @@ import { Response, Router } from "express";
 import { ServerError } from "../../definitions/errors";
 import { IAuthorizedRequest } from "../../definitions/requests";
 import { Role } from "../../schemas/role";
+import { validPaginate } from "../common";
 
 export let RoleRouter = Router();
 
@@ -27,9 +28,17 @@ RoleRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-RoleRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
+RoleRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const roles = await Role.find().select("_id rolename description").exec();
+        let query = Role.find();
+        if (req.query.rolename) {
+            query = query.where("rolename").equals(req.query.rolename);
+        }
+        if (req.query.search) {
+            query = query.where("rolename").regex(new RegExp(req.query.search));
+        }
+        query = query.skip(req.query.skip).limit(req.query.limit);
+        const roles = query.select("_id rolename description").exec();
         res.send(roles);
     } catch (e) {
         if (e instanceof ServerError) {

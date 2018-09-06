@@ -5,6 +5,7 @@ import { IAuthorizedRequest, ISolutionRequest } from "../../definitions/requests
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
 import { SolutionAccess } from "../../schemas/solutionAccess";
+import { validPaginate } from "../common";
 
 export let SolutionRouter = Router();
 
@@ -33,13 +34,20 @@ SolutionRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-SolutionRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
+SolutionRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const allowedSolutions = await SolutionAccess.find({ roleID: req.roleID }).select("solutionID").exec();
-        const solutions = [];
-        for (const solution of allowedSolutions) {
-            solutions.push(await Solution.findById(solution.solutionID).select("_id problemID status created owner"));
+        let query = Solution.find();
+        if (req.query.owner) {
+            query = query.where("owner").equals(req.query.owner);
         }
+        if (req.query.problemID) {
+            query = query.where("problemID").equals(req.query.problemID);
+        }
+        if (req.query.status) {
+            query = query.where("status").equals(req.query.status);
+        }
+        query = query.skip(req.query.skip).limit(req.query.limit);
+        const solutions = await query.select("_id problemID status created owner").exec();
         res.send(solutions);
     } catch (e) {
         if (e instanceof ServerError) {

@@ -4,6 +4,7 @@ import { ISolutionAccessRequest } from "../../../definitions/requests";
 import { Role } from "../../../schemas/role";
 import { Solution } from "../../../schemas/solution";
 import { SolutionAccess } from "../../../schemas/solutionAccess";
+import { validPaginate } from "../../common";
 
 export let SolutionAccessRouter = Router();
 
@@ -32,9 +33,9 @@ SolutionAccessRouter.post("/new", async (req, res) => {
     }
 });
 
-SolutionAccessRouter.get("/list", async (req, res) => {
+SolutionAccessRouter.get("/list", validPaginate, async (req, res) => {
     try {
-        const solutionAccesses = await SolutionAccess.find();
+        const solutionAccesses = await SolutionAccess.find().skip(req.query.skip).limit(req.query.limit);
         res.send(solutionAccesses);
     } catch (e) {
         if (e instanceof ServerError) {

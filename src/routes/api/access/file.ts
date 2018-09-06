@@ -4,6 +4,7 @@ import { IFileAccessRequest } from "../../../definitions/requests";
 import { BFile } from "../../../schemas/file";
 import { FileAccess } from "../../../schemas/fileAccess";
 import { Role } from "../../../schemas/role";
+import { validPaginate } from "../../common";
 
 export let FileAccessRouter = Router();
 
@@ -29,9 +30,9 @@ FileAccessRouter.post("/new", async (req, res) => {
     }
 });
 
-FileAccessRouter.get("/list", async (req, res) => {
+FileAccessRouter.get("/list", validPaginate, async (req, res) => {
     try {
-        const fileAccesses = await FileAccess.find();
+        const fileAccesses = await FileAccess.find().skip(req.query.skip).limit(req.query.limit);
         res.send(fileAccesses);
     } catch (e) {
         if (e instanceof ServerError) {

@@ -4,6 +4,7 @@ import { ServerError } from "../../definitions/errors";
 import { IAuthorizedRequest, IProblemRequest } from "../../definitions/requests";
 import { Problem } from "../../schemas/problem";
 import { ProblemAccess } from "../../schemas/problemAccess";
+import { validPaginate } from "../common";
 
 export let ProblemRouter = Router();
 
@@ -40,13 +41,20 @@ ProblemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-ProblemRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
+ProblemRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const AllowedProblems = await ProblemAccess.find({ roleID: req.roleID }).select("problemID").exec();
-        const problems = [];
-        for (const problem of AllowedProblems) {
-            problems.push(await Problem.findById(problem.problemID).select("_id title tags created owner"));
+        let query = Problem.find();
+        if (req.query.owner) {
+            query = query.where("owner").equals(req.query.owner);
         }
+        if (req.query.search) {
+            query = query.where("title").regex(new RegExp(req.query.search));
+        }
+        if (req.query.tags) {
+            query = query.where("tags").all(req.query.tags);
+        }
+        query = query.skip(req.query.skip).limit(req.query.limit);
+        const problems = await query.select("_id title tags created owner").exec();
         res.send(problems);
     } catch (e) {
         if (e instanceof ServerError) {

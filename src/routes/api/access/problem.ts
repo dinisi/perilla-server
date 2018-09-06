@@ -4,6 +4,7 @@ import { IProblemAccessRequest } from "../../../definitions/requests";
 import { Problem } from "../../../schemas/problem";
 import { ProblemAccess } from "../../../schemas/problemAccess";
 import { Role } from "../../../schemas/role";
+import { validPaginate } from "../../common";
 
 export let ProblemAccessRouter = Router();
 
@@ -32,9 +33,9 @@ ProblemAccessRouter.post("/new", async (req, res) => {
     }
 });
 
-ProblemAccessRouter.get("/list", async (req, res) => {
+ProblemAccessRouter.get("/list", validPaginate, async (req, res) => {
     try {
-        const problemAccesses = await ProblemAccess.find();
+        const problemAccesses = await ProblemAccess.find().skip(req.query.skip).limit(req.query.limit);
         res.send(problemAccesses);
     } catch (e) {
         if (e instanceof ServerError) {

@@ -9,6 +9,7 @@ import * as multer from "multer";
 import { config } from "../../config";
 import { MD5 } from "../../md5";
 import { BFile } from "../../schemas/file";
+import { validPaginate } from "../common";
 const upload = multer({ dest: "files/uploads/" });
 
 export let FileRouter = Router();
@@ -46,13 +47,20 @@ FileRouter.post("/upload", upload.array("files", 128), async (req: IAuthorizedRe
     }
 });
 
-FileRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
+FileRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const allowedFiles = await FileAccess.find({ roleID: req.roleID }).select("fileID").exec();
-        const files = [];
-        for (const file of allowedFiles) {
-            files.push(await BFile.findById(file.fileID).select("_id type created owner").exec());
+        let query = BFile.find();
+        if (req.query.owner) {
+            query = query.where("owner").equals(req.query.owner);
         }
+        if (req.query.search) {
+            query = query.where("description").regex(new RegExp(req.query.search));
+        }
+        if (req.query.type) {
+            query = query.where("type").equals(req.query.type);
+        }
+        query = query.skip(req.query.skip).limit(req.query.limit);
+        const files = await query.select("_id type created owner").exec();
         res.send(files);
     } catch (e) {
         if (e instanceof ServerError) {
