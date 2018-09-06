@@ -3,8 +3,8 @@ import { ServerError } from "../definitions/errors";
 
 export const validPaginate = (req: Request, res: Response, next: NextFunction) => {
     try {
-        if (!req.query.skip || !parseInt(req.query.skip, 10)) { throw new ServerError("Paginate: invalid skip", 403); }
-        if (!req.query.limit || !parseInt(req.query.limit, 10)) { throw new ServerError("Paginate: invalid limit", 403); }
+        if (!req.query.skip) { throw new ServerError("Paginate: invalid skip", 403); }
+        if (!req.query.limit) { throw new ServerError("Paginate: invalid limit", 403); }
         req.query.skip = parseInt(req.query.skip, 10);
         req.query.limit = parseInt(req.query.limit, 10);
         if (req.query.limit > 256) { throw new ServerError("Limit is too big", 403); }
