@@ -35,7 +35,12 @@ ProblemAccessRouter.post("/new", async (req, res) => {
 
 ProblemAccessRouter.get("/list", validPaginate, async (req, res) => {
     try {
-        const problemAccesses = await ProblemAccess.find().skip(req.query.skip).limit(req.query.limit);
+        let query = ProblemAccess.find();
+
+        if (req.body.roleID) { query = query.where("roleID").equals(req.body.roleID); }
+        if (req.body.problemID) { query = query.where("problemID").equals(req.body.problemID); }
+
+        const problemAccesses = await query.skip(req.query.skip).limit(req.query.limit).exec();
         res.send(problemAccesses);
     } catch (e) {
         if (e instanceof ServerError) {

@@ -35,7 +35,12 @@ SolutionAccessRouter.post("/new", async (req, res) => {
 
 SolutionAccessRouter.get("/list", validPaginate, async (req, res) => {
     try {
-        const solutionAccesses = await SolutionAccess.find().skip(req.query.skip).limit(req.query.limit);
+        let query = SolutionAccess.find();
+
+        if (req.body.roleID) { query = query.where("roleID").equals(req.body.roleID); }
+        if (req.body.solutionID) { query = query.where("solutionID").equals(req.body.solutionID); }
+
+        const solutionAccesses = await query.skip(req.query.skip).limit(req.query.limit).exec();
         res.send(solutionAccesses);
     } catch (e) {
         if (e instanceof ServerError) {

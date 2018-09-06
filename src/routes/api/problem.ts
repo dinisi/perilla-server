@@ -44,15 +44,11 @@ ProblemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
 ProblemRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = Problem.find();
-        if (req.query.owner) {
-            query = query.where("owner").equals(req.query.owner);
-        }
-        if (req.query.search) {
-            query = query.where("title").regex(new RegExp(req.query.search));
-        }
-        if (req.query.tags) {
-            query = query.where("tags").all(req.query.tags);
-        }
+
+        if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
+        if (req.query.search) { query = query.where("title").regex(new RegExp(req.query.search)); }
+        if (req.query.tags) { query = query.where("tags").all(req.query.tags); }
+
         query = query.skip(req.query.skip).limit(req.query.limit);
         const problems = await query.select("_id title tags created owner").exec();
         res.send(problems);

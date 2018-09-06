@@ -37,15 +37,11 @@ SolutionRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
 SolutionRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = Solution.find();
-        if (req.query.owner) {
-            query = query.where("owner").equals(req.query.owner);
-        }
-        if (req.query.problemID) {
-            query = query.where("problemID").equals(req.query.problemID);
-        }
-        if (req.query.status) {
-            query = query.where("status").equals(req.query.status);
-        }
+
+        if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
+        if (req.query.problemID) { query = query.where("problemID").equals(req.query.problemID); }
+        if (req.query.status) { query = query.where("status").equals(req.query.status); }
+
         query = query.skip(req.query.skip).limit(req.query.limit);
         const solutions = await query.select("_id problemID status created owner").exec();
         res.send(solutions);

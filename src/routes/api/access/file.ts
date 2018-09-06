@@ -32,7 +32,12 @@ FileAccessRouter.post("/new", async (req, res) => {
 
 FileAccessRouter.get("/list", validPaginate, async (req, res) => {
     try {
-        const fileAccesses = await FileAccess.find().skip(req.query.skip).limit(req.query.limit);
+        let query = FileAccess.find();
+
+        if (req.body.roleID) { query = query.where("roleID").equals(req.body.roleID); }
+        if (req.body.fileID) { query = query.where("fileID").equals(req.body.fileID); }
+
+        const fileAccesses = await query.skip(req.query.skip).limit(req.query.limit).exec();
         res.send(fileAccesses);
     } catch (e) {
         if (e instanceof ServerError) {

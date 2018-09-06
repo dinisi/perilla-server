@@ -50,15 +50,11 @@ FileRouter.post("/upload", upload.array("files", 128), async (req: IAuthorizedRe
 FileRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = BFile.find();
-        if (req.query.owner) {
-            query = query.where("owner").equals(req.query.owner);
-        }
-        if (req.query.search) {
-            query = query.where("description").regex(new RegExp(req.query.search));
-        }
-        if (req.query.type) {
-            query = query.where("type").equals(req.query.type);
-        }
+
+        if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
+        if (req.query.search) { query = query.where("description").regex(new RegExp(req.query.search)); }
+        if (req.query.type) { query = query.where("type").equals(req.query.type); }
+
         query = query.skip(req.query.skip).limit(req.query.limit);
         const files = await query.select("_id type created owner").exec();
         res.send(files);

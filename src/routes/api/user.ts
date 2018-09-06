@@ -29,18 +29,12 @@ UserRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
 UserRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = User.find();
-        if (req.query.username) {
-            query = query.where("username").equals(req.query.username);
-        }
-        if (req.query.realname) {
-            query = query.where("realname").equals(req.query.realname);
-        }
-        if (req.query.email) {
-            query = query.where("email").equals(req.query.email);
-        }
-        if (req.query.roles) {
-            query = query.where("roles").all(req.query.roles);
-        }
+
+        if (req.query.username) { query = query.where("username").equals(req.query.username); }
+        if (req.query.realname) { query = query.where("realname").equals(req.query.realname); }
+        if (req.query.email) { query = query.where("email").equals(req.query.email); }
+        if (req.query.roles) { query = query.where("roles").all(req.query.roles); }
+
         query = query.skip(req.query.skip).limit(req.query.limit);
         const users = await query.select("username realname email roles").exec();
         res.send(users);
