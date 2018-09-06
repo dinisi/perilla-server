@@ -37,9 +37,8 @@ SolutionRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
     try {
         const allowedSolutions = await SolutionAccess.find({ roleID: req.roleID }).select("solutionID").exec();
         const solutions = [];
-        for (const sa of allowedSolutions) {
-            const solution = await Solution.findById(sa.solutionID).select("_id problemID status created owner");
-            solutions.push(solution);
+        for (const solution of allowedSolutions) {
+            solutions.push(await Solution.findById(solution.solutionID).select("_id problemID status created owner"));
         }
         res.send(solutions);
     } catch (e) {

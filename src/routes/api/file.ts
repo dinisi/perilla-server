@@ -48,7 +48,11 @@ FileRouter.post("/upload", upload.array("files", 128), async (req: IAuthorizedRe
 
 FileRouter.get("/list", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const files = await BFile.find({});
+        const allowedFiles = await FileAccess.find({ roleID: req.roleID }).select("fileID").exec();
+        const files = [];
+        for (const file of allowedFiles) {
+            files.push(await BFile.findById(file.fileID).select("_id type created owner").exec());
+        }
         res.send(files);
     } catch (e) {
         if (e instanceof ServerError) {
