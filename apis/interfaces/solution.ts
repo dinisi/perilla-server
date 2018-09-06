@@ -16,3 +16,13 @@ export interface ISolutionNewPayload {
     problemID: string;
     files: string[];
 }
+
+export interface ISolutionAccess {
+    _id: string;
+    roleID: string;
+    solutionID: string;
+    RResult: boolean;
+    MContent: boolean;
+    DRejudge: boolean;
+    DRemove: boolean;
+}
