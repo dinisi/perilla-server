@@ -11,14 +11,11 @@ let getVerificationCode = (accessToken, clientID) => {
 const request = require('request');
 const rs = require("randomstring");
 
-const username = "Administrator";
-const password = "ZlkPRyBzwT";
-const rolename = "Administrators";
-const clientID = "TEST";
+const config = require("./config");
 
 (async () => {
     await new Promise((resolve) => {
-        request.get(`http://127.0.0.1:3000/rolesof?username=${username}`, (err, res) => {
+        request.get(`http://127.0.0.1:3000/rolesof?username=${config.username}`, (err, res) => {
             if (err) {
                 console.error(err);
                 process.exit(0);
@@ -30,10 +27,10 @@ const clientID = "TEST";
     });
     const accessToken = await new Promise((resolve) => {
         const loginPackage = {
-            username: username,
-            password: password,
-            rolename: rolename,
-            clientID: clientID,
+            username: config.username,
+            password: config.password,
+            rolename: config.rolename,
+            clientID: config.clientID,
         };
         request.post("http://127.0.0.1:3000/login", { form: loginPackage }, (err, res) => {
             if (err) {
