@@ -1,6 +1,5 @@
 import { Request, Response, Router } from "express";
 import { config } from "../../config";
-import { ServerError } from "../../definitions/errors";
 import { IAuthorizedRequest, IProblemRequest } from "../../definitions/requests";
 import { Problem } from "../../schemas/problem";
 import { ProblemAccess } from "../../schemas/problemAccess";
@@ -10,7 +9,7 @@ export let ProblemRouter = Router();
 
 ProblemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.role.CProblem) { throw new ServerError("Access denied", 403); }
+        if (!req.role.CProblem) { throw new Error("Access denied"); }
         const problem = new Problem();
 
         problem.title = req.body.title;
@@ -31,13 +30,23 @@ ProblemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
             defaultAccess.DSubmit = true;
             await defaultAccess.save();
         }
-        res.send(problem._id);
+        res.send({ status: "success", payload: problem._id });
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
+    }
+});
+
+ProblemRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
+    try {
+        let query = Problem.find();
+
+        if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
+        if (req.query.search) { query = query.where("title").regex(new RegExp(req.query.search)); }
+        if (req.query.tags) { query = query.where("tags").all(req.query.tags); }
+
+        res.send({ status: "success", payload: await query.countDocuments() });
+    } catch (e) {
+        res.send({ status: "failed", payload: e.message });
     }
 });
 
@@ -51,13 +60,9 @@ ProblemRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: R
 
         query = query.skip(req.query.skip).limit(req.query.limit);
         const problems = await query.select("_id title tags created owner").exec();
-        res.send(problems);
+        res.send({ status: "success", payload: problems });
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
     }
 });
 
@@ -65,41 +70,29 @@ ProblemRouter.use("/:id", async (req: IProblemRequest, res: Response, next) => {
     try {
         const problemID = req.params.id;
         const access = await ProblemAccess.findOne({ roleID: req.roleID, problemID });
-        if (!access) { throw new ServerError("Not found", 404); }
+        if (!access) { throw new Error("Not found"); }
         req.problemID = problemID;
         req.access = access;
         next();
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
     }
 });
 
 ProblemRouter.get("/:id", async (req: IProblemRequest, res: Response) => {
     try {
         const problem = await Problem.findById(req.problemID);
-        res.send(problem);
+        res.send({ status: "success", payload: problem });
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
     }
 });
 
 ProblemRouter.get("/:id/access", async (req: IProblemRequest, res: Response) => {
     try {
-        res.send(req.access);
+        res.send({ status: "success", payload: req.access });
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
     }
 });
 
@@ -118,27 +111,19 @@ ProblemRouter.post("/:id", async (req: IProblemRequest, res: Response) => {
             problem.tags = req.body.tags;
         }
         await problem.save();
-        res.send("success");
+        res.send({ status: "success" });
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
     }
 });
 
 ProblemRouter.delete("/:id", async (req: IProblemRequest, res: Response) => {
     try {
-        if (!req.access.DRemove) { throw new ServerError("No access", 403); }
+        if (!req.access.DRemove) { throw new Error("No access"); }
         const problem = await Problem.findById(req.problemID);
         await problem.remove();
-        res.send("success");
+        res.send({ status: "success" });
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
     }
 });

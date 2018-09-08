@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { ServerError } from "../../../definitions/errors";
 import { ISolutionAccessRequest } from "../../../definitions/requests";
 import { Role } from "../../../schemas/role";
 import { Solution } from "../../../schemas/solution";
@@ -10,9 +9,9 @@ export let SolutionAccessRouter = Router();
 
 SolutionAccessRouter.post("/new", async (req, res) => {
     try {
-        if (await SolutionAccess.findOne({ roleID: req.body.roleID, solutionID: req.body.solutionID })) { throw new ServerError("Already exists", 403); }
-        if (!await Role.findById(req.body.roleID)) { throw new ServerError("Not found", 404); }
-        if (!await Solution.findById(req.body.solutionID)) { throw new ServerError("Not found", 404); }
+        if (await SolutionAccess.findOne({ roleID: req.body.roleID, solutionID: req.body.solutionID })) { throw new Error("Already exists"); }
+        if (!await Role.findById(req.body.roleID)) { throw new Error("Not found"); }
+        if (!await Solution.findById(req.body.solutionID)) { throw new Error("Not found"); }
 
         const solutionAccess = new SolutionAccess();
         solutionAccess.roleID = req.body.roleID;
@@ -23,13 +22,22 @@ SolutionAccessRouter.post("/new", async (req, res) => {
         solutionAccess.DRemove = req.body.DRemove;
 
         await solutionAccess.save();
-        res.send(solutionAccess._id);
+        res.send({ status: "success", payload: solutionAccess._id });
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
+    }
+});
+
+SolutionAccessRouter.get("/count", async (req, res) => {
+    try {
+        let query = SolutionAccess.find();
+
+        if (req.body.roleID) { query = query.where("roleID").equals(req.body.roleID); }
+        if (req.body.solutionID) { query = query.where("solutionID").equals(req.body.solutionID); }
+
+        res.send({ status: "success", payload: await query.countDocuments() });
+    } catch (e) {
+        res.send({ status: "failed", payload: e.message });
     }
 });
 
@@ -41,70 +49,50 @@ SolutionAccessRouter.get("/list", validPaginate, async (req, res) => {
         if (req.body.solutionID) { query = query.where("solutionID").equals(req.body.solutionID); }
 
         const solutionAccesses = await query.skip(req.query.skip).limit(req.query.limit).exec();
-        res.send(solutionAccesses);
+        res.send({ status: "success", payload: solutionAccesses });
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
     }
 });
 
 SolutionAccessRouter.use("/:id", async (req: ISolutionAccessRequest, res, next) => {
     try {
         req.solutionAccess = await SolutionAccess.findById(req.params.id);
-        if (!req.solutionAccess) { throw new ServerError("Not found", 404); }
+        if (!req.solutionAccess) { throw new Error("Not found"); }
         next();
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
     }
 });
 
 SolutionAccessRouter.get("/:id", async (req: ISolutionAccessRequest, res) => {
     try {
-        res.send(req.solutionAccess);
+        res.send({ status: "success", payload: req.solutionAccess });
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
     }
 });
 
 SolutionAccessRouter.post("/:id", async (req: ISolutionAccessRequest, res) => {
     try {
-        if (req.solutionAccess._protected) { throw new ServerError("Object is protected", 403); }
+        if (req.solutionAccess._protected) { throw new Error("Object is protected"); }
         req.solutionAccess.RResult = req.body.RResult;
         req.solutionAccess.MContent = req.body.MContent;
         req.solutionAccess.DRejudge = req.body.DRejudge;
         req.solutionAccess.DRemove = req.body.DRemove;
         await req.solutionAccess.save();
-        res.send("success");
+        res.send({ status: "success" });
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
     }
 });
 
 SolutionAccessRouter.delete("/:id", async (req: ISolutionAccessRequest, res) => {
     try {
-        if (req.solutionAccess._protected) { throw new ServerError("Object is protected", 403); }
+        if (req.solutionAccess._protected) { throw new Error("Object is protected"); }
         await req.solutionAccess.remove();
-        res.send("success");
+        res.send({ status: "success" });
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
     }
 });

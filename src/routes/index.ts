@@ -1,6 +1,5 @@
 import { Response, Router } from "express";
 import { IClient } from "../definitions/client";
-import { ServerError } from "../definitions/errors";
 import { IAuthorizedRequest } from "../definitions/requests";
 import { generateAccessToken, getClient, setClient } from "../redis";
 import { Role } from "../schemas/role";
@@ -14,27 +13,23 @@ MainRouter.get("/rolesof", async (req, res) => {
     try {
         const username: string = req.query.username;
         const user = await User.findOne({ username });
-        if (!user) { throw new ServerError("Not found", 404); }
+        if (!user) { throw new Error("Not found"); }
         const roles = await Role.find().where("_id").in(user.roles).select("_id rolename description").exec();
-        res.send(roles);
+        res.send({ status: "success", payload: roles });
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
     }
 });
 
 MainRouter.post("/login", async (req, res) => {
     try {
-        if (req.headers.authorization) { throw new ServerError("Already logged in", 403); }
+        if (req.query.a) { throw new Error("Already logged in"); }
         const user = await User.findOne().where("username").equals(req.body.username).exec();
-        if (!user) { throw new ServerError("Not found", 404); }
+        if (!user) { throw new Error("Not found"); }
         // 防止傻逼爆密码
-        if (!user.validPassword(req.body.password)) { throw new ServerError("Unknow Error", 500); }
+        if (!user.validPassword(req.body.password)) { throw new Error("Unknow Error"); }
         const role = await Role.findOne().where("rolename").equals(req.body.rolename).where("_id").in(user.roles).exec();
-        if (!role) { throw new ServerError("Not found", 404); }
+        if (!role) { throw new Error("Not found"); }
         const client: IClient = {
             RoleID: role._id.toString(),
             UserID: user._id.toString(),
@@ -43,31 +38,23 @@ MainRouter.post("/login", async (req, res) => {
         };
         const expire = 2 * 24 * 60 * 60;
         await setClient(client, expire);
-        res.send(client.accessToken);
+        res.send({ status: "success", payload: client.accessToken });
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
     }
 });
 
 MainRouter.post("/register", async (req, res) => {
     try {
-        if (req.headers.authorization) { throw new ServerError("Already logged in", 403); }
+        if (req.query.a) { throw new Error("Already logged in"); }
         const user = new User();
         user.username = req.body.username;
         user.realname = req.body.realname;
         user.email = req.body.email;
         user.setPassword(req.body.password);
-        res.send(user._id);
+        res.send({ status: "success", payload: user._id });
     } catch (e) {
-        if (e instanceof ServerError) {
-            res.status(e.code).send(e.message);
-        } else {
-            res.status(500).send(e.message);
-        }
+        res.send({ status: "failed", payload: e.message });
     }
 });
 
@@ -75,22 +62,18 @@ MainRouter.use(
     "/api",
     async (req: IAuthorizedRequest, res: Response, next) => {
         try {
-            if (!req.headers.authorization) { throw new ServerError("Not logged in", 403); }
-            const client = await getClient(req.headers.authorization);
+            if (!req.query.a) { throw new Error("Not logged in"); }
+            const client = await getClient(req.query.a);
             const valid = getVerificationCode(client.accessToken, client.clientID);
-            if (!(valid === req.query.v)) { throw new ServerError("Access denied", 403); }
+            if (!(valid === req.query.v)) { throw new Error("Access denied"); }
             const role = await Role.findById(client.RoleID);
-            if (!role) { throw new ServerError("No such role", 403); }
+            if (!role) { throw new Error("No such role"); }
             req.userID = client.UserID;
             req.roleID = client.RoleID;
             req.role = role;
             next();
         } catch (e) {
-            if (e instanceof ServerError) {
-                res.status(e.code).send(e.message);
-            } else {
-                res.status(500).send(e.message);
-            }
+            res.send({ status: "failed", payload: e.message });
         }
     },
     APIRouter,
