@@ -1,0 +1,169 @@
+#%RAML 1.0
+title: LightOnlineJudge API
+version: 1.0
+/rolesof:
+	get:
+		description: 
+			Get roles of someone
+		queryParameters: 
+			username:
+		responses: 
+			200:
+				body:
+					application/json:
+						example: |
+						{
+							"status": "success",
+							"payload": [
+								{
+									"rolename": "Administrators"
+								}
+							]
+						}
+/login:
+	post:
+		description: 
+			User login
+		body: 
+			application/json:
+				properties: 
+					username:
+					rolename:
+					password:
+					clientID:
+		responses: 
+			200:
+				body:
+					application/json:
+						properties: 
+							status:
+							payload:
+/register:
+	post:
+		description:
+			User register
+		body:
+			application/json:
+				properties: 
+					username:
+					realname:
+					email:
+					password:
+		responses: 
+			200:
+				body: 
+					application/json:
+						properties: 
+							status:
+							payload:
+/api:
+	/file:
+		/upload:
+			post:
+				description: 
+					Upload files
+				body:
+					multipart/form-data:
+						properties: 
+							files:
+				responses: 
+					200:
+						body:
+							application/json:
+								properties: 
+									status:
+									payload:
+		/count:
+			get:
+				description: 
+					Count files
+				queryParameters: 
+					owner:
+					search:
+					type:
+				responses: 
+					200:
+						body:
+							application/json:
+								properties:
+									status:
+									payload:
+		/list:
+			get:
+				description:
+					Get files (NOT download)
+				queryParameters:
+					owner:
+					search:
+					type:
+				responses:
+					200:
+						body:
+							application/json:
+								properties:
+									status:
+									payload:
+		/{fileID}:
+			get:
+			post:
+			delete:
+			/meta:
+				get:
+				post:
+			/raw:
+				get:
+	/problem:
+		/new:
+			post:
+				description:
+					Create a problem
+				body:
+					application/json:
+						properties:
+							title:
+							content:
+							data:
+							meta:
+							tags:
+				responses:
+					200:
+						body:
+							application/json:
+								status:
+								payload:
+		/count:
+			get:
+				description:
+					Count problems
+				queryParameters:
+					owner:
+					search:
+					tags:
+				responses:
+					200:
+						body:
+							application/json:
+								status:
+								payload:
+		/list:
+			get:
+				description:
+					List problems
+				queryParameters:
+					owner:
+					search:
+					tags:
+				responses:
+					200:
+						body:
+							application/json:
+								status:
+								payload:
+		/{problemID}:
+			get:
+				responses:
+					200:
+						body:
+							application/json:
+								status:
+								payload:

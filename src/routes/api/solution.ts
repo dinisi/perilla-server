@@ -77,6 +77,7 @@ SolutionRouter.get("/:id", async (req: ISolutionRequest, res: Response) => {
         let select = "";
         if (!req.access.RResult) { select += " -result"; }
         const solution = await Solution.findById(req.solutionID).select(select).exec();
+        if (!solution) { throw new Error("Not found"); }
         res.send({ status: "success", payload: solution });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
@@ -87,6 +88,7 @@ SolutionRouter.post("/:id", async (req: ISolutionRequest, res: Response) => {
     try {
         if (!req.access.MContent) { throw new Error("No access"); }
         const solution = await Solution.findById(req.solutionID);
+        if (!solution) { throw new Error("Not found"); }
         solution.result = req.body.result;
         solution.status = req.body.status;
         await solution.save();
@@ -100,6 +102,7 @@ SolutionRouter.delete("/:id", async (req: ISolutionRequest, res: Response) => {
     try {
         if (!req.access.DRemove) { throw new Error("No access"); }
         const solution = await Solution.findById(req.solutionID);
+        if (!solution) { throw new Error("Not found"); }
         await solution.remove();
         res.send({ status: "success" });
     } catch (e) {
@@ -111,6 +114,7 @@ SolutionRouter.post("/:id/rejudge", async (req: ISolutionRequest, res: Response)
     try {
         if (!req.access.DRejudge) { throw new Error("No access"); }
         const solution = await Solution.findById(req.solutionID);
+        if (!solution) { throw new Error("Not found"); }
         await solution.judge();
         res.send({ status: "success" });
     } catch (e) {

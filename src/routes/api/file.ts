@@ -98,6 +98,7 @@ FileRouter.post("/:id", upload.single("file"), async (req: IFileRequest, res: Re
     try {
         if (!req.access.MContent) { throw new Error("No access"); }
         const bfile = await BFile.findById(req.fileID);
+        if (!bfile) { throw new Error("Not found"); }
         const md5 = await MD5(req.file.path);
         bfile.hash = md5;
         await bfile.save();
@@ -113,6 +114,7 @@ FileRouter.delete("/:id", async (req: IFileRequest, res: Response) => {
     try {
         if (!req.access.MContent) { throw new Error("No access"); }
         const bfile = await BFile.findById(req.fileID);
+        if (!bfile) { throw new Error("Not found"); }
         await unlink(bfile.getPath());
         await bfile.remove();
         res.send({ status: "success" });
@@ -124,6 +126,7 @@ FileRouter.delete("/:id", async (req: IFileRequest, res: Response) => {
 FileRouter.get("/:id/meta", async (req: IFileRequest, res: Response) => {
     try {
         const bfile = await BFile.findById(req.fileID);
+        if (!bfile) { throw new Error("Not found"); }
         res.send({ status: "success", payload: bfile });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
@@ -134,6 +137,7 @@ FileRouter.post("/:id/meta", async (req: IFileRequest, res: Response) => {
     try {
         if (!req.access.MContent) { throw new Error("No access"); }
         const bfile = await BFile.findById(req.fileID);
+        if (!bfile) { throw new Error("Not found"); }
         bfile.description = req.body.description;
         bfile.type = req.body.type;
         await bfile.save();

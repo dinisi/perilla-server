@@ -65,7 +65,7 @@ UserRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
 
 UserRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const user = await User.findById(req.params.id).select("username").exec();
+        const user = await User.findById(req.params.id).select("-_id username email").exec();
         if (!user) { throw new Error("Not found"); }
         res.send({ status: "success", payload: user });
     } catch (e) {

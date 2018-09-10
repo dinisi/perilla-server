@@ -82,6 +82,17 @@ ProblemRouter.use("/:id", async (req: IProblemRequest, res: Response, next) => {
 ProblemRouter.get("/:id", async (req: IProblemRequest, res: Response) => {
     try {
         const problem = await Problem.findById(req.problemID);
+        if (!problem) { throw new Error("Not found"); }
+        res.send({ status: "success", payload: problem });
+    } catch (e) {
+        res.send({ status: "failed", payload: e.message });
+    }
+});
+
+ProblemRouter.get("/:id/summary", async (req: IProblemRequest, res: Response) => {
+    try {
+        const problem = await Problem.findById(req.problemID).select("-_id title").exec();
+        if (!problem) { throw new Error("Not found"); }
         res.send({ status: "success", payload: problem });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
@@ -99,6 +110,7 @@ ProblemRouter.get("/:id/access", async (req: IProblemRequest, res: Response) => 
 ProblemRouter.post("/:id", async (req: IProblemRequest, res: Response) => {
     try {
         const problem = await Problem.findById(req.problemID);
+        if (!problem) { throw new Error("Not found"); }
         if (req.access.MContent) {
             problem.title = req.body.title;
             problem.content = req.body.content;
@@ -121,6 +133,7 @@ ProblemRouter.delete("/:id", async (req: IProblemRequest, res: Response) => {
     try {
         if (!req.access.DRemove) { throw new Error("No access"); }
         const problem = await Problem.findById(req.problemID);
+        if (!problem) { throw new Error("Not found"); }
         await problem.remove();
         res.send({ status: "success" });
     } catch (e) {

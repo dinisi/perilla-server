@@ -66,6 +66,16 @@ RoleRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
+RoleRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response) => {
+    try {
+        const role = await Role.findById(req.params.id).select("-_id rolename").exec();
+        if (!role) { throw new Error("Not found"); }
+        res.send({ status: "success", payload: role });
+    } catch (e) {
+        res.send({ status: "failed", payload: e.message });
+    }
+});
+
 RoleRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
         if (!req.role.MRole) { throw new Error("No access"); }
