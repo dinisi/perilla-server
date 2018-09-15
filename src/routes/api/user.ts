@@ -90,6 +90,9 @@ UserRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
                 }
             }
         }
+        if (req.body.password) {
+            user.setPassword(req.body.password);
+        }
         await user.save();
         res.send({ status: "success" });
     } catch (e) {
