@@ -13,6 +13,7 @@ UserRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
         user.username = req.body.username;
         user.realname = req.body.realname;
         user.roles = req.body.roles;
+        user.email = req.body.email;
         user.setPassword(req.body.password);
         await user.save();
         res.send({ status: "success", payload: user.id });
