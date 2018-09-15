@@ -26,6 +26,7 @@ FileRouter.post("/upload", upload.array("files", 128), async (req: IAuthorizedRe
             if (splitter !== -1 && splitter !== file.originalname.length - 1) {
                 bfile.type = file.originalname.substring(splitter + 1, file.originalname.length);
             }
+            bfile.description = file.originalname;
             await bfile.save();
             if (req.roleID !== config.defaultAdminRoleID && req.roleID !== config.defaultJudgerRoleID) {
                 const fileAccess = new FileAccess();
