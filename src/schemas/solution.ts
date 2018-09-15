@@ -18,10 +18,10 @@ export let SolutionSchema: Schema = new Schema(
     {
         created: Date,
         files: { type: [String], required: true },
-        meta: { type: Object, required: true, default: {} },
+        meta: { type: Object, required: true, default: { version: "1.0" } },
         owner: { type: String, required: true },
         problemID: { type: String, required: true },
-        result: { type: Object, required: true, default: {} },
+        result: { type: Object, required: true, default: { version: "1.0" } },
         status: { type: String, required: true, default: "Waiting" },
     },
 );

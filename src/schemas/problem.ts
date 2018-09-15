@@ -17,8 +17,8 @@ export let ProblemSchema: Schema = new Schema(
     {
         content: { type: String, required: true, default: "No content" },
         created: Date,
-        data: { type: Object, required: true, default: {} },
-        meta: { type: Object, required: true, default: {} },
+        data: { type: Object, required: true, default: { version: "1.0" } },
+        meta: { type: Object, required: true, default: { version: "1.0" } },
         owner: { type: String, required: true },
         tags: { type: [String], required: true, default: ["No tags"], index: true },
         title: { type: String, required: true, unique: true },
