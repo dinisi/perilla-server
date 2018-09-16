@@ -68,4 +68,6 @@ import { IUserModel, User } from "./schemas/user";
 
     fs.writeFileSync("config.json", JSON.stringify(defaultConfig));
     reloadConfig();
+
+    fs.writeFileSync("install.log", `Administrator password: ${adminPassword}\nJudger password: ${judgerPassword}\nParsed config:\n${JSON.stringify(defaultConfig, null, "\t")}`);
 })().then(() => { process.exit(0); });
