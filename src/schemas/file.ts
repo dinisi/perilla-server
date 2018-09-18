@@ -63,9 +63,6 @@ BFileSchema.pre("save", async function(next) {
     if (!(this as IBFileModel).created) {
         (this as IBFileModel).created = new Date();
     }
-    ensureElement((this as IBFileModel).allowedRead, config.defaultAdminRoleID);
-    ensureElement((this as IBFileModel).allowedRead, config.defaultJudgerRoleID);
-    ensureElement((this as IBFileModel).allowedModify, config.defaultAdminRoleID);
     next();
 });
 

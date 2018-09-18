@@ -71,10 +71,6 @@ ProblemSchema.pre("save", async function(next) {
     if (!(this as IProblemModel).created) {
         (this as IProblemModel).created = new Date();
     }
-    ensureElement((this as IProblemModel).allowedRead, config.defaultAdminRoleID);
-    ensureElement((this as IProblemModel).allowedRead, config.defaultJudgerRoleID);
-    ensureElement((this as IProblemModel).allowedModify, config.defaultAdminRoleID);
-    ensureElement((this as IProblemModel).allowedSubmit, config.defaultAdminRoleID);
     next();
 });
 

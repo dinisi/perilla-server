@@ -16,7 +16,7 @@ export let RoleSchema: Schema = new Schema(
     },
 );
 
-RoleSchema.pre("remove", async function(next) {
+RoleSchema.pre("remove", function(next) {
     if ((this as IRoleModel)._protected) { return; }
     next();
 });

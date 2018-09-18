@@ -14,9 +14,4 @@ export const AccessSchema = new Schema(
     },
 );
 
-AccessSchema.pre("save", async function(next) {
-    ensureElement((this as IAccessModel).roles, config.defaultAdminRoleID);
-    next();
-});
-
 export const Access: Model<IAccessModel> = model<IAccessModel>("Access", AccessSchema);

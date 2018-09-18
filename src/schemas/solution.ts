@@ -75,17 +75,10 @@ SolutionSchema.methods.judge = function() {
     return addJudgeTask(this.id);
 };
 
-SolutionSchema.pre("save", async function(next) {
+SolutionSchema.pre("save", function(next) {
     if (!(this as ISolutionModel).created) {
         (this as ISolutionModel).created = new Date();
     }
-    ensureElement((this as ISolutionModel).allowedRead, config.defaultAdminRoleID);
-    ensureElement((this as ISolutionModel).allowedRead, config.defaultJudgerRoleID);
-    ensureElement((this as ISolutionModel).allowedReadResult, config.defaultAdminRoleID);
-    ensureElement((this as ISolutionModel).allowedReadResult, config.defaultJudgerRoleID);
-    ensureElement((this as ISolutionModel).allowedRejudge, config.defaultAdminRoleID);
-    ensureElement((this as ISolutionModel).allowedModify, config.defaultAdminRoleID);
-    ensureElement((this as ISolutionModel).allowedModify, config.defaultJudgerRoleID);
     next();
 });
 

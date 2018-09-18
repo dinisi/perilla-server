@@ -48,10 +48,11 @@ UserSchema.methods.validPassword = function(password: string) {
 
 UserSchema.pre("save", async function(next) {
     const self = (this as IUserModel).self;
-    if (!self || !await Role.findById(self)) {
+    if (!self) {
         const role = new Role();
-        role.rolename = `AutoGenerate ${generate(5)}${Date.now()}`;
-        role.description = `Self role for user${this.id}`;
+        role.rolename = `User ${this.id}`;
+        role.description = `Self role for user ${this.id}`;
+        role._protected = true;
         await role.save();
         (this as IUserModel).self = role.id;
         ensureElement((this as IUserModel).roles, role.id);
@@ -76,6 +77,10 @@ UserSchema.pre("remove", async function(next) {
         badSolution.owner = config.defaultAdminUserID;
         await badSolution.save();
     }
+    const self = await Role.findById((this as IUserModel).self);
+    self._protected = false;
+    await self.save();
+    await self.remove();
     next();
 });
 
