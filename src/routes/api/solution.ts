@@ -17,7 +17,7 @@ solutionRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
         solution.owner = req.user.id;
         solution.problemID = req.body.problemID;
         solution.files = req.body.files;
-        ensureElement(solution.allowedRead, req.user.id);
+        ensureElement(solution.allowedRead, req.user.self);
         await solution.save();
         await solution.judge();
         res.send({ status: "success", payload: solution.id });
