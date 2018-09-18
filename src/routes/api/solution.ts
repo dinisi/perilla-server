@@ -68,7 +68,7 @@ solutionRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
 solutionRouter.get("/:id/result", async (req: IAuthorizedRequest, res: Response) => {
     try {
         const solution = await Solution.findById(req.params.id).where("allowedReadResult").in(req.user.roles).select("result");
-        res.send({ status: "success", payload: solution });
+        res.send({ status: "success", payload: solution.result });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }
