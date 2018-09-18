@@ -40,6 +40,7 @@ import { IUserModel, User } from "./schemas/user";
     for (const accessName of commonAccesses) {
         const access = new Access();
         access.accessName = accessName;
+        access.roles = [defaultConfig.defaultAdminRoleID];
         await access.save();
     }
 
