@@ -19,7 +19,7 @@ export const getVerificationCode = async (accessToken: string, clientID: string)
             if (err) {
                 reject(err);
             } else {
-                resolve(result.toString());
+                resolve(result.toString("hex"));
             }
         });
     });
