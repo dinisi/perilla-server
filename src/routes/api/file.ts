@@ -1,41 +1,36 @@
 import { Response, Router } from "express";
 import { ensureDirSync, existsSync, move, unlink } from "fs-extra";
-import * as path from "path";
-import { IAuthorizedRequest, IFileRequest } from "../../definitions/requests";
-import { FileAccess } from "../../schemas/fileAccess";
-ensureDirSync("files/uploads/");
 import * as multer from "multer";
-import { config } from "../../config";
+import { IAuthorizedRequest } from "../../definitions/requests";
 import { MD5 } from "../../md5";
 import { BFile } from "../../schemas/file";
+import { ensureElement, verifyAccess } from "../../utils";
 import { validPaginate } from "../common";
+
+ensureDirSync("files/uploads/");
 const upload = multer({ dest: "files/uploads/" });
 
-export let FileRouter = Router();
+export let fileRouter = Router();
 
-FileRouter.post("/upload", upload.array("files", 128), async (req: IAuthorizedRequest, res: Response) => {
+fileRouter.post("/upload", upload.array("files", 128), async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.role.CFile) { throw new Error("Access denied"); }
+        if (!await verifyAccess(req.user, "createFile")) { throw new Error("Access denied"); }
         const result = [];
         for (const file of req.files as Express.Multer.File[]) {
             const bfile = new BFile();
             const md5 = await MD5(file.path);
+            bfile.size = file.size;
             bfile.hash = md5;
-            bfile.owner = req.userID;
+            bfile.owner = req.user.id;
             const splitter = file.originalname.lastIndexOf(".");
             if (splitter !== -1 && splitter !== file.originalname.length - 1) {
                 bfile.type = file.originalname.substring(splitter + 1, file.originalname.length);
             }
             bfile.description = file.originalname;
+            ensureElement(bfile.allowedRead, req.user.self);
             await bfile.save();
-            if (req.roleID !== config.defaultAdminRoleID && req.roleID !== config.defaultJudgerRoleID) {
-                const fileAccess = new FileAccess();
-                fileAccess.fileID = bfile._id;
-                fileAccess.roleID = req.roleID;
-                await fileAccess.save();
-            }
             await move(file.path, bfile.getPath());
-            result.push(bfile._id);
+            result.push(bfile.id);
         }
         res.send({ status: "success", payload: result });
     } catch (e) {
@@ -43,9 +38,9 @@ FileRouter.post("/upload", upload.array("files", 128), async (req: IAuthorizedRe
     }
 });
 
-FileRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
+fileRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        let query = BFile.find();
+        let query = BFile.find().where("allowedRead").in(req.user.roles);
 
         if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
         if (req.query.search) { query = query.where("description").regex(new RegExp(req.query.search)); }
@@ -58,99 +53,82 @@ FileRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-FileRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
+fileRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
-        let query = BFile.find();
+        let query = BFile.find().where("allowedRead").in(req.user.roles);
 
         if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
         if (req.query.search) { query = query.where("description").regex(new RegExp(req.query.search)); }
         if (req.query.type) { query = query.where("type").equals(req.query.type); }
 
         query = query.skip(req.query.skip).limit(req.query.limit);
-        const files = await query.select("_id type created owner").exec();
+        const files = await query.select("id type created owner").exec();
         res.send({ status: "success", payload: files });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }
 });
 
-FileRouter.use("/:id", async (req: IFileRequest, res: Response, next) => {
+fileRouter.get("/:id/raw", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const fileID = req.params.id;
-        const access = await FileAccess.findOne({ roleID: req.roleID, fileID });
-        if (!access) { throw new Error("Not found"); }
-        req.fileID = fileID;
-        req.access = access;
-        next();
+        const file = await BFile.findById(req.params.id).where("allowedRead").in(req.user.roles);
+        if (!file) { throw new Error("Not found"); }
+        res.download(file.getPath());
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }
 });
 
-FileRouter.get("/:id", async (req: IFileRequest, res: Response) => {
+fileRouter.post("/:id/raw", upload.single("file"), async (req: IAuthorizedRequest, res: Response) => {
     try {
-        res.download(path.resolve("files/managed/" + req.fileID));
-    } catch (e) {
-        res.send({ status: "failed", payload: e.message });
-    }
-});
-
-FileRouter.post("/:id", upload.single("file"), async (req: IFileRequest, res: Response) => {
-    try {
-        if (!req.access.MContent) { throw new Error("No access"); }
-        const bfile = await BFile.findById(req.fileID);
-        if (!bfile) { throw new Error("Not found"); }
+        const file = await BFile.findById(req.params.id).where("allowedModify").in(req.user.roles);
+        if (!file) { throw new Error("Not found"); }
         const md5 = await MD5(req.file.path);
-        bfile.hash = md5;
-        await bfile.save();
-        if (existsSync(bfile.getPath())) { await unlink(bfile.getPath()); }
-        await move(req.file.path, bfile.getPath());
+        file.hash = md5;
+        file.size = req.file.size;
+        await file.save();
+        if (existsSync(file.getPath())) { await unlink(file.getPath()); }
+        await move(req.file.path, file.getPath());
         res.send({ status: "success" });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }
 });
 
-FileRouter.delete("/:id", async (req: IFileRequest, res: Response) => {
+fileRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.access.MContent) { throw new Error("No access"); }
-        const bfile = await BFile.findById(req.fileID);
-        if (!bfile) { throw new Error("Not found"); }
-        await unlink(bfile.getPath());
-        await bfile.remove();
+        const file = await BFile.findById(req.params.id).where("allowedModify").in(req.user.roles);
+        if (!file) { throw new Error("Not found"); }
+        await unlink(file.getPath());
+        await file.remove();
         res.send({ status: "success" });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }
 });
 
-FileRouter.get("/:id/meta", async (req: IFileRequest, res: Response) => {
+fileRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const bfile = await BFile.findById(req.fileID);
-        if (!bfile) { throw new Error("Not found"); }
-        res.send({ status: "success", payload: bfile });
+        const file = await BFile.findById(req.params.id).where("allowedRead").in(req.user.roles);
+        if (!file) { throw new Error("Not found"); }
+        res.send({ status: "success", payload: file });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }
 });
 
-FileRouter.post("/:id/meta", async (req: IFileRequest, res: Response) => {
+fileRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.access.MContent) { throw new Error("No access"); }
-        const bfile = await BFile.findById(req.fileID);
-        if (!bfile) { throw new Error("Not found"); }
-        bfile.description = req.body.description;
-        bfile.type = req.body.type;
-        await bfile.save();
+        const file = await BFile.findById(req.params.id).where("allowedRead").in(req.user.roles);
+        if (!file) { throw new Error("Not found"); }
+        file.description = req.body.description;
+        file.type = req.body.type;
+        if (await verifyAccess(req.user, "manageSystem")) {
+            file.allowedModify = req.body.allowedModify;
+            file.allowedRead = req.body.allowedRead;
+        }
+        await file.save();
         res.send({ status: "success" });
-    } catch (e) {
-        res.send({ status: "failed", payload: e.message });
-    }
-});
-
-FileRouter.get("/:id/raw", async (req: IFileRequest, res: Response) => {
-    try {
-        res.sendFile(path.resolve("files/managed/" + req.fileID));
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }

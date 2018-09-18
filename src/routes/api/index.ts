@@ -1,21 +1,20 @@
 import { Router } from "express";
 import { IAuthorizedRequest } from "../../definitions/requests";
-import { AccessRouter } from "./access";
-import { FileRouter } from "./file";
-import { ProblemRouter } from "./problem";
-import { RoleRouter } from "./role";
-import { SolutionRouter } from "./solution";
-import { UserRouter } from "./user";
+import { accessRouter } from "./access";
+import { fileRouter } from "./file";
+import { problemRouter } from "./problem";
+import { roleRouter } from "./role";
+import { solutionRouter } from "./solution";
+import { userRouter } from "./user";
 
 export let APIRouter = Router();
 
-APIRouter.use("/access", AccessRouter);
-
-APIRouter.use("/file", FileRouter);
-APIRouter.use("/problem", ProblemRouter);
-APIRouter.use("/solution", SolutionRouter);
-APIRouter.use("/user", UserRouter);
-APIRouter.use("/role", RoleRouter);
+APIRouter.use("/file", fileRouter);
+APIRouter.use("/problem", problemRouter);
+APIRouter.use("/solution", solutionRouter);
+APIRouter.use("/user", userRouter);
+APIRouter.use("/role", roleRouter);
+APIRouter.use("/access", accessRouter);
 
 APIRouter.get("/session", async (req: IAuthorizedRequest, res) => {
     try {
@@ -25,9 +24,7 @@ APIRouter.get("/session", async (req: IAuthorizedRequest, res) => {
                 hostname: req.hostname,
                 httpVersion: req.httpVersion,
                 ips: req.ips,
-                role: req.role,
-                roleID: req.roleID,
-                userID: req.userID,
+                user: req.user,
             },
             status: "success",
         });

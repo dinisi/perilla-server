@@ -1,15 +1,15 @@
 import { Request, Response, Router } from "express";
 import { config } from "../../config";
-import { IAuthorizedRequest, IProblemRequest } from "../../definitions/requests";
+import { IAuthorizedRequest } from "../../definitions/requests";
 import { Problem } from "../../schemas/problem";
-import { ProblemAccess } from "../../schemas/problemAccess";
+import { ensureElement, verifyAccess } from "../../utils";
 import { validPaginate } from "../common";
 
-export let ProblemRouter = Router();
+export let problemRouter = Router();
 
-ProblemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
+problemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.role.CProblem) { throw new Error("Access denied"); }
+        if (!await verifyAccess(req.user, "createProblem")) { throw new Error("Access denied"); }
         const problem = new Problem();
 
         problem.title = req.body.title;
@@ -18,27 +18,20 @@ ProblemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
         problem.meta = req.body.meta;
         problem.tags = req.body.tags;
 
-        problem.owner = req.userID;
+        problem.owner = req.user.id;
+        ensureElement(problem.allowedRead, req.user.self);
+        ensureElement(problem.allowedSubmit, req.user.self);
+        ensureElement(problem.allowedModify, req.user.self);
         await problem.save();
-        if (req.roleID !== config.defaultAdminRoleID && req.roleID !== config.defaultJudgerRoleID) {
-            const defaultAccess = new ProblemAccess();
-            defaultAccess.problemID = problem._id;
-            defaultAccess.roleID = req.roleID;
-            defaultAccess.MContent = true;
-            defaultAccess.MData = true;
-            defaultAccess.MTag = true;
-            defaultAccess.DSubmit = true;
-            await defaultAccess.save();
-        }
-        res.send({ status: "success", payload: problem._id });
+        res.send({ status: "success", payload: problem.id });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }
 });
 
-ProblemRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
+problemRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        let query = Problem.find();
+        let query = Problem.find().where("allowedRead").in(req.user.roles);
 
         if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
         if (req.query.search) { query = query.where("title").regex(new RegExp(req.query.search)); }
@@ -50,38 +43,25 @@ ProblemRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-ProblemRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
+problemRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
-        let query = Problem.find();
+        let query = Problem.find().where("allowedRead").in(req.user.roles);
 
         if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
         if (req.query.search) { query = query.where("title").regex(new RegExp(req.query.search)); }
         if (req.query.tags) { query = query.where("tags").all(req.query.tags); }
 
         query = query.skip(req.query.skip).limit(req.query.limit);
-        const problems = await query.select("_id title tags created owner").exec();
+        const problems = await query.select("id title tags created owner").exec();
         res.send({ status: "success", payload: problems });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }
 });
 
-ProblemRouter.use("/:id", async (req: IProblemRequest, res: Response, next) => {
+problemRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const problemID = req.params.id;
-        const access = await ProblemAccess.findOne({ roleID: req.roleID, problemID });
-        if (!access) { throw new Error("Not found"); }
-        req.problemID = problemID;
-        req.access = access;
-        next();
-    } catch (e) {
-        res.send({ status: "failed", payload: e.message });
-    }
-});
-
-ProblemRouter.get("/:id", async (req: IProblemRequest, res: Response) => {
-    try {
-        const problem = await Problem.findById(req.problemID);
+        const problem = await Problem.findById(req.params.id).where("allowedRead").in(req.user.roles);
         if (!problem) { throw new Error("Not found"); }
         res.send({ status: "success", payload: problem });
     } catch (e) {
@@ -89,9 +69,9 @@ ProblemRouter.get("/:id", async (req: IProblemRequest, res: Response) => {
     }
 });
 
-ProblemRouter.get("/:id/summary", async (req: IProblemRequest, res: Response) => {
+problemRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const problem = await Problem.findById(req.problemID).select("-_id title").exec();
+        const problem = await Problem.findById(req.params.id).where("allowedRead").in(req.user.roles).select("title").exec();
         if (!problem) { throw new Error("Not found"); }
         res.send({ status: "success", payload: problem });
     } catch (e) {
@@ -99,28 +79,19 @@ ProblemRouter.get("/:id/summary", async (req: IProblemRequest, res: Response) =>
     }
 });
 
-ProblemRouter.get("/:id/access", async (req: IProblemRequest, res: Response) => {
+problemRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        res.send({ status: "success", payload: req.access });
-    } catch (e) {
-        res.send({ status: "failed", payload: e.message });
-    }
-});
-
-ProblemRouter.post("/:id", async (req: IProblemRequest, res: Response) => {
-    try {
-        const problem = await Problem.findById(req.problemID);
+        const problem = await Problem.findById(req.params.id).where("allowedModify").in(req.user.roles);
         if (!problem) { throw new Error("Not found"); }
-        if (req.access.MContent) {
-            problem.title = req.body.title;
-            problem.content = req.body.content;
-        }
-        if (req.access.MData) {
-            problem.data = req.body.data;
-            problem.meta = req.body.meta;
-        }
-        if (req.access.MTag) {
-            problem.tags = req.body.tags;
+        problem.title = req.body.title;
+        problem.content = req.body.content;
+        problem.data = req.body.data;
+        problem.meta = req.body.meta;
+        problem.tags = req.body.tags;
+        if (await verifyAccess(req.user, "manageSystem")) {
+            problem.allowedModify = req.body.allowedModify;
+            problem.allowedRead = req.body.allowedRead;
+            problem.allowedSubmit = req.body.allowedSubmit;
         }
         await problem.save();
         res.send({ status: "success" });
@@ -129,10 +100,9 @@ ProblemRouter.post("/:id", async (req: IProblemRequest, res: Response) => {
     }
 });
 
-ProblemRouter.delete("/:id", async (req: IProblemRequest, res: Response) => {
+problemRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.access.DRemove) { throw new Error("No access"); }
-        const problem = await Problem.findById(req.problemID);
+        const problem = await Problem.findById(req.params.id).where("allowedModify").in(req.user.roles);
         if (!problem) { throw new Error("Not found"); }
         await problem.remove();
         res.send({ status: "success" });
