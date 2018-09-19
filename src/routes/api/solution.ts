@@ -1,5 +1,4 @@
 import { Response, Router } from "express";
-import { config } from "../../config";
 import { IAuthorizedRequest } from "../../definitions/requests";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";

@@ -1,7 +1,6 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
 import { addJudgeTask } from "../redis";
-import { ensureElement } from "../utils";
 
 export interface ISolutionModel extends Document {
     owner: string;

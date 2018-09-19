@@ -1,6 +1,5 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
-import { ensureElement } from "../utils";
 import { Solution } from "./solution";
 
 export interface IProblemModel extends Document {

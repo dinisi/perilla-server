@@ -2,7 +2,6 @@ import { ensureDirSync, unlink } from "fs-extra";
 import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
 import { config } from "../config";
-import { ensureElement } from "../utils";
 ensureDirSync("files/managed");
 
 export interface IBFileModel extends Document {

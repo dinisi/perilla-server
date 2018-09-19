@@ -1,6 +1,4 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { BFile } from "./file";
-import { User } from "./user";
 
 export interface IRoleModel extends Document {
     rolename: string;

@@ -1,6 +1,5 @@
 import { Document, model, Model, Schema } from "mongoose";
 import { config } from "../config";
-import { ensureElement } from "../utils";
 
 export interface IAccessModel extends Document {
     accessName: string;

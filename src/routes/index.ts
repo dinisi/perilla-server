@@ -2,7 +2,6 @@ import { Response, Router } from "express";
 import { IClient } from "../definitions/client";
 import { IAuthorizedRequest } from "../definitions/requests";
 import { generateAccessToken, getClient, setClient } from "../redis";
-import { Role } from "../schemas/role";
 import { User } from "../schemas/user";
 import { getVerificationCode } from "../utils";
 import { APIRouter } from "./api";

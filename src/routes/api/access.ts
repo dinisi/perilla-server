@@ -1,10 +1,7 @@
 import { Router } from "express";
-import { commonAccesses } from "../../definitions/access";
 import { IAuthorizedRequest } from "../../definitions/requests";
 import { Access } from "../../schemas/access";
-import { Role } from "../../schemas/role";
 import { verifyAccess } from "../../utils";
-import { validPaginate } from "../common";
 
 export let accessRouter = Router();
 
