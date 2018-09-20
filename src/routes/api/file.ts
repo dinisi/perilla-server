@@ -40,8 +40,7 @@ fileRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
         let query = BFile.find().where("allowedRead").in(req.user.roles);
 
         if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
-        if (req.query.search) { query = query.where("description").regex(new RegExp(req.query.search)); }
-        if (req.query.type) { query = query.where("type").equals(req.query.type); }
+        if (req.query.search) { query = query.where("filename").regex(new RegExp(req.query.search)); }
 
         res.send({ status: "success", payload: await query.countDocuments() });
     } catch (e) {
@@ -55,8 +54,7 @@ fileRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Resp
         let query = BFile.find().where("allowedRead").in(req.user.roles);
 
         if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
-        if (req.query.search) { query = query.where("description").regex(new RegExp(req.query.search)); }
-        if (req.query.type) { query = query.where("type").equals(req.query.type); }
+        if (req.query.search) { query = query.where("filename").regex(new RegExp(req.query.search)); }
 
         query = query.skip(req.query.skip).limit(req.query.limit);
         const files = await query.select("id filename created owner").exec();

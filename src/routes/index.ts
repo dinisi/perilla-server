@@ -47,8 +47,8 @@ MainRouter.use(
         try {
             if (!req.query.a) { throw new Error("Not logged in"); }
             const client = await getClient(req.query.a);
-            const validCode = await getVerificationCode(client.accessToken, client.clientID);
-            if (!(validCode === req.query.v)) { throw new Error("Access denied"); }
+            const validCode = client.clientID;
+            if (!(validCode === req.query.c)) { throw new Error("Access denied"); }
             const user = await User.findById(client.UserID);
             req.user = user;
             next();
