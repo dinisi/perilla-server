@@ -59,7 +59,7 @@ fileRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Resp
         if (req.query.type) { query = query.where("type").equals(req.query.type); }
 
         query = query.skip(req.query.skip).limit(req.query.limit);
-        const files = await query.select("id type created owner").exec();
+        const files = await query.select("id filename created owner").exec();
         res.send({ status: "success", payload: files });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
