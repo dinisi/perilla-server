@@ -5,14 +5,14 @@ import { config } from "../config";
 ensureDirSync("files/managed");
 
 export interface IBFileModel extends Document {
-    hash: string;
     owner: string;
+    filename: string;
     description: string;
-    type: string;
-    created: Date;
+    hash: string;
     size: number;
     allowedRead: string[];
     allowedModify: string[];
+    created: Date;
     getPath(): string;
 }
 
@@ -46,10 +46,9 @@ export let BFileSchema = new Schema(
             type: Number,
             required: true,
         },
-        type: {
+        filename: {
             type: String,
             required: true,
-            default: "txt",
         },
     },
 );

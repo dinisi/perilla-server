@@ -22,14 +22,11 @@ fileRouter.post("/upload", upload.array("files", 128), async (req: IAuthorizedRe
             bfile.size = file.size;
             bfile.hash = md5;
             bfile.owner = req.user.id;
-            const splitter = file.originalname.lastIndexOf(".");
-            if (splitter !== -1 && splitter !== file.originalname.length - 1) {
-                bfile.type = file.originalname.substring(splitter + 1, file.originalname.length);
-            }
+            bfile.filename = file.originalname;
             bfile.description = file.originalname;
             ensureElement(bfile.allowedRead, req.user.self);
-            await bfile.save();
             await move(file.path, bfile.getPath());
+            await bfile.save();
             result.push(bfile.id);
         }
         res.send({ status: "success", payload: result });
@@ -86,6 +83,7 @@ fileRouter.post("/:id/raw", upload.single("file"), async (req: IAuthorizedReques
         const md5 = await MD5(req.file.path);
         file.hash = md5;
         file.size = req.file.size;
+        file.filename = req.file.originalname;
         await file.save();
         if (existsSync(file.getPath())) { await unlink(file.getPath()); }
         await move(req.file.path, file.getPath());
@@ -122,7 +120,7 @@ fileRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
         const file = await BFile.findById(req.params.id).where("allowedRead").in(req.user.roles);
         if (!file) { throw new Error("Not found"); }
         file.description = req.body.description;
-        file.type = req.body.type;
+        file.filename = req.body.filename;
         if (await verifyAccess(req.user, "manageSystem")) {
             file.allowedModify = req.body.allowedModify;
             file.allowedRead = req.body.allowedRead;
