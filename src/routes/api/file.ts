@@ -115,6 +115,16 @@ fileRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
+fileRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response) => {
+    try {
+        const file = await BFile.findById(req.params.id).where("allowedRead").in(req.user.roles).select("filename").exec();
+        if (!file) { throw new Error("Not found"); }
+        res.send({ status: "success", payload: file });
+    } catch (e) {
+        res.send({ status: "failed", payload: e.message });
+    }
+});
+
 fileRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
         const file = await BFile.findById(req.params.id).where("allowedRead").in(req.user.roles);
