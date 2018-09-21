@@ -30,6 +30,7 @@ userRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
         if (req.query.realname) { query = query.where("realname").equals(req.query.realname); }
         if (req.query.email) { query = query.where("email").equals(req.query.email); }
         if (req.query.roles) { query = query.where("roles").all(req.query.roles); }
+        if (req.query.search) { query = query.where("username").regex(new RegExp(req.query.search)); }
 
         res.send({ status: "success", payload: await query.countDocuments() });
     } catch (e) {
@@ -45,6 +46,7 @@ userRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Resp
         if (req.query.realname) { query = query.where("realname").equals(req.query.realname); }
         if (req.query.email) { query = query.where("email").equals(req.query.email); }
         if (req.query.roles) { query = query.where("roles").all(req.query.roles); }
+        if (req.query.search) { query = query.where("username").regex(new RegExp(req.query.search)); }
 
         query = query.skip(req.query.skip).limit(req.query.limit);
         const users = await query.select("username realname email roles").exec();

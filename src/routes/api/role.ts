@@ -45,7 +45,7 @@ roleRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Resp
             query = query.where("rolename").regex(new RegExp(req.query.search));
         }
         query = query.skip(req.query.skip).limit(req.query.limit);
-        const roles = query.select("id rolename description").exec();
+        const roles = await query.select("id rolename description").exec();
         res.send({ status: "success", payload: roles });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
