@@ -1,29 +1,25 @@
 import { Response, Router } from "express";
 import { IAuthorizedRequest } from "../../definitions/requests";
 import { Role } from "../../schemas/role";
+import { verifyAccess } from "../../utils";
 import { validPaginate } from "../common";
 
-export let RoleRouter = Router();
+export let roleRouter = Router();
 
-RoleRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
+roleRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.role.MRole) { throw new Error("No access"); }
+        if (!await verifyAccess(req.user, "manageSystem")) { throw new Error("Access denied"); }
         const role = new Role();
         role.rolename = req.body.rolename;
         role.description = req.body.description;
-        role.MUser = req.body.MUser;
-        role.MRole = req.body.MRole;
-        role.CProblem = req.body.CProblem;
-        role.CFile = req.body.CFile;
-        role.MAccess = req.body.MAccess;
         await role.save();
-        res.send({ status: "success", payload: role._id });
+        res.send({ status: "success", payload: role.id });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }
 });
 
-RoleRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
+roleRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = Role.find();
         if (req.query.rolename) {
@@ -39,7 +35,7 @@ RoleRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-RoleRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
+roleRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = Role.find();
         if (req.query.rolename) {
@@ -49,14 +45,14 @@ RoleRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Resp
             query = query.where("rolename").regex(new RegExp(req.query.search));
         }
         query = query.skip(req.query.skip).limit(req.query.limit);
-        const roles = query.select("_id rolename description").exec();
+        const roles = await query.select("id rolename description").exec();
         res.send({ status: "success", payload: roles });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }
 });
 
-RoleRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
+roleRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
         const role = await Role.findById(req.params.id);
         if (!role) { throw new Error("Not found"); }
@@ -66,9 +62,9 @@ RoleRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-RoleRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response) => {
+roleRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const role = await Role.findById(req.params.id).select("-_id rolename").exec();
+        const role = await Role.findById(req.params.id).select("rolename").exec();
         if (!role) { throw new Error("Not found"); }
         res.send({ status: "success", payload: role });
     } catch (e) {
@@ -76,19 +72,14 @@ RoleRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response) =>
     }
 });
 
-RoleRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
+roleRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.role.MRole) { throw new Error("No access"); }
+        if (!await verifyAccess(req.user, "manageSystem")) { throw new Error("Access denied"); }
         const role = await Role.findById(req.params.id);
         if (!role) { throw new Error("Not found"); }
         if (role._protected) { throw new Error("Object is protected"); }
         role.rolename = req.body.rolename;
         role.description = req.body.description;
-        role.MUser = req.body.MUser;
-        role.MRole = req.body.MRole;
-        role.CProblem = req.body.CProblem;
-        role.CFile = req.body.CFile;
-        role.MAccess = req.body.MAccess;
         await role.save();
         res.send({ status: "success" });
     } catch (e) {
@@ -96,9 +87,9 @@ RoleRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-RoleRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => {
+roleRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.role.MRole) { throw new Error("No access"); }
+        if (!await verifyAccess(req.user, "manageSystem")) { throw new Error("Access denied"); }
         const role = await Role.findById(req.params.id);
         if (!role) { throw new Error("Not found"); }
         if (role._protected) { throw new Error("Object is protected"); }

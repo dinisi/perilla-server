@@ -1,14 +1,14 @@
 import { Response, Router } from "express";
 import { IAuthorizedRequest } from "../../definitions/requests";
-import { Role } from "../../schemas/role";
 import { User } from "../../schemas/user";
+import { verifyAccess } from "../../utils";
 import { validPaginate } from "../common";
 
-export let UserRouter = Router();
+export let userRouter = Router();
 
-UserRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
+userRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!req.role.MUser) { throw new Error("No access"); }
+        if (!await verifyAccess(req.body, "manageSystem")) { throw new Error("Access denied"); }
         const user = new User();
         user.username = req.body.username;
         user.realname = req.body.realname;
@@ -22,7 +22,7 @@ UserRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-UserRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
+userRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = User.find();
 
@@ -30,6 +30,7 @@ UserRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
         if (req.query.realname) { query = query.where("realname").equals(req.query.realname); }
         if (req.query.email) { query = query.where("email").equals(req.query.email); }
         if (req.query.roles) { query = query.where("roles").all(req.query.roles); }
+        if (req.query.search) { query = query.where("username").regex(new RegExp(req.query.search)); }
 
         res.send({ status: "success", payload: await query.countDocuments() });
     } catch (e) {
@@ -37,7 +38,7 @@ UserRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-UserRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
+userRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = User.find();
 
@@ -45,6 +46,7 @@ UserRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Resp
         if (req.query.realname) { query = query.where("realname").equals(req.query.realname); }
         if (req.query.email) { query = query.where("email").equals(req.query.email); }
         if (req.query.roles) { query = query.where("roles").all(req.query.roles); }
+        if (req.query.search) { query = query.where("username").regex(new RegExp(req.query.search)); }
 
         query = query.skip(req.query.skip).limit(req.query.limit);
         const users = await query.select("username realname email roles").exec();
@@ -54,7 +56,7 @@ UserRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Resp
     }
 });
 
-UserRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
+userRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
         const user = await User.findById(req.params.id).select("-hash -salt").exec();
         if (!user) { throw new Error("Not found"); }
@@ -64,9 +66,9 @@ UserRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-UserRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response) => {
+userRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const user = await User.findById(req.params.id).select("-_id username email").exec();
+        const user = await User.findById(req.params.id).select("username email").exec();
         if (!user) { throw new Error("Not found"); }
         res.send({ status: "success", payload: user });
     } catch (e) {
@@ -74,26 +76,18 @@ UserRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response) =>
     }
 });
 
-UserRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
+userRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (req.params.id !== req.userID && !req.role.MUser) { throw new Error("No access"); }
+        const allowedManage = await verifyAccess(req.body, "manageSystem");
+        if (req.params.id !== req.user.id && !allowedManage) { throw new Error("Access denied"); }
         const user = await User.findById(req.params.id);
         if (!user) { throw new Error("Not found"); }
         if (user._protected) { throw new Error("Object is protected"); }
         user.realname = req.body.realname;
         user.email = req.body.email;
         user.bio = req.body.bio;
-        if (req.role.MUser) {
-            user.roles.splice(0, user.roles.length);
-            for (const id of req.body.roles) {
-                if (await Role.findById(id)) {
-                    user.roles.push(id);
-                }
-            }
-        }
-        if (req.body.password) {
-            user.setPassword(req.body.password);
-        }
+        if (allowedManage) { user.roles = req.body.roles; }
+        if (req.body.password) { user.setPassword(req.body.password); }
         await user.save();
         res.send({ status: "success" });
     } catch (e) {
@@ -101,9 +95,9 @@ UserRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-UserRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => {
+userRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (req.params.id !== req.userID && !req.role.MUser) { throw new Error("No access"); }
+        if (req.params.id !== req.user.id && !await verifyAccess(req.body, "manageSystem")) { throw new Error("Access denied"); }
         const user = await User.findById(req.params.id);
         if (!user) { throw new Error("Not found"); }
         if (user._protected) { throw new Error("Object is protected"); }

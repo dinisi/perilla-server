@@ -1,8 +1,10 @@
 import * as fs from "fs-extra";
 import { generate } from "randomstring";
 import { reloadConfig } from "./config";
+import { commonAccesses } from "./definitions/access";
 import { ISystemConfig } from "./definitions/config";
 import "./schemas";
+import { Access } from "./schemas/access";
 import { IRoleModel, Role } from "./schemas/role";
 import { IUserModel, User } from "./schemas/user";
 
@@ -14,11 +16,6 @@ import { IUserModel, User } from "./schemas/user";
     const defaultAdminRole: IRoleModel = new Role();
     defaultAdminRole.rolename = "Administrators";
     defaultAdminRole.description = "System administrators";
-    defaultAdminRole.CFile = true;
-    defaultAdminRole.CProblem = true;
-    defaultAdminRole.MAccess = true;
-    defaultAdminRole.MRole = true;
-    defaultAdminRole.MUser = true;
 
     defaultAdminRole._protected = true;
     await defaultAdminRole.save();
@@ -39,6 +36,13 @@ import { IUserModel, User } from "./schemas/user";
     defaultConfig.defaultUserRoleID = defaultUserRole._id;
     fs.writeFileSync("config.json", JSON.stringify(defaultConfig));
     reloadConfig();
+
+    for (const accessName of commonAccesses) {
+        const access = new Access();
+        access.accessName = accessName;
+        access.roles = [defaultConfig.defaultAdminRoleID];
+        await access.save();
+    }
 
     const defaultAdminUser: IUserModel = new User();
     defaultAdminUser.username = "Administrator";

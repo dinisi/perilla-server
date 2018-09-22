@@ -18,23 +18,11 @@ const v = () => {
 };
 
 (async () => {
-    await new Promise((resolve) => {
-        request.get(`http://127.0.0.1:3000/rolesof?username=${config.username}`, (err, res) => {
-            if (err) {
-                console.error(err);
-                process.exit(0);
-            }
-            console.log(`[${res.statusCode}]`);
-            console.log(res.body);
-            resolve();
-        });
-    });
     if (!accessToken) {
         accessToken = await new Promise((resolve) => {
             const loginPackage = {
                 username: config.username,
                 password: config.password,
-                rolename: config.rolename,
                 clientID: config.clientID,
             };
             request.post("http://127.0.0.1:3000/login", { form: loginPackage }, (err, res) => {

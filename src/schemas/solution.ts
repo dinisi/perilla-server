@@ -1,7 +1,6 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
 import { addJudgeTask } from "../redis";
-import { SolutionAccess } from "./solutionAccess";
 
 export interface ISolutionModel extends Document {
     owner: string;
@@ -11,51 +10,74 @@ export interface ISolutionModel extends Document {
     result: object;
     meta: object;
     created: Date;
+    allowedRead: string[];
+    allowedReadResult: string[];
+    allowedRejudge: string[];
+    allowedModify: string[];
     judge(): Promise<void>;
 }
 
 export let SolutionSchema: Schema = new Schema(
     {
+        allowedRead: {
+            type: [String],
+            required: true,
+            default: [config.defaultAdminRoleID, config.defaultJudgerRoleID],
+        },
+        allowedReadResult: {
+            type: [String],
+            required: true,
+            default: [config.defaultAdminRoleID, config.defaultJudgerRoleID],
+        },
+        allowedRejudge: {
+            type: [String],
+            required: true,
+            default: [config.defaultAdminRoleID],
+        },
+        allowedModify: {
+            type: [String],
+            required: true,
+            default: [config.defaultAdminRoleID, config.defaultJudgerRoleID],
+        },
         created: Date,
-        files: { type: [String], required: true },
-        meta: { type: Object, required: true, default: { version: "1.0" } },
-        owner: { type: String, required: true },
-        problemID: { type: String, required: true },
-        result: { type: Object, required: true, default: { version: "1.0" } },
-        status: { type: String, required: true, default: "Waiting" },
+        files: {
+            type: [String],
+            required: true,
+        },
+        meta: {
+            type: Object,
+            required: true,
+            default: { version: "1.0" },
+        },
+        owner: {
+            type: String,
+            required: true,
+        },
+        problemID: {
+            type: String,
+            required: true,
+        },
+        result: {
+            type: Object,
+            required: true,
+            default: { version: "1.0" },
+        },
+        status: {
+            type: String,
+            required: true,
+            default: "Waiting",
+        },
     },
 );
 
 SolutionSchema.methods.judge = function() {
-    return addJudgeTask(this._id.toString());
+    return addJudgeTask(this.id);
 };
 
-SolutionSchema.pre("save", async function(next) {
+SolutionSchema.pre("save", function(next) {
     if (!(this as ISolutionModel).created) {
         (this as ISolutionModel).created = new Date();
-        const adminAccess = new SolutionAccess();
-        adminAccess.roleID = config.defaultAdminRoleID;
-        adminAccess.solutionID = this._id;
-        adminAccess.RResult = true;
-        adminAccess.MContent = true;
-        adminAccess.DRejudge = true;
-        adminAccess.DRemove = true;
-        adminAccess._protected = true;
-        await adminAccess.save();
-
-        const judgerAccess = new SolutionAccess();
-        judgerAccess.roleID = config.defaultJudgerRoleID;
-        judgerAccess.solutionID = this._id;
-        judgerAccess.RResult = true;
-        judgerAccess.MContent = true;
-        judgerAccess._protected = true;
-        await judgerAccess.save();
     }
-    next();
-});
-
-SolutionSchema.pre("remove", async function(next) {
-    await SolutionAccess.remove({ solutionID: this._id }).exec();
     next();
 });
 

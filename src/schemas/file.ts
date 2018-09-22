@@ -1,56 +1,71 @@
-import { ensureDirSync, unlinkSync } from "fs-extra";
+import { ensureDirSync, unlink } from "fs-extra";
 import { Document, Model, model, Schema } from "mongoose";
-import { join } from "path";
+import { join, resolve } from "path";
 import { config } from "../config";
-import { FileAccess } from "./fileAccess";
 ensureDirSync("files/managed");
 
 export interface IBFileModel extends Document {
-    hash: string;
     owner: string;
+    filename: string;
     description: string;
-    type: string;
+    hash: string;
+    size: number;
+    allowedRead: string[];
+    allowedModify: string[];
     created: Date;
     getPath(): string;
 }
 
 export let BFileSchema = new Schema(
     {
+        allowedRead: {
+            type: [String],
+            required: true,
+            default: [config.defaultAdminRoleID, config.defaultJudgerRoleID],
+        },
+        allowedModify: {
+            type: [String],
+            required: true,
+            default: [config.defaultAdminRoleID],
+        },
         created: Date,
-        description: { type: String, required: true, default: "No description" },
-        hash: { type: String, required: true },
-        owner: { type: String, required: true },
-        type: { type: String, required: true, default: "txt" },
+        description: {
+            type: String,
+            required: true,
+            default: "No description",
+        },
+        hash: {
+            type: String,
+            required: true,
+        },
+        owner: {
+            type: String,
+            required: true,
+        },
+        size: {
+            type: Number,
+            required: true,
+        },
+        filename: {
+            type: String,
+            required: true,
+        },
     },
 );
 
 BFileSchema.methods.getPath = function() {
-    return join("files/managed", this._id.toString());
+    return resolve(join("files/managed", this.id));
 };
 
 BFileSchema.pre("save", async function(next) {
     if (!(this as IBFileModel).created) {
         (this as IBFileModel).created = new Date();
-        const adminAccess = new FileAccess();
-        adminAccess.roleID = config.defaultAdminRoleID;
-        adminAccess.fileID = this._id;
-        adminAccess.MContent = true;
-        adminAccess.DRemove = true;
-        adminAccess._protected = true;
-        await adminAccess.save();
-
-        const judgerAccess = new FileAccess();
-        judgerAccess.roleID = config.defaultJudgerRoleID;
-        judgerAccess.fileID = this._id;
-        judgerAccess._protected = true;
-        await judgerAccess.save();
     }
     next();
 });
 
 BFileSchema.pre("remove", async function(next) {
-    await FileAccess.remove({ fileID: this._id }).exec();
-    unlinkSync((this as IBFileModel).getPath());
+    await unlink((this as IBFileModel).getPath());
     next();
 });
 
