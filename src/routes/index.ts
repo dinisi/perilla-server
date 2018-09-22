@@ -47,6 +47,7 @@ MainRouter.use(
         try {
             if (!req.query.a) { throw new Error("Not logged in"); }
             const client = await getClient(req.query.a);
+            if (!client) { throw new Error("Invalid query"); }
             const validCode = client.clientID;
             if (!(validCode === req.query.c)) { throw new Error("Access denied"); }
             const user = await User.findById(client.UserID);
