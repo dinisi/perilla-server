@@ -48,7 +48,7 @@ solutionRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: 
         if (req.query.status) { query = query.where("status").equals(req.query.status); }
 
         query = query.skip(req.query.skip).limit(req.query.limit);
-        const solutions = await query.select("id problemID status created owner").exec();
+        const solutions = await query.select("_id problemID status created owner").exec();
         res.send({ status: "success", payload: solutions });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });

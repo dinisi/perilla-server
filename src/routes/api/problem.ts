@@ -51,7 +51,7 @@ problemRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: R
         if (req.query.tags) { query = query.where("tags").all(req.query.tags); }
 
         query = query.skip(req.query.skip).limit(req.query.limit);
-        const problems = await query.select("id title tags created owner").exec();
+        const problems = await query.select("_id title tags created owner").exec();
         res.send({ status: "success", payload: problems });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
