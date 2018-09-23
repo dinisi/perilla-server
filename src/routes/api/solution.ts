@@ -1,5 +1,6 @@
 import { Response, Router } from "express";
 import { IAuthorizedRequest } from "../../definitions/requests";
+import { setClient } from "../../redis";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
 import { ensureElement } from "../../utils";
@@ -10,6 +11,9 @@ export let solutionRouter = Router();
 solutionRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
         if (!req.client.config.createSolution) { throw new Error("Access denied"); }
+        if (req.client.lastVisit - req.client.lastSolutionCreation < req.client.config.minSolutionCreationInterval) {
+            throw new Error("Too many solutions");
+        }
         const problem = await Problem.findById(req.body.problemID).where("allowedSubmit").in(req.client.roles);
         if (!problem) { throw new Error("Not found"); }
         const solution = new Solution();
@@ -19,6 +23,8 @@ solutionRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
         ensureElement(solution.allowedRead, req.client.userID);
         await solution.save();
         await solution.judge();
+        req.client.lastSolutionCreation = +new Date();
+        await setClient(req.client);
         res.send({ status: "success", payload: solution.id });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
