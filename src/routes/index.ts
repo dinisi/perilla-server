@@ -35,6 +35,7 @@ MainRouter.post("/register", async (req, res) => {
         user.realname = req.body.realname;
         user.email = req.body.email;
         user.setPassword(req.body.password);
+        await user.save();
         res.send({ status: "success", payload: user.id });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
