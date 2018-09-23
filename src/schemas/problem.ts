@@ -67,8 +67,9 @@ export let ProblemSchema: Schema = new Schema(
 );
 
 ProblemSchema.pre("save", async function(next) {
-    if (!(this as IProblemModel).created) {
-        (this as IProblemModel).created = new Date();
+    const This = this as IProblemModel;
+    if (!This.created) {
+        This.created = new Date();
     }
     next();
 });

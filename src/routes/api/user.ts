@@ -1,14 +1,13 @@
 import { Response, Router } from "express";
 import { IAuthorizedRequest } from "../../definitions/requests";
 import { User } from "../../schemas/user";
-import { verifyAccess } from "../../utils";
 import { validPaginate } from "../common";
 
 export let userRouter = Router();
 
 userRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!await verifyAccess(req.body, "manageSystem")) { throw new Error("Access denied"); }
+        if (!req.client.config.manageSystem) { throw new Error("Access denied"); }
         const user = new User();
         user.username = req.body.username;
         user.realname = req.body.realname;
@@ -78,8 +77,8 @@ userRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response) =>
 
 userRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const allowedManage = await verifyAccess(req.body, "manageSystem");
-        if (req.params.id !== req.user.id && !allowedManage) { throw new Error("Access denied"); }
+        const allowedManage = req.client.config.manageSystem;
+        if (req.params.id !== req.client.userID && !allowedManage) { throw new Error("Access denied"); }
         const user = await User.findById(req.params.id);
         if (!user) { throw new Error("Not found"); }
         if (user._protected) { throw new Error("Object is protected"); }
@@ -97,7 +96,7 @@ userRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
 
 userRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (req.params.id !== req.user.id && !await verifyAccess(req.body, "manageSystem")) { throw new Error("Access denied"); }
+        if (req.params.id !== req.client.userID && !req.client.config.manageSystem) { throw new Error("Access denied"); }
         const user = await User.findById(req.params.id);
         if (!user) { throw new Error("Not found"); }
         if (user._protected) { throw new Error("Object is protected"); }

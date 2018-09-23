@@ -16,9 +16,9 @@ export const generateAccessToken = async () => {
     return token;
 };
 
-export const setClient = async (client: IClient, expire: number) => {
+export const setClient = async (client: IClient) => {
     await instance.setAsync(client.accessToken, JSON.stringify(client));
-    if (expire >= 0) { await instance.expireAsync(client.accessToken, expire); }
+    if (client.expire >= 0) { await instance.expireAsync(client.accessToken, client.expire); }
 };
 
 export const addJudgeTask = async (taskID: string) => {

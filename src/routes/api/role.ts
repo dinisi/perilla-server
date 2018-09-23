@@ -1,14 +1,13 @@
 import { Response, Router } from "express";
 import { IAuthorizedRequest } from "../../definitions/requests";
 import { Role } from "../../schemas/role";
-import { verifyAccess } from "../../utils";
 import { validPaginate } from "../common";
 
 export let roleRouter = Router();
 
 roleRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!await verifyAccess(req.user, "manageSystem")) { throw new Error("Access denied"); }
+        if (!req.client.config.manageSystem) { throw new Error("Access denied"); }
         const role = new Role();
         role.rolename = req.body.rolename;
         role.description = req.body.description;
@@ -74,7 +73,7 @@ roleRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response) =>
 
 roleRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!await verifyAccess(req.user, "manageSystem")) { throw new Error("Access denied"); }
+        if (!req.client.config.manageSystem) { throw new Error("Access denied"); }
         const role = await Role.findById(req.params.id);
         if (!role) { throw new Error("Not found"); }
         if (role._protected) { throw new Error("Object is protected"); }
@@ -89,7 +88,7 @@ roleRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
 
 roleRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!await verifyAccess(req.user, "manageSystem")) { throw new Error("Access denied"); }
+        if (!req.client.config.manageSystem) { throw new Error("Access denied"); }
         const role = await Role.findById(req.params.id);
         if (!role) { throw new Error("Not found"); }
         if (role._protected) { throw new Error("Object is protected"); }

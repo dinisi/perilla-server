@@ -1,14 +1,14 @@
 import { Response, Router } from "express";
 import { IAuthorizedRequest } from "../../definitions/requests";
 import { Problem } from "../../schemas/problem";
-import { ensureElement, verifyAccess } from "../../utils";
+import { ensureElement } from "../../utils";
 import { validPaginate } from "../common";
 
 export let problemRouter = Router();
 
 problemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        if (!await verifyAccess(req.user, "createProblem")) { throw new Error("Access denied"); }
+        if (!req.client.config.createProblem) { throw new Error("Access denied"); }
         const problem = new Problem();
 
         problem.title = req.body.title;
@@ -17,10 +17,10 @@ problemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
         problem.meta = req.body.meta;
         problem.tags = req.body.tags;
 
-        problem.owner = req.user.id;
-        ensureElement(problem.allowedRead, req.user.self);
-        ensureElement(problem.allowedSubmit, req.user.self);
-        ensureElement(problem.allowedModify, req.user.self);
+        problem.owner = req.client.userID;
+        ensureElement(problem.allowedRead, req.client.userID);
+        ensureElement(problem.allowedSubmit, req.client.userID);
+        ensureElement(problem.allowedModify, req.client.userID);
         await problem.save();
         res.send({ status: "success", payload: problem.id });
     } catch (e) {
@@ -30,7 +30,7 @@ problemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
 
 problemRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        let query = Problem.find().where("allowedRead").in(req.user.roles);
+        let query = Problem.find().where("allowedRead").in(req.client.roles);
 
         if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
         if (req.query.search) { query = query.where("title").regex(new RegExp(req.query.search)); }
@@ -44,7 +44,7 @@ problemRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
 
 problemRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
-        let query = Problem.find().where("allowedRead").in(req.user.roles);
+        let query = Problem.find().where("allowedRead").in(req.client.roles);
 
         if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
         if (req.query.search) { query = query.where("title").regex(new RegExp(req.query.search)); }
@@ -60,7 +60,7 @@ problemRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: R
 
 problemRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const problem = await Problem.findById(req.params.id).where("allowedRead").in(req.user.roles);
+        const problem = await Problem.findById(req.params.id).where("allowedRead").in(req.client.roles);
         if (!problem) { throw new Error("Not found"); }
         res.send({ status: "success", payload: problem });
     } catch (e) {
@@ -70,7 +70,7 @@ problemRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
 
 problemRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const problem = await Problem.findById(req.params.id).where("allowedRead").in(req.user.roles).select("title").exec();
+        const problem = await Problem.findById(req.params.id).where("allowedRead").in(req.client.roles).select("title").exec();
         if (!problem) { throw new Error("Not found"); }
         res.send({ status: "success", payload: problem });
     } catch (e) {
@@ -80,14 +80,14 @@ problemRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response)
 
 problemRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const problem = await Problem.findById(req.params.id).where("allowedModify").in(req.user.roles);
+        const problem = await Problem.findById(req.params.id).where("allowedModify").in(req.client.roles);
         if (!problem) { throw new Error("Not found"); }
         problem.title = req.body.title;
         problem.content = req.body.content;
         problem.data = req.body.data;
         problem.meta = req.body.meta;
         problem.tags = req.body.tags;
-        if (await verifyAccess(req.user, "manageSystem")) {
+        if (req.client.config.manageSystem) {
             problem.allowedModify = req.body.allowedModify;
             problem.allowedRead = req.body.allowedRead;
             problem.allowedSubmit = req.body.allowedSubmit;
@@ -101,7 +101,7 @@ problemRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
 
 problemRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const problem = await Problem.findById(req.params.id).where("allowedModify").in(req.user.roles);
+        const problem = await Problem.findById(req.params.id).where("allowedModify").in(req.client.roles);
         if (!problem) { throw new Error("Not found"); }
         await problem.remove();
         res.send({ status: "success" });

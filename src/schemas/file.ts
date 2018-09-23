@@ -58,14 +58,16 @@ BFileSchema.methods.getPath = function() {
 };
 
 BFileSchema.pre("save", async function(next) {
-    if (!(this as IBFileModel).created) {
-        (this as IBFileModel).created = new Date();
+    const This = this as IBFileModel;
+    if (!This.created) {
+        This.created = new Date();
     }
     next();
 });
 
 BFileSchema.pre("remove", async function(next) {
-    await unlink((this as IBFileModel).getPath());
+    const This = this as IBFileModel;
+    await unlink(This.getPath());
     next();
 });
 

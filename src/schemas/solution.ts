@@ -75,8 +75,9 @@ SolutionSchema.methods.judge = function() {
 };
 
 SolutionSchema.pre("save", function(next) {
-    if (!(this as ISolutionModel).created) {
-        (this as ISolutionModel).created = new Date();
+    const This = this as ISolutionModel;
+    if (!This.created) {
+        This.created = new Date();
     }
     next();
 });
