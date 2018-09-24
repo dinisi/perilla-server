@@ -5,4 +5,8 @@ Light-weight Online Judge Platform
 - MEVN Full javascript stack
 - RESTFul API Design
 
-Status: under development
+Status: PV avaliable
+
+Todos:
+1. Add mail register support
+2. Add CLI interface(for system setup, maintaince, ...)
