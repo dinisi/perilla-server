@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { IAuthorizedRequest } from "../../definitions/requests";
-import { accessRouter } from "./access";
+import { Role } from "../../schemas/role";
+import { User } from "../../schemas/user";
 import { fileRouter } from "./file";
 import { problemRouter } from "./problem";
 import { roleRouter } from "./role";
@@ -14,7 +15,6 @@ APIRouter.use("/problem", problemRouter);
 APIRouter.use("/solution", solutionRouter);
 APIRouter.use("/user", userRouter);
 APIRouter.use("/role", roleRouter);
-APIRouter.use("/access", accessRouter);
 
 APIRouter.get("/session", async (req: IAuthorizedRequest, res) => {
     try {
@@ -24,10 +24,29 @@ APIRouter.get("/session", async (req: IAuthorizedRequest, res) => {
                 hostname: req.hostname,
                 httpVersion: req.httpVersion,
                 ips: req.ips,
-                user: req.user,
+                client: req.client,
             },
             status: "success",
         });
+    } catch (e) {
+        res.send({ status: "failed", payload: e.message });
+    }
+});
+
+// Authority control entity
+APIRouter.get("/ace", async (req: IAuthorizedRequest, res) => {
+    try {
+        const search = new RegExp(req.query.search);
+        const users = await User.find().where("username").regex(search).limit(10);
+        const roles = await Role.find().where("rolename").regex(search).limit(10);
+        const result = [];
+        for (const user of users) {
+            result.push({ id: user.id, name: user.username, type: "user" });
+        }
+        for (const role of roles) {
+            result.push({ id: role.id, name: role.rolename, type: "role" });
+        }
+        res.send({ status: "success", payload: result });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }

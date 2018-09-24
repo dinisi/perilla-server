@@ -1,9 +1,13 @@
+import * as Ajv from "ajv";
 import { Response, Router } from "express";
+import { readFileSync } from "fs-extra";
 import { IAuthorizedRequest } from "../../definitions/requests";
 import { Role } from "../../schemas/role";
 import { validPaginate } from "../common";
 
 export let roleRouter = Router();
+const ajv = new Ajv();
+const validate = ajv.compile(JSON.parse(readFileSync("schemas/configuration.json").toString()));
 
 roleRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
@@ -77,8 +81,11 @@ roleRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
         const role = await Role.findById(req.params.id);
         if (!role) { throw new Error("Not found"); }
         if (role._protected) { throw new Error("Object is protected"); }
+        const valid = validate(req.body.config);
+        if (!valid) { throw new Error("Invalid config"); }
         role.rolename = req.body.rolename;
         role.description = req.body.description;
+        role.config = req.body.config;
         await role.save();
         res.send({ status: "success" });
     } catch (e) {
