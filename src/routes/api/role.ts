@@ -7,7 +7,7 @@ import { validPaginate } from "../common";
 
 export let roleRouter = Router();
 const ajv = new Ajv();
-const validate = ajv.compile(JSON.parse(readFileSync("schemas/configuration.json").toString()));
+const validate = ajv.compile(JSON.parse(readFileSync("schemas/userconfig.json").toString()));
 
 roleRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {

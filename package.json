@@ -24,7 +24,8 @@
     "prompts": "^1.1.1",
     "randomstring": "^1.1.5",
     "redis": "^2.8.0",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "typescript": "^3.0.3"
   },
   "devDependencies": {
     "@types/ajv": "^1.0.0",

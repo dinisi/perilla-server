@@ -7,7 +7,7 @@ import { validPaginate } from "../common";
 
 export let userRouter = Router();
 const ajv = new Ajv();
-const validate = ajv.compile(JSON.parse(readFileSync("schemas/configuration.json").toString()));
+const validate = ajv.compile(JSON.parse(readFileSync("schemas/userconfig.json").toString()));
 
 userRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
