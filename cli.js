@@ -4,6 +4,14 @@ const prompts = require("prompts");
 const mongoose = require("mongoose");
 const child_process = require("child_process");
 const path = require("path");
+const crypto = require("crypto");
+const generate = require("randomstring").generate;
+
+const oldLog = console.log;
+console.log = function (message) {
+    oldLog(message);
+    fs.appendFileSync("cli.log", `[${(new Date()).toLocaleString()}] ${message}\n`);
+};
 
 (async () => {
     if (argv[0] === "init") {
@@ -16,7 +24,7 @@ const path = require("path");
                     fs.removeSync("files");
                     fs.removeSync("dist");
                     fs.unlinkSync("config.json");
-                    fs.unlinkSync("install.log");
+                    fs.unlinkSync("cli.log");
                 } catch (e) {
                     console.log("[ERROR] " + e.message);
                     if (!(await prompts({ type: "confirm", name: "value", message: "continue?", initial: false })).value) process.exit(0);
@@ -37,9 +45,108 @@ const path = require("path");
         const dbURL = (await prompts({ type: "text", name: "value", message: "Database URL:", initial: "mongodb://localhost:27017/loj" })).value;
         const dbOptions = { useNewUrlParser: true };
         await mongoose.connect(dbURL, dbOptions);
-        const Role = require(path.join(__dirname, "dist", "schemas", "role.js")).Role;
-        const User = require(path.join(__dirname, "dist", "schemas", "user.js")).User;
-        //
+        // Database models
+        const UserSchema = new mongoose.Schema({
+            username: { type: String, required: true, unique: true },
+            bio: { type: String, required: true, default: "No bio" },
+            email: { type: String, required: true, unique: true },
+            realname: { type: String, required: true, unique: true },
+            roles: { type: [String], required: true },
+            hash: String,
+            salt: String,
+            config: { type: Object, required: true },
+            _protected: { type: Boolean, required: true },
+        });
+        UserSchema.methods.setPassword = function (password) {
+            this.salt = crypto.randomBytes(16).toString("hex");
+            this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, "sha512").toString("hex");
+        };
+        const User = mongoose.model("User", UserSchema);
+        const RoleSchema = new mongoose.Schema({
+            rolename: { type: String, unique: true, required: true },
+            description: { type: String, required: true },
+            config: { type: Object, required: true },
+            _protected: { type: Boolean, required: true },
+        });
+        RoleSchema.pre("remove", function (next) {
+            const This = this;
+            if (This._protected) {
+                return;
+            }
+            next();
+        });
+        const Role = mongoose.model("Role", RoleSchema);
+        // UAC defines
+        const worst = {
+            createFile: false,
+            createProblem: false,
+            createSolution: false,
+            manageSystem: false,
+            minSolutionCreationInterval: 10000,
+        };
+        const best = {
+            createFile: true,
+            createProblem: true,
+            createSolution: true,
+            manageSystem: true,
+            minSolutionCreationInterval: 0,
+        };
+        // Roles
+        const adminRole = new Role();
+        adminRole.rolename = "Administrators";
+        adminRole.description = "System administrators";
+        adminRole.config = best;
+        adminRole._protected = true;
+        await adminRole.save();
+        const judgerRole = new Role();
+        judgerRole.rolename = "Judgers";
+        judgerRole.description = "System judgers";
+        judgerRole.config = worst;
+        judgerRole._protected = true;
+        await judgerRole.save();
+        const userRole = new Role();
+        userRole.rolename = "Users";
+        userRole.description = "System users";
+        userRole.config = worst;
+        userRole._protected = true;
+        await userRole.save();
+        // Users
+        const admin = new User();
+        admin.username = "Administrator";
+        admin.realname = "Administrator";
+        admin.email = "admin@zhangzisu.cn";
+        admin.roles = [adminRole.id];
+        admin._protected = true;
+        const adminPassword = generate(10);
+        admin.setPassword(adminPassword);
+        console.log("[INFO] [STEP 2/4] Admin password: " + adminPassword);
+        admin.config = best;
+        await admin.save();
+        const judger = new User();
+        judger.username = "Judger";
+        judger.realname = "Judger";
+        judger.email = "judger@zhangzisu.cn";
+        judger.roles = [judgerRole.id];
+        judger._protected = true;
+        const judgerPassword = generate(10);
+        judger.setPassword(judgerPassword);
+        console.log("[INFO] [STEP 2/4] Judger password: " + judgerPassword);
+        judger.config = worst;
+        await judger.save();
+        const config = {
+            defaultAdminUserID: admin.id,
+            defaultAdminRoleID: adminRole.id,
+            defaultJudgerUserID: judger.id,
+            defaultJudgerRoleID: judgerRole.id,
+            defaultUserRoleID: userRole.id,
+            db: {
+                url: dbURL,
+                options: dbOptions
+            }
+        };
+        console.log("[INFO] [STEP 3/4] Generating config.json");
+        fs.writeFileSync("config.json", JSON.stringify(config, null, '\t'));
+        console.log("[INFO] [STEP 4/4] Done");
     } else {
         console.log("LightOnlineJudge CLI");
         console.log("");
