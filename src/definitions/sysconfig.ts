@@ -13,6 +13,6 @@ export interface ISystemConfig {
     mail: {
         enabled: boolean;
         options?: any;
-        from?: any;
+        from?: string;
     };
 }
