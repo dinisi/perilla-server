@@ -11,6 +11,7 @@ console.log = (message: string) => {
     consoleLogger(message);
     appendFileSync("app.log", `[${(new Date()).toLocaleString()}] ${message}\n`);
 };
+console.log("LightOnlineJudge started");
 
 const app: express.Application = express();
 const port: number = parseInt(process.env.PORT, 10) || 3000;

@@ -10,4 +10,9 @@ export interface ISystemConfig {
         url: string;
         options: ConnectionOptions;
     };
+    mail: {
+        enabled: boolean;
+        options?: any;
+        from?: any;
+    };
 }

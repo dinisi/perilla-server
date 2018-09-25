@@ -26,7 +26,37 @@
                 "options": {
                     "type": "object"
                 }
-            }
+            },
+            "required": [
+                "url",
+                "options"
+            ]
+        },
+        "mail": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "options": {
+                    "type": "object"
+                },
+                "from": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "enabled"
+            ]
         }
-    }
+    },
+    "required": [
+        "defaultAdminUserID",
+        "defaultAdminRoleID",
+        "defaultJudgerUserID",
+        "defaultJudgerRoleID",
+        "defaultUserRoleID",
+        "db",
+        "mail"
+    ]
 }

@@ -1,4 +1,4 @@
-import { IConfiguration } from "./configuration";
+import { IConfiguration } from "./userconfig";
 
 export interface IClient {
     clientID: string;
