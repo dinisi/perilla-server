@@ -51,3 +51,21 @@ APIRouter.get("/ace", async (req: IAuthorizedRequest, res) => {
         res.send({ status: "failed", payload: e.message });
     }
 });
+
+APIRouter.get("/ace/:id", async (req: IAuthorizedRequest, res) => {
+    try {
+        const role = await Role.findById(req.params.id);
+        if (role) {
+            res.send({ status: "success", payload: { name: role.rolename, type: "role" } });
+            return;
+        }
+        const user = await User.findById(req.params.id);
+        if (user) {
+            res.send({ status: "success", payload: { name: user.username, type: "user" } });
+            return;
+        }
+        throw new Error("Not found");
+    } catch (e) {
+        res.send({ status: "failed", payload: e.message });
+    }
+});
