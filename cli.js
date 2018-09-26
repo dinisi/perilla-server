@@ -78,9 +78,9 @@ console.log = function (message) {
         const Role = mongoose.model("Role", RoleSchema);
         // UAC defines
         const worst = {
-            createFile: false,
-            createProblem: false,
-            createSolution: false,
+            createFile: true,
+            createProblem: true,
+            createSolution: true,
             manageSystem: false,
             minSolutionCreationInterval: 10000,
         };
