@@ -48,6 +48,17 @@
             "required": [
                 "enabled"
             ]
+        },
+        "http": {
+            "type": "object",
+            "properties": {
+                "port": {
+                    "type": "number"
+                },
+                "hostname": {
+                    "type": "string"
+                }
+            }
         }
     },
     "required": [
@@ -57,6 +68,7 @@
         "defaultJudgerRoleID",
         "defaultUserRoleID",
         "db",
-        "mail"
+        "mail",
+        "http"
     ]
 }

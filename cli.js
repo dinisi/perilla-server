@@ -133,6 +133,21 @@ console.log = function (message) {
         console.log("[INFO] [STEP 2/4] Judger password: " + judgerPassword);
         judger.config = worst;
         await judger.save();
+        console.log("[INFO] [STEP 3/4] Generating HTTP config");
+        const httpResult = await prompts([
+            {
+                type: "text",
+                name: "hostname",
+                message: "HTTP Hostname:",
+                initial: "127.0.0.1"
+            },
+            {
+                type: "number",
+                name: "port",
+                message: "HTTP Port",
+                initial: 80
+            }
+        ]);
         const config = {
             defaultAdminUserID: admin.id,
             defaultAdminRoleID: adminRole.id,
@@ -142,11 +157,16 @@ console.log = function (message) {
             db: {
                 url: dbURL,
                 options: dbOptions
-            }
+            },
+            mail: {
+                enabled: false
+            },
+            http: httpResult
         };
-        console.log("[INFO] [STEP 3/4] Generating config.json");
+        console.log("[INFO] [STEP 4/4] Generating config.json");
         fs.writeFileSync("config.json", JSON.stringify(config, null, '\t'));
-        console.log("[INFO] [STEP 4/4] Done");
+        console.log("[INFO] Done");
+        process.exit(0);
     } else {
         console.log("LightOnlineJudge CLI");
         console.log("");

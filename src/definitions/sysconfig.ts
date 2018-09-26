@@ -15,4 +15,8 @@ export interface ISystemConfig {
         options?: any;
         from?: string;
     };
+    http: {
+        port: number;
+        hostname: string;
+    };
 }

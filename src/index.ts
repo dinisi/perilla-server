@@ -4,6 +4,7 @@ import "./redis";
 import { json, urlencoded } from "body-parser";
 import * as express from "express";
 import { appendFileSync } from "fs-extra";
+import { config } from "./config";
 import { MainRouter } from "./routes";
 
 const consoleLogger = console.log;
@@ -14,7 +15,6 @@ console.log = (message: string) => {
 console.log("LightOnlineJudge started");
 
 const app: express.Application = express();
-const port: number = parseInt(process.env.PORT, 10) || 3000;
 
 app.use(json());
 app.use(urlencoded({ extended: false }));
@@ -33,6 +33,6 @@ app.use((req, res, next) => {
 
 app.use(MainRouter);
 
-app.listen(port, () => {
-    console.log(`Listening on port ${port}`);
+app.listen(config.http.port, config.http.hostname, () => {
+    console.log(`HTTP service started`);
 });

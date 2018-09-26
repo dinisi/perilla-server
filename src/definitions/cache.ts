@@ -10,3 +10,10 @@ export interface IClient {
     lastSolutionCreation: number;
     expire: number;
 }
+
+export interface IPendingUser {
+    username: string;
+    realname: string;
+    email: string;
+    password: string;
+}
