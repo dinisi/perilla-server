@@ -1,4 +1,4 @@
-import { IConfiguration } from "./configuration";
+import { IConfiguration } from "./userconfig";
 
 export interface IClient {
     clientID: string;
@@ -9,4 +9,11 @@ export interface IClient {
     lastVisit: number;
     lastSolutionCreation: number;
     expire: number;
+}
+
+export interface IPendingUser {
+    username: string;
+    realname: string;
+    email: string;
+    password: string;
 }

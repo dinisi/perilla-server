@@ -1,11 +1,9 @@
-// tslint:disable:no-console
 import * as mongoose from "mongoose";
-const dbURL: string = "mongodb://localhost:27017/loj";
+import { config } from "./config";
 
-mongoose.connect(dbURL, { useNewUrlParser: true });
-
+mongoose.connect(config.db.url, config.db.options);
 mongoose.connection.on("connected", () => {
-    console.log("Mongoose connected to " + dbURL);
+    console.log("Mongoose connected");
 });
 mongoose.connection.on("error", (err) => {
     console.log("Mongoose connection error: " + err);
@@ -13,14 +11,12 @@ mongoose.connection.on("error", (err) => {
 mongoose.connection.on("disconnected", () => {
     console.log("Mongoose disconnected");
 });
-
 const gracefulShutdown = (msg: string, callback: any) => {
     mongoose.connection.close(() => {
         console.log("Mongoose disconnected through " + msg);
         callback();
     });
 };
-
 process.once("SIGUSR2", () => {
     gracefulShutdown("nodemon restart", () => {
         process.kill(process.pid, "SIGUSR2");
@@ -36,12 +32,3 @@ process.on("SIGTERM", () => {
         process.exit(0);
     });
 });
-
-import "./file";
-import "./fileAccess";
-import "./problem";
-import "./problemAccess";
-import "./role";
-import "./solution";
-import "./solutionAccess";
-import "./user";

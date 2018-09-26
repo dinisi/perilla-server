@@ -1,0 +1,29 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "title": "UserConfig",
+    "properties": {
+        "createFile": {
+            "type": "boolean"
+        },
+        "createProblem": {
+            "type": "boolean"
+        },
+        "createSolution": {
+            "type": "boolean"
+        },
+        "manageSystem": {
+            "type": "boolean"
+        },
+        "minSolutionCreationInterval": {
+            "type": "number",
+            "minimum": 0
+        }
+    },
+    "required": [
+        "createFile",
+        "createProblem",
+        "createSolution",
+        "manageSystem",
+        "minSolutionCreationInterval"
+    ]
+}

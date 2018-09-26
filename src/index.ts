@@ -1,14 +1,20 @@
-import "./config";
+import "./database";
 import "./redis";
-import "./schemas";
 
 import { json, urlencoded } from "body-parser";
 import * as express from "express";
+import { appendFileSync } from "fs-extra";
+import { config } from "./config";
 import { MainRouter } from "./routes";
 
-const app: express.Application = express();
+const consoleLogger = console.log;
+console.log = (message: string) => {
+    consoleLogger(message);
+    appendFileSync("app.log", `[${(new Date()).toLocaleString()}] ${message}\n`);
+};
+console.log("LightOnlineJudge started");
 
-const port: number = parseInt(process.env.PORT, 10) || 3000;
+const app: express.Application = express();
 
 app.use(json());
 app.use(urlencoded({ extended: false }));
@@ -27,7 +33,6 @@ app.use((req, res, next) => {
 
 app.use(MainRouter);
 
-app.listen(port, () => {
-    // tslint:disable-next-line:no-console
-    console.log(`Listening on port ${port}`);
+app.listen(config.http.port, config.http.hostname, () => {
+    console.log(`HTTP service started`);
 });

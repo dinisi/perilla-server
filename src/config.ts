@@ -1,14 +1,12 @@
-import * as fs from "fs-extra";
-import { ISystemConfig } from "./definitions/config";
+import * as Ajv from "ajv";
+import { existsSync, readFileSync } from "fs-extra";
+import { ISystemConfig } from "./definitions/sysconfig";
 
-if (!fs.existsSync("config.json")) {
-    // tslint:disable-next-line:no-console
-    console.error("System is not initialized");
-    fs.writeFileSync("config.json", "{}");
-}
+const ajv = new Ajv();
+const validate = ajv.compile(JSON.parse(readFileSync("schemas/sysconfig.json").toString()));
 
-export let config: ISystemConfig = JSON.parse(fs.readFileSync("config.json").toString());
-
-export const reloadConfig = () => {
-    config = JSON.parse(fs.readFileSync("config.json").toString());
-};
+if (!existsSync("config.json")) { throw new Error("No config.json found"); }
+const sysconfig = JSON.parse(readFileSync("config.json").toString());
+const valid = validate(sysconfig);
+if (!valid) { throw new Error("Invalid sysconfig"); }
+export const config: ISystemConfig = sysconfig;
