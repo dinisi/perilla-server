@@ -51,7 +51,7 @@ fileRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
 
 fileRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
-        let query = BFile.find().where("allowedRead").in(req.client.roles);
+        let query = BFile.find().sort("-_id").where("allowedRead").in(req.client.roles);
 
         if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
         if (req.query.search) { query = query.where("filename").regex(new RegExp(req.query.search)); }

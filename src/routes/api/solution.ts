@@ -47,7 +47,7 @@ solutionRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
 
 solutionRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
-        let query = Solution.find().where("allowedRead").in(req.client.roles);
+        let query = Solution.find().sort("-_id").where("allowedRead").in(req.client.roles);
 
         if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
         if (req.query.problemID) { query = query.where("problemID").equals(req.query.problemID); }
