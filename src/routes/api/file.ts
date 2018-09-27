@@ -1,9 +1,9 @@
 import { Response, Router } from "express";
-import { ensureDirSync, existsSync, move, unlink } from "fs-extra";
+import { ensureDirSync, existsSync, move, unlink, writeFile } from "fs-extra";
 import * as multer from "multer";
 import { IAuthorizedRequest } from "../../definitions/requests";
-import { MD5 } from "../../md5";
 import { BFile } from "../../schemas/file";
+import { getFileSize, MD5 } from "../../utils";
 import { ensureElement } from "../../utils";
 import { validPaginate } from "../common";
 
@@ -30,6 +30,24 @@ fileRouter.post("/upload", upload.array("files", 128), async (req: IAuthorizedRe
             result.push(bfile.id);
         }
         res.send({ status: "success", payload: result });
+    } catch (e) {
+        res.send({ status: "failed", payload: e.message });
+    }
+});
+
+fileRouter.post("/create", async (req: IAuthorizedRequest, res) => {
+    try {
+        if (!req.client.config.createFile) { throw new Error("Access denied"); }
+        const bfile = new BFile();
+        await writeFile(bfile.getPath(), req.body.content);
+        bfile.size = await getFileSize(bfile.getPath());
+        bfile.hash = await MD5(bfile.getPath());
+        bfile.owner = req.client.userID;
+        bfile.filename = req.body.filename || "untitled";
+        bfile.description = req.body.description;
+        ensureElement(bfile.allowedRead, req.client.userID);
+        await bfile.save();
+        res.send({ status: "success", payload: bfile.id });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }
