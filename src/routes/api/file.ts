@@ -92,23 +92,6 @@ fileRouter.get("/:id/raw", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-fileRouter.post("/:id/raw", upload.single("file"), async (req: IAuthorizedRequest, res: Response) => {
-    try {
-        const file = await BFile.findById(req.params.id).where("allowedModify").in(req.client.roles);
-        if (!file) { throw new Error("Not found"); }
-        const md5 = await MD5(req.file.path);
-        file.hash = md5;
-        file.size = req.file.size;
-        file.filename = req.file.originalname;
-        await file.save();
-        if (existsSync(file.getPath())) { await unlink(file.getPath()); }
-        await move(req.file.path, file.getPath());
-        res.send({ status: "success" });
-    } catch (e) {
-        res.send({ status: "failed", payload: e.message });
-    }
-});
-
 fileRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
         const file = await BFile.findById(req.params.id).where("allowedModify").in(req.client.roles);
