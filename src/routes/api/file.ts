@@ -1,5 +1,6 @@
 import { Response, Router } from "express";
 import { ensureDirSync, existsSync, move, unlink, writeFile } from "fs-extra";
+import { lookup } from "mime-types";
 import * as multer from "multer";
 import { IAuthorizedRequest } from "../../definitions/requests";
 import { BFile } from "../../schemas/file";
@@ -82,7 +83,7 @@ fileRouter.get("/:id/raw", async (req: IAuthorizedRequest, res: Response) => {
     try {
         const file = await BFile.findById(req.params.id).where("allowedRead").in(req.client.roles);
         if (!file) { throw new Error("Not found"); }
-        res.download(file.getPath());
+        res.sendFile(file.getPath(), { headers: { "Content-Type": lookup(file.filename) } });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }
