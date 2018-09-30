@@ -13,6 +13,7 @@ problemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
 
         problem.title = req.body.title;
         problem.content = req.body.content;
+        problem.files = req.body.files;
         problem.data = req.body.data;
         problem.meta = req.body.meta;
         problem.tags = req.body.tags;
@@ -84,6 +85,7 @@ problemRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
         if (!problem) { throw new Error("Not found"); }
         problem.title = req.body.title;
         problem.content = req.body.content;
+        problem.files = req.body.files;
         problem.data = req.body.data;
         problem.meta = req.body.meta;
         problem.tags = req.body.tags;

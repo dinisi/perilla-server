@@ -5,6 +5,7 @@ import { Solution } from "./solution";
 export interface IProblemModel extends Document {
     title: string;
     content: string;
+    files: string[];
     data: object;
     tags: string[];
     owner: string;
@@ -38,6 +39,10 @@ export let ProblemSchema: Schema = new Schema(
             default: "No content",
         },
         created: Date,
+        files: {
+            type: [String],
+            required: true,
+        },
         data: {
             type: Object,
             required: true,
