@@ -166,6 +166,7 @@ console.log = function (message) {
         console.log("[INFO] [STEP 4/4] Generating config.json");
         fs.writeFileSync("config.json", JSON.stringify(config, null, '\t'));
         console.log("[INFO] Done");
+        console.log("[TIP] use `yarn start` to start LightOnlineJudge");
         process.exit(0);
     } else {
         console.log("LightOnlineJudge CLI");
