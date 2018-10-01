@@ -168,11 +168,18 @@ console.log = function (message) {
         console.log("[INFO] Done");
         console.log("[TIP] use `yarn start` to start LightOnlineJudge");
         process.exit(0);
+    } else if (argv[0] === "recompile") {
+        console.log("[INFO] Compiling");
+        const tsc_path = path.join(__dirname, "node_modules", ".bin", "tsc");
+        await child_process.execSync(tsc_path);
+        console.log("[INFO] Done");
     } else {
         console.log("LightOnlineJudge CLI");
         console.log("");
         console.log("usage:");
         console.log("➜  node cli.js init");
         console.log("Initialize the system");
+        console.log("➜  node cli.js recompile");
+        console.log("Recompile typescript code into runnable javascript");
     }
 })();
