@@ -1,4 +1,6 @@
 import { Response, Router } from "express";
+import express = require("express");
+import { join } from "path";
 import { config } from "../config";
 import { IClient, IPendingUser } from "../definitions/cache";
 import { IAuthorizedRequest } from "../definitions/requests";
@@ -121,3 +123,12 @@ MainRouter.use(
     },
     APIRouter,
 );
+
+const UIPath = join(__dirname, "..", "..", "ui", "dist");
+
+MainRouter.use(express.static(join(UIPath)));
+
+// Redirt all unmatched routes to root
+MainRouter.get("/*", (req, res) => {
+    res.sendFile(join(UIPath, "index.html"));
+});

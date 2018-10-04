@@ -173,6 +173,16 @@ console.log = function (message) {
         const tsc_path = path.join(__dirname, "node_modules", ".bin", "tsc");
         await child_process.execSync(tsc_path);
         console.log("[INFO] Done");
+    } else if (argv[0] === "ui") {
+        if (argv[1] === "recompile") {
+            console.log("[INFO]");
+        } else {
+            console.log("LightOnlineJudge CLI - UI");
+            console.log("");
+            console.log("usage:");
+            console.log("➜  node cli.js ui recompile");
+            console.log("Recompile UI");
+        }
     } else {
         console.log("LightOnlineJudge CLI");
         console.log("");
