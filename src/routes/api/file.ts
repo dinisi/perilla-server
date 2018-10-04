@@ -2,12 +2,12 @@ import { Response, Router } from "express";
 import { ensureDirSync, existsSync, writeFile } from "fs-extra";
 import { lookup } from "mime-types";
 import * as multer from "multer";
+import * as tmp from "tmp";
 import { IAuthorizedRequest } from "../../definitions/requests";
 import { BFile } from "../../schemas/file";
 import { getFileSize, MD5 } from "../../utils";
 import { ensureElement } from "../../utils";
 import { validPaginate } from "../common";
-import { file } from "tmp";
 
 ensureDirSync("files/uploads/");
 const upload = multer({ dest: "files/uploads/" });
@@ -34,11 +34,11 @@ fileRouter.post("/create", async (req: IAuthorizedRequest, res) => {
     try {
         if (!req.client.config.createFile) { throw new Error("Access denied"); }
         const path = await new Promise<string>((resolve, reject) => {
-            file((err, path) => {
+            tmp.file((err, filepath) => {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(path);
+                    resolve(filepath);
                 }
             });
         });
@@ -100,7 +100,6 @@ fileRouter.post("/:id/upload", upload.single("file"), async (req: IAuthorizedReq
         const bfile = await BFile.findById(req.params.id).where("allowedModify").in(req.client.roles);
         if (!bfile) { throw new Error("Not found"); }
         await bfile.setFile(req.file.path);
-        bfile.filename = req.file.originalname;
         await bfile.save();
         res.send({ status: "success" });
     } catch (e) {
@@ -113,17 +112,16 @@ fileRouter.post("/:id/raw", async (req: IAuthorizedRequest, res) => {
         const bfile = await BFile.findById(req.params.id).where("allowedModify").in(req.client.roles);
         if (!bfile) { throw new Error("Not found"); }
         const path = await new Promise<string>((resolve, reject) => {
-            file((err, path) => {
+            tmp.file((err, filepath) => {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(path);
+                    resolve(filepath);
                 }
             });
         });
         await writeFile(path, req.body.content);
         await bfile.setFile(path);
-        bfile.filename = req.body.filename || "untitled";
         await bfile.save();
         res.send({ status: "success" });
     } catch (e) {
