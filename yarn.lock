@@ -66,6 +66,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/git-rev@^0.2.0":
+  version "0.2.0"
+  resolved "http://registry.npm.taobao.org/@types/git-rev/download/@types/git-rev-0.2.0.tgz#b660c41a6aab5df3e6e330df9c7025b426ee67c2"
+  integrity sha1-tmDEGmqrXfPm4zDfnHAltCbuZ8I=
+
 "@types/mime-types@^2.1.0":
   version "2.1.0"
   resolved "http://registry.npm.taobao.org/@types/mime-types/download/@types/mime-types-2.1.0.tgz#9ca52cda363f699c69466c2a6ccdaad913ea7a73"
@@ -691,6 +696,11 @@ getpass@^0.1.1:
   integrity sha1-Xv+OPmhNVprkyysSgmBOi6YhSfo=
   dependencies:
     assert-plus "^1.0.0"
+
+git-rev@^0.2.1:
+  version "0.2.1"
+  resolved "http://registry.npm.taobao.org/git-rev/download/git-rev-0.2.1.tgz#8ccbd2092b345bc2c9149548396df549646ca63f"
+  integrity sha1-jMvSCSs0W8LJFJVIOW31SWRspj8=
 
 glob@^7.1.1:
   version "7.1.3"
