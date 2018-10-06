@@ -29,8 +29,8 @@
 5. 访问redis服务器
 
 步骤：
-1. 执行`git clone https://github.com/ZhangZisu/LightJudger.git`
-2. 执行`cd LightJudger`
+1. 执行`git clone https://github.com/ZhangZisu/perilla-judger.git`
+2. 执行`cd perilla-judger`
 3. 执行`yarn`
 4. 安装`typescript`：`yarn global add typescript`
 5. 编译代码：`tsc`

@@ -1,4 +1,4 @@
-# LightOnlineJudge
+# Perilla
 > 轻量在线测评系统
 
 特性：
@@ -15,6 +15,6 @@
 
 本系统完全使用Javascript进行开发。相关项目：
 - [PerillaUI](https://github.com/ZhangZisu/perilla-ui) - 本项目使用的前端
-- [LightJudger](https://github.com/ZhangZisu/LightJudger) - 评测器
+- [PerillaJudger](https://github.com/ZhangZisu/perilla-judger.git) - 评测器
 
 欢迎参与开发！
