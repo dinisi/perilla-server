@@ -1,6 +1,6 @@
 module.exports = {
   apps: [{
-    name: 'LightOnlineJudge',
+    name: 'Perilla',
     script: 'dist/index.js',
     instances: 4,
     autorestart: true,

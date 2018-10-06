@@ -12,7 +12,7 @@ console.log = (message: string) => {
     consoleLogger(message);
     appendFileSync("app.log", `[${(new Date()).toLocaleString()}] ${message}\n`);
 };
-console.log("LightOnlineJudge started");
+console.log("Perilla started");
 
 const app: express.Application = express();
 

@@ -8,8 +8,8 @@
 请注意：mongodb和redis并不一定需要安装在本地
 
 步骤：
-1. 执行`git clone https://github.com/ZhangZisu/LightOnlineJudge.git`
-2. 执行`cd LightOnlineJudge`
+1. 执行`git clone https://github.com/ZhangZisu/perilla.git`
+2. 执行`cd perilla`
 3. 执行`yarn`
 4. 执行`node cli init`，按照提示输入信息
 5. 系统会自动初始化服务器

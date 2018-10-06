@@ -1,9 +1,9 @@
 # 主服务器配置
 当执行`node cli init`后，系统将自动生成`config.json`
 
-[typescript定义文件](https://github.com/ZhangZisu/LightOnlineJudge/blob/master/src/definitions/sysconfig.ts)
+[typescript定义文件](https://github.com/ZhangZisu/perilla/blob/master/src/definitions/sysconfig.ts)
 
-[JSON Schemas](https://github.com/ZhangZisu/LightOnlineJudge/blob/master/schemas/sysconfig.json)
+[JSON Schemas](https://github.com/ZhangZisu/perilla/blob/master/schemas/sysconfig.json)
 
 ## defaultAdminUserID
 > string
@@ -42,14 +42,14 @@
 
 数据库URL
 
-作为参数传递到`mongoose.connect`中[database.ts](https://github.com/ZhangZisu/LightOnlineJudge/blob/master/src/database.ts#L4)
+作为参数传递到`mongoose.connect`中[database.ts](https://github.com/ZhangZisu/perilla/blob/master/src/database.ts#L4)
 
 ### db.options
 > object
 
 数据库连接参数，见[mongoose/index.d.ts](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/mongoose/index.d.ts#L436)
 
-作为参数传递到`mongoose.connect`中[database.ts](https://github.com/ZhangZisu/LightOnlineJudge/blob/master/src/database.ts#L4)
+作为参数传递到`mongoose.connect`中[database.ts](https://github.com/ZhangZisu/perilla/blob/master/src/database.ts#L4)
 
 ## mail
 > object
@@ -68,7 +68,7 @@
 
 邮件初始化选项，见[https://nodemailer.com/smtp/](https://nodemailer.com/smtp/)
 
-作为参数转递到[mail.ts](https://github.com/ZhangZisu/LightOnlineJudge/blob/master/src/mail.ts#L4)
+作为参数转递到[mail.ts](https://github.com/ZhangZisu/perilla/blob/master/src/mail.ts#L4)
 
 ### mail.from
 > string

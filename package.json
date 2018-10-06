@@ -1,9 +1,9 @@
 {
-  "name": "lightonlinejudge",
+  "name": "perilla",
   "version": "0.0.4",
   "description": "Light-weight Online Judge Platform",
   "main": "dist/index.js",
-  "repository": "https://github.com/ZhangZisu/LightOnlineJudge",
+  "repository": "https://github.com/ZhangZisu/perilla",
   "author": "ZhangZisu",
   "license": "Apache-2.0",
   "private": false,

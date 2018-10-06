@@ -1,4 +1,4 @@
-# LightOnlineJudge
+# Perilla
 Light-weight Online Judge Platform
 
 - RBAC Access control

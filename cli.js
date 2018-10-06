@@ -149,7 +149,7 @@ console.log = function (message) {
             }
         ]);
         const config = {
-            $schema: "https://raw.githubusercontent.com/ZhangZisu/LightOnlineJudge/master/schemas/sysconfig.json",
+            $schema: "https://raw.githubusercontent.com/ZhangZisu/perilla/master/schemas/sysconfig.json",
             defaultAdminUserID: admin.id,
             defaultAdminRoleID: adminRole.id,
             defaultJudgerUserID: judger.id,
@@ -167,7 +167,7 @@ console.log = function (message) {
         console.log("[INFO] [STEP 4/4] Generating config.json");
         fs.writeFileSync("config.json", JSON.stringify(config, null, '\t'));
         console.log("[INFO] Done");
-        console.log("[TIP] use `yarn start` to start LightOnlineJudge");
+        console.log("[TIP] use `yarn start` to start perilla");
         process.exit(0);
     } else if (argv[0] === "recompile") {
         console.log("[INFO] Compiling");
@@ -178,14 +178,14 @@ console.log = function (message) {
         if (argv[1] === "recompile") {
             console.log("[INFO]");
         } else {
-            console.log("LightOnlineJudge CLI - UI");
+            console.log("Perilla CLI - UI");
             console.log("");
             console.log("usage:");
             console.log("➜  node cli.js ui recompile");
             console.log("Recompile UI");
         }
     } else {
-        console.log("LightOnlineJudge CLI");
+        console.log("Perilla CLI");
         console.log("");
         console.log("usage:");
         console.log("➜  node cli.js init");
