@@ -149,6 +149,7 @@ console.log = function (message) {
             }
         ]);
         const config = {
+            $schema: "https://raw.githubusercontent.com/ZhangZisu/LightOnlineJudge/master/schemas/sysconfig.json",
             defaultAdminUserID: admin.id,
             defaultAdminRoleID: adminRole.id,
             defaultJudgerUserID: judger.id,
