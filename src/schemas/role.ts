@@ -1,5 +1,5 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { IConfiguration, worst } from "../definitions/userconfig";
+import { IConfiguration, worst } from "../interfaces/userconfig";
 
 export interface IRoleModel extends Document {
     rolename: string;

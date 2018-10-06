@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { IAuthorizedRequest } from "../../definitions/requests";
+import { IAuthorizedRequest } from "../../interfaces/requests";
 import { Role } from "../../schemas/role";
 import { User } from "../../schemas/user";
 import { fileRouter } from "./file";

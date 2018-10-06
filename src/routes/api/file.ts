@@ -3,7 +3,7 @@ import { ensureDirSync, existsSync, writeFile } from "fs-extra";
 import { lookup } from "mime-types";
 import * as multer from "multer";
 import * as tmp from "tmp";
-import { IAuthorizedRequest } from "../../definitions/requests";
+import { IAuthorizedRequest } from "../../interfaces/requests";
 import { BFile } from "../../schemas/file";
 import { getFileSize, MD5 } from "../../utils";
 import { ensureElement } from "../../utils";

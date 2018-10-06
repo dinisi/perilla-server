@@ -1,7 +1,7 @@
 import * as Ajv from "ajv";
 import { Response, Router } from "express";
 import { readFileSync } from "fs-extra";
-import { IAuthorizedRequest } from "../../definitions/requests";
+import { IAuthorizedRequest } from "../../interfaces/requests";
 import { User } from "../../schemas/user";
 import { validPaginate } from "../common";
 

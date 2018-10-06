@@ -1,7 +1,7 @@
 import * as crypto from "crypto";
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
-import { IConfiguration, worst } from "../definitions/userconfig";
+import { IConfiguration, worst } from "../interfaces/userconfig";
 import { ensureElement } from "../utils";
 import { BFile } from "./file";
 import { Problem } from "./problem";

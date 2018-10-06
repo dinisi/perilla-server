@@ -1,7 +1,7 @@
 import { promisifyAll } from "bluebird";
 import { generate } from "randomstring";
 import * as redis from "redis";
-import { IClient, IPendingUser } from "./definitions/cache";
+import { IClient, IPendingUser } from "./interfaces/cache";
 promisifyAll(redis);
 const instance: any = redis.createClient();
 const accessTokenPrefix = "at_";

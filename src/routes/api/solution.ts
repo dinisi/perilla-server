@@ -1,5 +1,5 @@
 import { Response, Router } from "express";
-import { IAuthorizedRequest } from "../../definitions/requests";
+import { IAuthorizedRequest } from "../../interfaces/requests";
 import { setClient } from "../../redis";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";

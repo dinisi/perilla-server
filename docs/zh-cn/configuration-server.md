@@ -1,7 +1,7 @@
 # 主服务器配置
 当执行`node cli init`后，系统将自动生成`config.json`
 
-[typescript定义文件](https://github.com/ZhangZisu/perilla/blob/master/src/definitions/sysconfig.ts)
+[typescript定义文件](https://github.com/ZhangZisu/perilla/blob/master/src/interfaces/sysconfig.ts)
 
 [JSON Schemas](https://github.com/ZhangZisu/perilla/blob/master/schemas/sysconfig.json)
 
