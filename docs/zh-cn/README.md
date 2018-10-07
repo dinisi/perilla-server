@@ -1,4 +1,11 @@
-# Perilla
+<div align="center">
+
+![Perilla](../asserts/icon.svg ':size=128x128')
+
+<h1>Perilla</h1>
+
+</div>
+
 > 轻量在线测评系统
 
 特性：
