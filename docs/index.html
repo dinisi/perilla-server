@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="//unpkg.com/docsify/lib/themes/vue.css">
   <link rel="icon" href="asserts/favicon.ico">
   <style>
-    .app-name-link>img{
+    .app-name-link>img {
       width: 64px;
       height: 64px;
     }
@@ -38,7 +38,7 @@
   </script>
   <script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
   <script>
-    if (typeof navigator.serviceWorker !== 'undefined') {
+    if (typeof navigator.serviceWorker !== 'undefined' && window.location.hostname !== "localhost") {
       navigator.serviceWorker.register('sw.js')
     }
   </script>
