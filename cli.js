@@ -148,6 +148,7 @@ console.log = function (message) {
                 initial: 80
             }
         ]);
+        httpResult.https = false;
         const config = {
             $schema: "https://raw.githubusercontent.com/ZhangZisu/perilla/master/schemas/sysconfig.json",
             defaultAdminUserID: admin.id,

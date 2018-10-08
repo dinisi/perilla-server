@@ -18,5 +18,8 @@ export interface ISystemConfig {
     http: {
         port: number;
         hostname: string;
+        https: boolean;
+        certificate?: string;
+        privatekey?: string;
     };
 }

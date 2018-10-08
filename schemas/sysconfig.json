@@ -57,8 +57,22 @@
                 },
                 "hostname": {
                     "type": "string"
+                },
+                "https": {
+                    "type": "boolean"
+                },
+                "certificate": {
+                    "type": "string"
+                },
+                "privatekey": {
+                    "type":"string"
                 }
-            }
+            },
+            "required": [
+                "port",
+                "hostname",
+                "https"
+            ]
         }
     },
     "required": [
