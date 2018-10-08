@@ -25,6 +25,7 @@
 
 本系统完全使用Javascript进行开发。相关项目：
 - [PerillaUI](https://github.com/ZhangZisu/perilla-ui) - 本项目使用的前端
-- [PerillaJudger](https://github.com/ZhangZisu/perilla-judger.git) - 评测器
+- [PerillaJudger](https://github.com/ZhangZisu/perilla-judger) - 评测器
+- [PerillaDesktop](https://github.com/ZhangZisu/perilla-desktop) - 客户端
 
 欢迎参与开发！

@@ -1,4 +1,12 @@
+<div align="center">
+<h2>
+Project <font color="#42b983">Perilla</font>
+</h2>
+</div>
+
 * [首页](/zh-cn/)
 * [部署](/zh-cn/deploy)
-* [主服务器配置](/zh-cn/configuration-server)
-* [评测机配置](/zh-cn/configuration-judger)
+* [PerillaServer](/zh-cn/perilla/)
+* [PerillaJudger](/zh-cn/perilla-judger/)
+* [PerillaUI](/zh-cn/perilla-ui/)
+* [PerillaDesktop](/zh-cn/perilla-desktop/)
