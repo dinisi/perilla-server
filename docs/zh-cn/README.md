@@ -1,6 +1,6 @@
 <div align="center">
 
-![Perilla](../asserts/icon.svg ':size=128x128')
+![Perilla](https://perilla.js.org/asserts/icon.svg ':size=128x128')
 
 <h1>Perilla</h1>
 
