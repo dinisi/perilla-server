@@ -1,6 +1,6 @@
 import * as Ajv from "ajv";
 import { existsSync, readFileSync } from "fs-extra";
-import { ISystemConfig } from "./interfaces/sysconfig";
+import { ISystemConfig } from "./interfaces/config/system";
 
 const ajv = new Ajv();
 const validate = ajv.compile(JSON.parse(readFileSync("schemas/sysconfig.json").toString()));

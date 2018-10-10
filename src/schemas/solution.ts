@@ -22,22 +22,22 @@ export let SolutionSchema: Schema = new Schema(
         allowedRead: {
             type: [String],
             required: true,
-            default: [config.defaultAdminRoleID, config.defaultJudgerRoleID],
+            default: config.defaults.solution.allowedRead,
         },
         allowedReadResult: {
             type: [String],
             required: true,
-            default: [config.defaultAdminRoleID, config.defaultJudgerRoleID],
+            default: config.defaults.solution.allowedReadResult,
         },
         allowedRejudge: {
             type: [String],
             required: true,
-            default: [config.defaultAdminRoleID],
+            default: config.defaults.solution.allowedRejudge,
         },
         allowedModify: {
             type: [String],
             required: true,
-            default: [config.defaultAdminRoleID, config.defaultJudgerRoleID],
+            default: config.defaults.solution.allowedModify,
         },
         created: Date,
         files: {

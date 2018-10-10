@@ -1,5 +1,6 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { IConfiguration, worst } from "../interfaces/userconfig";
+import { config } from "../config";
+import { IConfiguration } from "../interfaces/config/user";
 
 export interface IRoleModel extends Document {
     rolename: string;
@@ -12,7 +13,7 @@ export let RoleSchema: Schema = new Schema(
     {
         rolename: { type: String, unique: true, required: true },
         description: { type: String, required: true, default: "" },
-        config: { type: Object, required: true, default: worst },
+        config: { type: Object, required: true, default: config.defaults.role.config },
         _protected: { type: Boolean, required: true, default: false },
     },
 );

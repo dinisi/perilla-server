@@ -1,7 +1,7 @@
 import * as crypto from "crypto";
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
-import { IConfiguration, worst } from "../interfaces/userconfig";
+import { IConfiguration } from "../interfaces/config/user";
 import { ensureElement } from "../utils";
 import { BFile } from "./file";
 import { Problem } from "./problem";
@@ -28,10 +28,10 @@ export let UserSchema: Schema = new Schema(
         bio: { type: String, required: true, default: "No bio" },
         email: { type: String, required: true, unique: true },
         realname: { type: String, required: true, unique: true },
-        roles: { type: [String], required: true, default: [config.defaultUserRoleID] },
+        roles: { type: [String], required: true, default: config.defaults.user.roles },
         hash: String,
         salt: String,
-        config: { type: Object, required: true, default: worst },
+        config: { type: Object, required: true, default: config.defaults.user.config },
         _protected: { type: Boolean, required: true, default: false },
     },
 );
@@ -51,17 +51,17 @@ UserSchema.pre("remove", async function(next) {
     if (This._protected) { return; }
     const badFiles = await BFile.find({ owner: this.id });
     for (const badFile of badFiles) {
-        badFile.owner = config.defaultAdminUserID;
+        badFile.owner = config.reservedUserID;
         await badFile.save();
     }
     const badProblems = await Problem.find({ owner: this.id });
     for (const badProblem of badProblems) {
-        badProblem.owner = config.defaultAdminUserID;
+        badProblem.owner = config.reservedUserID;
         await badProblem.save();
     }
     const badSolutions = await Solution.find({ owner: this.id });
     for (const badSolution of badSolutions) {
-        badSolution.owner = config.defaultAdminUserID;
+        badSolution.owner = config.reservedUserID;
         await badSolution.save();
     }
     next();

@@ -21,17 +21,17 @@ export let ProblemSchema: Schema = new Schema(
         allowedRead: {
             type: [String],
             required: true,
-            default: [config.defaultAdminRoleID, config.defaultJudgerRoleID],
+            default: config.defaults.problem.allowedRead,
         },
         allowedModify: {
             type: [String],
             required: true,
-            default: [config.defaultAdminRoleID],
+            default: config.defaults.problem.allowedModify,
         },
         allowedSubmit: {
             type: [String],
             required: true,
-            default: [config.defaultAdminRoleID],
+            default: config.defaults.problem.allowedSubmit,
         },
         content: {
             type: String,

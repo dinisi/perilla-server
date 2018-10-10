@@ -11,6 +11,9 @@
         "createSolution": {
             "type": "boolean"
         },
+        "createContest": {
+            "type": "boolean"
+        },
         "manageSystem": {
             "type": "boolean"
         },
