@@ -131,6 +131,9 @@ problemRouter.post("/:id/submit", async (req: IAuthorizedRequest, res: Response)
         solution.files = req.body.files;
         // We allow user see their results by default
         solution.allowedRead.push(req.client.userID);
+        if (req.client.config.defaultSolutionResult) {
+            solution.allowedReadResult.push(req.client.userID);
+        }
         await solution.save();
         await solution.judge();
         req.client.lastSolutionCreation = +new Date();

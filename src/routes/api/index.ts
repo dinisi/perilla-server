@@ -2,6 +2,7 @@ import { Router } from "express";
 import { IAuthorizedRequest } from "../../interfaces/requests";
 import { Role } from "../../schemas/role";
 import { User } from "../../schemas/user";
+import { contestRouter } from "./contest";
 import { fileRouter } from "./file";
 import { problemRouter } from "./problem";
 import { roleRouter } from "./role";
@@ -13,6 +14,7 @@ export let APIRouter = Router();
 APIRouter.use("/file", fileRouter);
 APIRouter.use("/problem", problemRouter);
 APIRouter.use("/solution", solutionRouter);
+APIRouter.use("/contest", contestRouter);
 APIRouter.use("/user", userRouter);
 APIRouter.use("/role", roleRouter);
 

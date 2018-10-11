@@ -1,3 +1,5 @@
+#!/bin/node
+
 let argv = process.argv.splice(2);
 const fs = require("fs-extra");
 const prompts = require("prompts");
@@ -15,6 +17,15 @@ console.log = function (message) {
 
 (async () => {
     if (argv[0] === "init") {
+        // Init system
+        // Steps:
+        // 0. remove exists installition
+        // 1. Compile typescript code into javascript
+        // 2. Init database
+        // 3. Generate inital config (use least questions)
+        // 4. Write config to config.json
+
+        // Step 0
         if (fs.existsSync("config.json")) {
             console.log("[INFO] config.json exists.")
             if ((await prompts({ type: "confirm", name: "value", message: "continue will overwrite exist data. confirm?", initial: false })).value) {
@@ -38,14 +49,18 @@ console.log = function (message) {
             }
         }
         console.log("[INFO] Initializing the system...");
+        // Step 1
         console.log("[INFO] [STEP 1/4] Compiling typescript code...");
         const tsc_path = path.join(__dirname, "node_modules", ".bin", "tsc");
         await child_process.execSync(tsc_path);
+        // Step 2
+        // Step 2 - 1: connect to mongodb
         console.log("[INFO] [STEP 2/4] Initializing database...");
-        const dbURL = (await prompts({ type: "text", name: "value", message: "Database URL:", initial: "mongodb://localhost:27017/loj" })).value;
+        const dbURL = (await prompts({ type: "text", name: "value", message: "Database URL:", initial: "mongodb://localhost:27017/perilla" })).value;
         const dbOptions = { useNewUrlParser: true };
         await mongoose.connect(dbURL, dbOptions);
-        // Database models
+
+        // Step 2 - 2: define database models
         const UserSchema = new mongoose.Schema({
             username: { type: String, required: true, unique: true },
             bio: { type: String, required: true, default: "No bio" },
@@ -76,20 +91,25 @@ console.log = function (message) {
             next();
         });
         const Role = mongoose.model("Role", RoleSchema);
-        // UAC defines
+
+        // Step 2 - 3: generate default users/roles
         const worst = {
             createFile: true,
             createProblem: true,
             createSolution: true,
+            createContest: false,
             manageSystem: false,
             minSolutionCreationInterval: 10000,
+            defaultSolutionResult: false
         };
         const best = {
             createFile: true,
             createProblem: true,
             createSolution: true,
+            createContest: true,
             manageSystem: true,
             minSolutionCreationInterval: 0,
+            defaultSolutionResult: true
         };
         // Roles
         const adminRole = new Role();
@@ -114,8 +134,8 @@ console.log = function (message) {
         const admin = new User();
         admin.username = "Administrator";
         admin.realname = "Administrator";
-        admin.email = "admin@zhangzisu.cn";
-        admin.roles = [adminRole.id];
+        admin.email = "admin@perilla.js.org";
+        admin.roles = [adminRole.id, userRole.id];
         admin._protected = true;
         const adminPassword = generate(10);
         admin.setPassword(adminPassword);
@@ -125,50 +145,80 @@ console.log = function (message) {
         const judger = new User();
         judger.username = "Judger";
         judger.realname = "Judger";
-        judger.email = "judger@zhangzisu.cn";
-        judger.roles = [judgerRole.id];
+        judger.email = "judger@perilla.js.org";
+        judger.roles = [judgerRole.id, userRole.id];
         judger._protected = true;
         const judgerPassword = generate(10);
         judger.setPassword(judgerPassword);
         console.log("[INFO] [STEP 2/4] Judger password: " + judgerPassword);
         judger.config = worst;
         await judger.save();
-        console.log("[INFO] [STEP 3/4] Generating HTTP config");
-        const httpResult = await prompts([
-            {
-                type: "text",
-                name: "hostname",
-                message: "HTTP Hostname:",
-                initial: "127.0.0.1"
-            },
-            {
-                type: "number",
-                name: "port",
-                message: "HTTP Port",
-                initial: 80
-            }
-        ]);
-        httpResult.https = false;
+        const removedUser = new User();
+        removedUser.username = "removedUser";
+        removedUser.realname = "removedUser";
+        removedUser.email = "removed@perilla.js.org";
+        removedUser.roles = [userRole.id];
+        removedUser._protected = true;
+        const removedUserPWD = generate(10);
+        removedUser.setPassword(removedUserPWD);
+        console.log("[INFO] [STEP 2/4] Removed user password: " + removedUserPWD);
+
+        // Step 3
+        console.log("[INFO] [STEP 3/4] Generating default config");
         const config = {
-            $schema: "https://raw.githubusercontent.com/ZhangZisu/perilla/master/schemas/sysconfig.json",
-            defaultAdminUserID: admin.id,
-            defaultAdminRoleID: adminRole.id,
-            defaultJudgerUserID: judger.id,
-            defaultJudgerRoleID: judgerRole.id,
-            defaultUserRoleID: userRole.id,
             db: {
                 url: dbURL,
                 options: dbOptions
             },
+            redis: {
+                prefix: "PERILLA",
+                options: {}
+            },
             mail: {
                 enabled: false
             },
-            http: httpResult
+            http: {
+                port: 3000,
+                hostname: "localhost",
+                https: false
+            },
+            defaults: {
+                role: {
+                    config: worst
+                },
+                user: {
+                    config: worst,
+                    roles: [userRole.id]
+                },
+                file: {
+                    allowedRead: [adminRole.id, judgerRole.id],
+                    allowedModify: [adminRole.id]
+                },
+                problem: {
+                    allowedRead: [adminRole.id, judgerRole.id],
+                    allowedModify: [adminRole.id],
+                    allowedSubmit: [adminRole.id]
+                },
+                solution: {
+                    allowedRead: [adminRole.id, judgerRole.id],
+                    allowedReadResult: [adminRole.id],
+                    allowedModify: [adminRole.id, judgerRole.id],
+                    allowedRejudge: [adminRole.id]
+                },
+                contest: {
+                    allowedRead: [adminRole.id, judgerRole.id],
+                    allowedModify: [adminRole.id]
+                }
+            },
+            reservedUserID: removedUser.id
         };
-        console.log("[INFO] [STEP 4/4] Generating config.json");
+        // Step 4
+        console.log("[INFO] [STEP 4/4] Writing config.json");
         fs.writeFileSync("config.json", JSON.stringify(config, null, '\t'));
-        console.log("[INFO] Done");
+        console.log("[INFO] ✔️ Done");
         console.log("[TIP] use `yarn start` to start perilla");
+        console.log("[TIP] Edit config.json to customize perilla.");
+        console.log("[TIP] Please read https://perilla.js.org for more information");
         process.exit(0);
     } else if (argv[0] === "recompile") {
         console.log("[INFO] Compiling");
