@@ -1,7 +1,7 @@
 import * as mongoose from "mongoose";
 import { config } from "./config";
 
-mongoose.connect(config.db.url, config.db.options);
+mongoose.connect(config.db.url, config.db.options as mongoose.ConnectionOptions);
 mongoose.connection.on("connected", () => {
     console.log("Mongoose connected");
 });

@@ -6,11 +6,12 @@ export interface IProblemModel extends Document {
     title: string;
     content: string;
     files: string[];
-    data: object;
+    data?: object;
+    meta?: object;
+    channel?: string;
     tags: string[];
     owner: string;
     created: Date;
-    meta: object;
     allowedRead: string[];
     allowedModify: string[];
     allowedSubmit: string[];
@@ -18,55 +19,51 @@ export interface IProblemModel extends Document {
 
 export let ProblemSchema: Schema = new Schema(
     {
-        allowedRead: {
-            type: [String],
+        title: {
+            type: String,
             required: true,
-            default: config.defaults.problem.allowedRead,
-        },
-        allowedModify: {
-            type: [String],
-            required: true,
-            default: config.defaults.problem.allowedModify,
-        },
-        allowedSubmit: {
-            type: [String],
-            required: true,
-            default: config.defaults.problem.allowedSubmit,
+            unique: true,
         },
         content: {
             type: String,
             required: true,
             default: "No content",
         },
+        owner: {
+            type: String,
+            required: true,
+        },
         created: Date,
         files: {
             type: [String],
             required: true,
         },
-        data: {
-            type: Object,
-            required: true,
-            default: { version: "1.0" },
-        },
-        meta: {
-            type: Object,
-            required: true,
-            default: { version: "1.0" },
-        },
-        owner: {
-            type: String,
-            required: true,
-        },
+        channel: String,
+        data: Object,
+        meta: Object,
         tags: {
             type: [String],
             required: true,
             default: ["No tags"],
             index: true,
         },
-        title: {
-            type: String,
+        allowedRead: {
+            type: [String],
             required: true,
-            unique: true,
+            default: config.defaults.problem.allowedRead,
+            index: true,
+        },
+        allowedModify: {
+            type: [String],
+            required: true,
+            default: config.defaults.problem.allowedModify,
+            index: true,
+        },
+        allowedSubmit: {
+            type: [String],
+            required: true,
+            default: config.defaults.problem.allowedSubmit,
+            index: true,
         },
     },
 );

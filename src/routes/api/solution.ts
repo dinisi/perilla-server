@@ -3,33 +3,11 @@ import { IAuthorizedRequest } from "../../interfaces/requests";
 import { setClient } from "../../redis";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
-import { ensureElement } from "../../utils";
 import { validPaginate } from "../common";
 
 export let solutionRouter = Router();
 
-solutionRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
-    try {
-        if (!req.client.config.createSolution) { throw new Error("Access denied"); }
-        if (req.client.lastVisit - req.client.lastSolutionCreation < req.client.config.minSolutionCreationInterval) {
-            throw new Error("Too many solutions");
-        }
-        const problem = await Problem.findById(req.body.problemID).where("allowedSubmit").in(req.client.roles);
-        if (!problem) { throw new Error("Not found"); }
-        const solution = new Solution();
-        solution.owner = req.client.userID;
-        solution.problemID = req.body.problemID;
-        solution.files = req.body.files;
-        ensureElement(solution.allowedRead, req.client.userID);
-        await solution.save();
-        await solution.judge();
-        req.client.lastSolutionCreation = +new Date();
-        await setClient(req.client);
-        res.send({ status: "success", payload: solution.id });
-    } catch (e) {
-        res.send({ status: "failed", payload: e.message });
-    }
-});
+// solution cannot be created independently
 
 solutionRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     try {

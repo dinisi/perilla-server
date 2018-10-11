@@ -1,11 +1,8 @@
 import { createHash } from "crypto";
-import { createReadStream, stat } from "fs-extra";
-
-export const ensureElement = <T>(arr: T[], element: T) => {
-    if (!arr.includes(element)) {
-        arr.push(element);
-    }
-};
+import { createReadStream, readFileSync, stat } from "fs-extra";
+import { Problem } from "./schemas/problem";
+import { Role } from "./schemas/role";
+import { User } from "./schemas/user";
 
 export const getBaseURL = (hostname: string, port: number) => {
     return "http://" + hostname + (port === 80 ? "" : ":" + port);
@@ -32,4 +29,20 @@ export const getFileSize = (path: string): Promise<number> => {
             resolve(stats.size);
         });
     });
+};
+
+export const validateRoles = async (roles: string[]) => {
+    const count = await Role.find().where("_id").in(roles).countDocuments();
+    return count === roles.length;
+};
+
+export const validateACE = async (aces: string[]) => {
+    const users = await User.find().where("_id").in(aces).countDocuments();
+    const roles = await Role.find().where("_id").in(aces).countDocuments();
+    return (users + roles) === aces.length;
+};
+
+export const validateProblem = async (problems: string[]) => {
+    const count = await Problem.find().where("_id").in(problems).countDocuments();
+    return count === problems.length;
 };

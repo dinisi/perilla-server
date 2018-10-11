@@ -2,10 +2,9 @@ import * as crypto from "crypto";
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
 import { IConfiguration } from "../interfaces/config/user";
-import { ensureElement } from "../utils";
+import { validateRoles } from "../utils";
 import { BFile } from "./file";
 import { Problem } from "./problem";
-import { Role } from "./role";
 import { Solution } from "./solution";
 
 export interface IUserModel extends Document {
@@ -15,6 +14,7 @@ export interface IUserModel extends Document {
     bio: string;
     hash: string;
     salt: string;
+    created: Date;
     roles: string[];
     config: IConfiguration;
     _protected: boolean;
@@ -24,15 +24,46 @@ export interface IUserModel extends Document {
 
 export let UserSchema: Schema = new Schema(
     {
-        username: { type: String, required: true, unique: true },
-        bio: { type: String, required: true, default: "No bio" },
-        email: { type: String, required: true, unique: true },
-        realname: { type: String, required: true, unique: true },
-        roles: { type: [String], required: true, default: config.defaults.user.roles },
+        username: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+        realname: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+        bio: {
+            type: String,
+            required: true,
+            default: "No bio",
+        },
+        created: Date,
+        roles: {
+            type: [String],
+            required: true,
+            default: config.defaults.user.roles,
+            validate: validateRoles,
+        },
         hash: String,
         salt: String,
-        config: { type: Object, required: true, default: config.defaults.user.config },
-        _protected: { type: Boolean, required: true, default: false },
+        config: {
+            type: Object,
+            required: true,
+            default: config.defaults.user.config,
+            validate: (v: any) => IConfiguration.validate(v).success,
+        },
+        _protected: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
     },
 );
 

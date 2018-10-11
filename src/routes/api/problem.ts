@@ -1,7 +1,8 @@
 import { Response, Router } from "express";
 import { IAuthorizedRequest } from "../../interfaces/requests";
+import { setClient } from "../../redis";
 import { Problem } from "../../schemas/problem";
-import { ensureElement } from "../../utils";
+import { Solution } from "../../schemas/solution";
 import { validPaginate } from "../common";
 
 export let problemRouter = Router();
@@ -17,11 +18,14 @@ problemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
         problem.data = req.body.data;
         problem.meta = req.body.meta;
         problem.tags = req.body.tags;
+        problem.channel = req.body.channel;
 
         problem.owner = req.client.userID;
-        ensureElement(problem.allowedRead, req.client.userID);
-        ensureElement(problem.allowedSubmit, req.client.userID);
-        ensureElement(problem.allowedModify, req.client.userID);
+        // Problem writers should be allowed to
+        // read, modify and submit to the problem
+        problem.allowedRead.push(req.client.userID);
+        problem.allowedSubmit.push(req.client.userID);
+        problem.allowedModify.push(req.client.userID);
         await problem.save();
         res.send({ status: "success", payload: problem.id });
     } catch (e) {
@@ -89,6 +93,7 @@ problemRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
         problem.data = req.body.data;
         problem.meta = req.body.meta;
         problem.tags = req.body.tags;
+        problem.channel = req.body.channel;
         if (req.client.config.manageSystem) {
             problem.allowedModify = req.body.allowedModify;
             problem.allowedRead = req.body.allowedRead;
@@ -106,6 +111,30 @@ problemRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => {
         const problem = await Problem.findById(req.params.id).where("allowedModify").in(req.client.roles);
         if (!problem) { throw new Error("Not found"); }
         await problem.remove();
+        res.send({ status: "success" });
+    } catch (e) {
+        res.send({ status: "failed", payload: e.message });
+    }
+});
+
+problemRouter.post("/:id/submit", async (req: IAuthorizedRequest, res: Response) => {
+    try {
+        const problem = await Problem.findById(req.params.id).where("allowedSubmit").in(req.client.roles);
+        if (!problem) { throw new Error("Not found"); }
+        if (!req.client.config.createSolution) { throw new Error("Access denied"); }
+        if (req.client.lastVisit - req.client.lastSolutionCreation < req.client.config.minSolutionCreationInterval) {
+            throw new Error("Too many solutions");
+        }
+        const solution = new Solution();
+        solution.owner = req.client.userID;
+        solution.problemID = req.body.problemID;
+        solution.files = req.body.files;
+        // We allow user see their results by default
+        solution.allowedRead.push(req.client.userID);
+        await solution.save();
+        await solution.judge();
+        req.client.lastSolutionCreation = +new Date();
+        await setClient(req.client);
         res.send({ status: "success" });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });

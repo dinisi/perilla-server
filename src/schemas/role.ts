@@ -11,10 +11,27 @@ export interface IRoleModel extends Document {
 
 export let RoleSchema: Schema = new Schema(
     {
-        rolename: { type: String, unique: true, required: true },
-        description: { type: String, required: true, default: "" },
-        config: { type: Object, required: true, default: config.defaults.role.config },
-        _protected: { type: Boolean, required: true, default: false },
+        rolename: {
+            type: String,
+            unique: true,
+            required: true,
+        },
+        description: {
+            type: String,
+            required: true,
+            default: "",
+        },
+        config: {
+            type: Object,
+            required: true,
+            default: config.defaults.role.config,
+            validate: (v: any) => IConfiguration.validate(v).success,
+        },
+        _protected: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
     },
 );
 

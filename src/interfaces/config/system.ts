@@ -1,50 +1,60 @@
-import { ConnectionOptions } from "mongoose";
+import { Always, Array, Boolean, Number, Partial, Record, Static, String } from "runtypes";
 import { IConfiguration } from "./user";
 
-export interface ISystemConfig {
-    db: {
-        url: string;
-        options: ConnectionOptions;
-    };
-    mail: {
-        enabled: boolean;
-        options?: any;
-        from?: string;
-    };
-    http: {
-        port: number;
-        hostname: string;
-        https: boolean;
-        certificate?: string;
-        privatekey?: string;
-    };
-    defaults: {
-        role: {
+export const ISystemConfig = Record({
+    db: Record({
+        url: String,
+        options: Always,
+    }),
+    redis: Record({
+        prefix: String,
+        options: Always,
+    }),
+    mail: Record({
+        enabled: Boolean,
+    }).And(Partial({
+        options: Always,
+        from: String,
+    })),
+    http: Record({
+        port: Number,
+        hostname: String,
+        https: Boolean,
+    }).And(Partial({
+        certificate: String,
+        privatekey: String,
+    })),
+    defaults: Record({
+        role: Record({
             config: IConfiguration,
-        },
-        user: {
-            roles: string[];
-            config: IConfiguration
-        },
-        file: {
-            allowedRead: string[];
-            allowedModify: string[];
-        },
-        problem: {
-            allowedRead: string[];
-            allowedModify: string[];
-            allowedSubmit: string[];
-        },
-        solution: {
-            allowedRead: string[];
-            allowedReadResult: string[];
-            allowedRejudge: string[];
-            allowedModify: string[];
-        },
-        contest: {
-            allowedRead: string[];
-            allowedModify: string[];
-        },
-    };
-    reservedUserID: string;
+        }),
+        user: Record({
+            roles: Array(String),
+            config: IConfiguration,
+        }),
+        file: Record({
+            allowedRead: Array(String),
+            allowedModify: Array(String),
+        }),
+        problem: Record({
+            allowedRead: Array(String),
+            allowedModify: Array(String),
+            allowedSubmit: Array(String),
+        }),
+        solution: Record({
+            allowedRead: Array(String),
+            allowedReadResult: Array(String),
+            allowedModify: Array(String),
+            allowedRejudge: Array(String),
+        }),
+        contest: Record({
+            allowedRead: Array(String),
+            allowedModify: Array(String),
+        }),
+    }),
+    reservedUserID: String,
+});
+
+export interface ISystemConfig extends Static<typeof ISystemConfig> {
+    [key: string]: any;
 }

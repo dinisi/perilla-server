@@ -1,5 +1,6 @@
 import { Document, model, Model, Schema } from "mongoose";
 import { config } from "../config";
+import { validateACE, validateProblem } from "../utils";
 
 export enum ContestResultCalcType {
     CodeForces,
@@ -19,7 +20,7 @@ export interface IContestPhrase {
 
 export interface IContestModel extends Document {
     owner: string;
-    contestname: string;
+    title: string;
     description: string;
     start: Date;
     created: Date;
@@ -37,16 +38,6 @@ export let ContestSchema = new Schema(
             type: String,
             required: true,
         },
-        allowedRead: {
-            type: [String],
-            required: true,
-            default: config.defaults.contest.allowedRead,
-        },
-        allowedModify: {
-            type: [String],
-            required: true,
-            default: config.defaults.contest.allowedModify,
-        },
         created: Date,
         contestname: {
             type: String,
@@ -63,15 +54,32 @@ export let ContestSchema = new Schema(
         problem: {
             type: [String],
             required: true,
+            validate: validateProblem,
         },
         resultCalcType: {
             type: Number,
             required: true,
+            min: 0,
+            max: 3,
         },
         phrases: {
             type: [Object],
             required: true,
             default: [],
+        },
+        allowedRead: {
+            type: [String],
+            required: true,
+            default: config.defaults.contest.allowedRead,
+            validate: validateACE,
+            index: true,
+        },
+        allowedModify: {
+            type: [String],
+            required: true,
+            default: config.defaults.contest.allowedModify,
+            validate: validateACE,
+            index: true,
         },
     },
 );

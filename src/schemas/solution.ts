@@ -1,6 +1,7 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
 import { addJudgeTask } from "../redis";
+import { Problem } from "./problem";
 
 export interface ISolutionModel extends Document {
     owner: string;
@@ -23,21 +24,25 @@ export let SolutionSchema: Schema = new Schema(
             type: [String],
             required: true,
             default: config.defaults.solution.allowedRead,
+            index: true,
         },
         allowedReadResult: {
             type: [String],
             required: true,
             default: config.defaults.solution.allowedReadResult,
+            index: true,
         },
         allowedRejudge: {
             type: [String],
             required: true,
             default: config.defaults.solution.allowedRejudge,
+            index: true,
         },
         allowedModify: {
             type: [String],
             required: true,
             default: config.defaults.solution.allowedModify,
+            index: true,
         },
         created: Date,
         files: {
@@ -70,8 +75,11 @@ export let SolutionSchema: Schema = new Schema(
     },
 );
 
-SolutionSchema.methods.judge = function() {
-    return addJudgeTask(this.id);
+SolutionSchema.methods.judge = async function() {
+    const self = this as ISolutionModel;
+    const channel = (await Problem.findById(self.problemID).select("channel")).channel;
+    if (!channel) { return; }
+    return addJudgeTask(self.id, channel);
 };
 
 SolutionSchema.pre("save", function(next) {

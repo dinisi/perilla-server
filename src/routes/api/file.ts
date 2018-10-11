@@ -5,8 +5,6 @@ import * as multer from "multer";
 import * as tmp from "tmp";
 import { IAuthorizedRequest } from "../../interfaces/requests";
 import { BFile } from "../../schemas/file";
-import { getFileSize, MD5 } from "../../utils";
-import { ensureElement } from "../../utils";
 import { validPaginate } from "../common";
 
 ensureDirSync("files/uploads/");
@@ -22,7 +20,8 @@ fileRouter.post("/upload", upload.single("file"), async (req: IAuthorizedRequest
         bfile.owner = req.client.userID;
         bfile.filename = req.file.originalname;
         bfile.description = req.file.originalname;
-        ensureElement(bfile.allowedRead, req.client.userID);
+        // File uploaders should be allowed to read their files
+        bfile.allowedModify.push(req.client.userID);
         await bfile.save();
         res.send({ status: "success", payload: bfile.id });
     } catch (e) {
@@ -48,7 +47,8 @@ fileRouter.post("/create", async (req: IAuthorizedRequest, res) => {
         bfile.owner = req.client.userID;
         bfile.filename = req.body.filename || "untitled";
         bfile.description = req.body.description;
-        ensureElement(bfile.allowedRead, req.client.userID);
+        // File creators should be allowed to read their files
+        bfile.allowedRead.push(req.client.userID);
         await bfile.save();
         res.send({ status: "success", payload: bfile.id });
     } catch (e) {

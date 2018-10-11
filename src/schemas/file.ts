@@ -2,7 +2,7 @@ import { ensureDirSync, move, unlink } from "fs-extra";
 import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
 import { config } from "../config";
-import { getFileSize, MD5 } from "../utils";
+import { getFileSize, MD5, validateRoles } from "../utils";
 ensureDirSync("files/managed");
 
 export interface IBFileModel extends Document {
@@ -24,11 +24,15 @@ export let BFileSchema = new Schema(
             type: [String],
             required: true,
             default: config.defaults.file.allowedRead,
+            validate: validateRoles,
+            index: true,
         },
         allowedModify: {
             type: [String],
             required: true,
             default: config.defaults.file.allowedModify,
+            validate: validateRoles,
+            index: true,
         },
         created: Date,
         filename: {
