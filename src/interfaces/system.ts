@@ -32,27 +32,12 @@ export const ISystemConfig = Record({
             roleIDs: Array(String),
             config: IConfiguration,
         }),
-        file: Record({
-            allowedRead: Array(String),
-            allowedModify: Array(String),
-        }),
-        problem: Record({
-            allowedRead: Array(String),
-            allowedModify: Array(String),
-            allowedSubmit: Array(String),
-        }),
-        solution: Record({
-            allowedRead: Array(String),
-            allowedReadResult: Array(String),
-            allowedModify: Array(String),
-            allowedRejudge: Array(String),
-        }),
-        contest: Record({
-            allowedRead: Array(String),
-            allowedModify: Array(String),
-        }),
     }),
     reservedUserID: String,
+    system: Record({
+        root: String,
+        wheel: String,
+    }),
 });
 
 export interface ISystemConfig extends Static<typeof ISystemConfig> {

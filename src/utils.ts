@@ -1,9 +1,13 @@
 import { createHash } from "crypto";
 import { createReadStream, readFileSync, stat } from "fs-extra";
 import { Model } from "mongoose";
-import { File } from "./schemas/file";
-import { Problem } from "./schemas/problem";
+import { config } from "./config";
+import { IClient } from "./interfaces/cache";
+import { IContestModel } from "./schemas/contest";
+import { File, IFileModel } from "./schemas/file";
+import { IProblemModel, Problem } from "./schemas/problem";
 import { Role } from "./schemas/role";
+import { ISolutionModel } from "./schemas/solution";
 import { User } from "./schemas/user";
 
 export const getBaseURL = (hostname: string, port: number) => {
@@ -38,6 +42,10 @@ export const validateRoles = async (roles: string[]) => {
     return count === roles.length;
 };
 
+export const validateRole = async (role: string) => {
+    return !!(await Role.findById(role).countDocuments());
+};
+
 export const validateUser = async (user: string[]) => {
     return !!(await User.findById(user).countDocuments());
 };
@@ -60,4 +68,40 @@ export const validateProblem = async (problem: string) => {
 export const validateFiles = async (files: string[]) => {
     const count = await File.find().where("_id").in(files).countDocuments();
     return count === files.length;
+};
+
+// Linux-style Access config
+// rwrwrw user group
+// | | |--Others (lowest 2 bits)
+// | |----Same Group
+// |------Same User
+// Group `wheel` and user `root` have super power!!!
+// See code below
+
+export const getAccess = (resource: IContestModel | IFileModel | IProblemModel | ISolutionModel, client: IClient) => {
+    // Special User
+    if (client.userID === config.system.root || client.roles.includes(config.system.wheel)) {
+        return 3; // RW
+    }
+    // Common user
+    if (client.userID === resource.ownerID) {
+        // tslint:disable-next-line:no-bitwise
+        return (resource.permission >> 4) & 3;
+    } else if (client.roles.includes(resource.groupID)) {
+        // tslint:disable-next-line:no-bitwise
+        return (resource.permission >> 2) & 3;
+    } else {
+        // tslint:disable-next-line:no-bitwise
+        return resource.permission & 3;
+    }
+};
+
+export const canRead = (access: number) => {
+    // tslint:disable-next-line:no-bitwise
+    return !!((access >> 1) & 1);
+};
+
+export const canWrite = (access: number) => {
+    // tslint:disable-next-line:no-bitwise
+    return !!(access & 1);
 };

@@ -105,4 +105,4 @@ UserSchema.pre("remove", async function(next) {
     next();
 });
 
-export const User: Model<IUserModel> = model<IUserModel>("User", UserSchema);
+export const User = model<IUserModel>("User", UserSchema);

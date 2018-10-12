@@ -1,10 +1,9 @@
 import { Document, model, Model, Schema } from "mongoose";
 import { config } from "../config";
 import { ContestResultCalcType, IContestPhrase } from "../interfaces/contest";
-import { validateACES, validateProblems, validateUser } from "../utils";
+import { validateACES, validateProblems, validateRole, validateUser } from "../utils";
 
 export interface IContestModel extends Document {
-    ownerID: string;
     title: string;
     description: string;
     start: Date;
@@ -12,18 +11,14 @@ export interface IContestModel extends Document {
     problemIDs: string[];
     resultCalcType: ContestResultCalcType;
     phrases: IContestPhrase[];
-    allowedRead: string[];
-    allowedModify: string[];
+    ownerID: string;
+    groupID: string;
+    permission: number;
     getPhrase(): IContestPhrase;
 }
 
 export let ContestSchema = new Schema(
     {
-        ownerID: {
-            type: String,
-            required: true,
-            validate: validateUser,
-        },
         title: {
             type: String,
             required: true,
@@ -64,19 +59,20 @@ export let ContestSchema = new Schema(
             },
         },
         created: Date,
-        allowedRead: {
-            type: [String],
+        ownerID: {
+            type: String,
             required: true,
-            default: config.defaults.contest.allowedRead,
-            validate: validateACES,
-            index: true,
+            validate: validateUser,
         },
-        allowedModify: {
-            type: [String],
+        groupID: {
+            type: String,
             required: true,
-            default: config.defaults.contest.allowedModify,
-            validate: validateACES,
-            index: true,
+            validate: validateRole,
+        },
+        permission: {
+            type: Number,
+            min: 0,
+            max: 127,
         },
     },
 );

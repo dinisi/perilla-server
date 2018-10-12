@@ -1,6 +1,6 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
-import { validateACES, validateFiles } from "../utils";
+import { validateACES, validateFiles, validateRole, validateUser } from "../utils";
 import { Solution } from "./solution";
 
 export interface IProblemModel extends Document {
@@ -10,11 +10,10 @@ export interface IProblemModel extends Document {
     data?: object;
     channel?: string;
     tags: string[];
-    ownerID: string;
     created: Date;
-    allowedRead: string[];
-    allowedModify: string[];
-    allowedSubmit: string[];
+    ownerID: string;
+    groupID: string;
+    permission: number;
 }
 
 export let ProblemSchema: Schema = new Schema(
@@ -33,11 +32,6 @@ export let ProblemSchema: Schema = new Schema(
             minlength: 1,
             maxlength: 40960,
         },
-        ownerID: {
-            type: String,
-            required: true,
-        },
-        created: Date,
         fileIDs: {
             type: [String],
             required: true,
@@ -51,26 +45,21 @@ export let ProblemSchema: Schema = new Schema(
             default: ["No tags"],
             index: true,
         },
-        allowedRead: {
-            type: [String],
+        created: Date,
+        ownerID: {
+            type: String,
             required: true,
-            default: config.defaults.problem.allowedRead,
-            validate: validateACES,
-            index: true,
+            validate: validateUser,
         },
-        allowedModify: {
-            type: [String],
+        groupID: {
+            type: String,
             required: true,
-            default: config.defaults.problem.allowedModify,
-            validate: validateACES,
-            index: true,
+            validate: validateRole,
         },
-        allowedSubmit: {
-            type: [String],
-            required: true,
-            default: config.defaults.problem.allowedSubmit,
-            validate: validateACES,
-            index: true,
+        permission: {
+            type: Number,
+            min: 0,
+            max: 127,
         },
     },
 );

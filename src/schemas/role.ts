@@ -6,7 +6,6 @@ export interface IRoleModel extends Document {
     rolename: string;
     description: string;
     config: IConfiguration;
-    father?: string;
     _protected: boolean;
 }
 

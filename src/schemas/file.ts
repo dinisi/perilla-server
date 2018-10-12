@@ -2,30 +2,24 @@ import { ensureDirSync, move, unlink } from "fs-extra";
 import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
 import { config } from "../config";
-import { getFileSize, MD5, validateACES, validateRoles, validateUser } from "../utils";
+import { getFileSize, MD5, validateACES, validateRole, validateRoles, validateUser } from "../utils";
 ensureDirSync("files/managed");
 
 export interface IFileModel extends Document {
-    ownerID: string;
     filename: string;
     description: string;
     hash: string;
     size: number;
-    allowedRead: string[];
-    allowedModify: string[];
     created: Date;
+    ownerID: string;
+    groupID: string;
+    permission: number;
     getPath(): string;
     setFile(path: string): Promise<void>;
 }
 
 export let FileSchema = new Schema(
     {
-        ownerID: {
-            type: String,
-            required: true,
-            validate: validateUser,
-            index: true,
-        },
         filename: {
             type: String,
             required: true,
@@ -39,19 +33,20 @@ export let FileSchema = new Schema(
         hash: String,
         size: String,
         created: Date,
-        allowedRead: {
-            type: [String],
+        ownerID: {
+            type: String,
             required: true,
-            default: config.defaults.file.allowedRead,
-            validate: validateACES,
-            index: true,
+            validate: validateUser,
         },
-        allowedModify: {
-            type: [String],
+        groupID: {
+            type: String,
             required: true,
-            default: config.defaults.file.allowedModify,
-            validate: validateACES,
-            index: true,
+            validate: validateRole,
+        },
+        permission: {
+            type: Number,
+            min: 0,
+            max: 127,
         },
     },
 );
