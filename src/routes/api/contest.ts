@@ -207,6 +207,7 @@ contestRouter.get("/:id/solution/list", verifyPaginate, async (req: IAuthorizedR
         if (req.query.status) { query = query.where("status").equals(req.query.status); }
 
         query = query.skip(req.query.skip).limit(req.query.limit);
+        query = query.sort("-_id");
         const solutions = await query.select("_id problemID status created ownerID").exec();
         res.send({ status: "success", payload: solutions });
     } catch (e) {
@@ -227,6 +228,9 @@ contestRouter.get("/:id/solution/:sid", async (req: IAuthorizedRequest, res) => 
         const solution = await Solution.findById(req.params.sid).where("contestID").equals(contest.id);
         if (!solution) { throw new Error("Not found"); }
         if (solution.ownerID !== req.client.userID && phrase.seeResult === "own") { throw new Error("Not found"); }
+        if (!phrase.seeLog) {
+            delete solution.log;
+        }
         res.send({ status: "success", payload: solution });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
@@ -242,7 +246,7 @@ contestRouter.get("/:id/ranklist/count", async (req: IAuthorizedRequest, res) =>
         if (!phrase.seeRank) { throw new Error("Operation not permitted"); }
 
         const query = Player.find().where("contestID").equals(contest.id);
-        res.send({status: "success", payload: await query.countDocuments()});
+        res.send({ status: "success", payload: await query.countDocuments() });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }
@@ -259,7 +263,7 @@ contestRouter.get("/:id/ranklist/list", verifyPaginate, async (req: IAuthorizedR
         let query = Player.find().where("contestID").equals(contest.id);
         query = query.skip(req.query.skip).limit(req.query.limit);
         query = query.sort("-score penalty");
-        res.send({status: "success", payload: await query.countDocuments()});
+        res.send({ status: "success", payload: await query.countDocuments() });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }

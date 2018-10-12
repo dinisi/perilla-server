@@ -36,6 +36,7 @@ solutionRouter.get("/list", verifyPaginate, async (req: IAuthorizedRequest, res:
         if (req.query.status) { query = query.where("status").equals(req.query.status); }
 
         query = query.skip(req.query.skip).limit(req.query.limit);
+        query = query.sort("-_id");
         const solutions = await query.select("_id problemID status created ownerID").exec();
         res.send({ status: "success", payload: solutions });
     } catch (e) {

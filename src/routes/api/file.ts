@@ -79,6 +79,7 @@ fileRouter.get("/list", verifyPaginate, async (req: IAuthorizedRequest, res: Res
         if (req.query.search) { query = query.where("filename").regex(new RegExp(req.query.search)); }
 
         query = query.skip(req.query.skip).limit(req.query.limit);
+        query = query.sort("-_id");
         const files = await query.select("_id filename created ownerID").exec();
         res.send({ status: "success", payload: files });
     } catch (e) {

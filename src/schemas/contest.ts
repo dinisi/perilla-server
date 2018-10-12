@@ -92,6 +92,7 @@ ContestSchema.methods.getPhrase = function(): IContestPhrase {
         seeRank: true,
         seeResult: "all",
         seeProblem: true,
+        seeLog: true,
         submit: false,
     };
 };
