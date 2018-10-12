@@ -28,6 +28,7 @@ contestRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
         }
         contest.resultCalcType = req.body.resultCalcType;
         contest.phrases = req.body.phrases;
+        contest.permission = 56;  // rwr---
         await contest.save();
         res.send({ status: "failed", payload: contest._id });
     } catch (e) {
@@ -103,6 +104,7 @@ contestRouter.post("/:id", async (req: IAuthorizedRequest, res) => {
         if (req.client.config.manageSystem) {
             contest.ownerID = req.body.ownerID;
             contest.groupID = req.body.groupID;
+            contest.permission = req.body.permission;
         }
         await contest.save();
         res.send({ status: "success" });
