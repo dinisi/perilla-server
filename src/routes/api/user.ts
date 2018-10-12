@@ -1,6 +1,6 @@
 import { Response, Router } from "express";
-import { IConfiguration } from "../../interfaces/config/user";
 import { IAuthorizedRequest } from "../../interfaces/requests";
+import { IConfiguration } from "../../interfaces/user";
 import { User } from "../../schemas/user";
 import { validPaginate } from "../common";
 
@@ -12,7 +12,7 @@ userRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
         const user = new User();
         user.username = req.body.username;
         user.realname = req.body.realname;
-        user.roles = req.body.roles;
+        user.roleIDs = req.body.roleIDs;
         user.email = req.body.email;
         user.setPassword(req.body.password);
         await user.save();
@@ -88,7 +88,7 @@ userRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
         user.email = req.body.email;
         user.bio = req.body.bio;
         if (allowedManage) {
-            user.roles = req.body.roles;
+            user.roleIDs = req.body.roleIDs;
             user.config = req.body.config;
         }
         if (req.body.password) { user.setPassword(req.body.password); }

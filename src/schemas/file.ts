@@ -2,11 +2,11 @@ import { ensureDirSync, move, unlink } from "fs-extra";
 import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
 import { config } from "../config";
-import { getFileSize, MD5, validateRoles } from "../utils";
+import { getFileSize, MD5, validateACES, validateRoles, validateUser } from "../utils";
 ensureDirSync("files/managed");
 
-export interface IBFileModel extends Document {
-    owner: string;
+export interface IFileModel extends Document {
+    ownerID: string;
     filename: string;
     description: string;
     hash: string;
@@ -18,26 +18,18 @@ export interface IBFileModel extends Document {
     setFile(path: string): Promise<void>;
 }
 
-export let BFileSchema = new Schema(
+export let FileSchema = new Schema(
     {
-        allowedRead: {
-            type: [String],
+        ownerID: {
+            type: String,
             required: true,
-            default: config.defaults.file.allowedRead,
-            validate: validateRoles,
+            validate: validateUser,
             index: true,
         },
-        allowedModify: {
-            type: [String],
-            required: true,
-            default: config.defaults.file.allowedModify,
-            validate: validateRoles,
-            index: true,
-        },
-        created: Date,
         filename: {
             type: String,
             required: true,
+            index: true,
         },
         description: {
             type: String,
@@ -46,22 +38,33 @@ export let BFileSchema = new Schema(
         },
         hash: String,
         size: String,
-        owner: {
-            type: String,
+        created: Date,
+        allowedRead: {
+            type: [String],
             required: true,
+            default: config.defaults.file.allowedRead,
+            validate: validateACES,
+            index: true,
+        },
+        allowedModify: {
+            type: [String],
+            required: true,
+            default: config.defaults.file.allowedModify,
+            validate: validateACES,
+            index: true,
         },
     },
 );
 
-BFileSchema.methods.getPath = function() {
-    const self = this as IBFileModel;
+FileSchema.methods.getPath = function() {
+    const self = this as IFileModel;
     return resolve(join("files/managed", self.hash));
 };
 
-BFileSchema.methods.setFile = async function(path: string) {
-    const self = this as IBFileModel;
+FileSchema.methods.setFile = async function(path: string) {
+    const self = this as IFileModel;
     if (self.hash) {
-        const count = await BFile.find().where("hash").equals(self.hash).countDocuments();
+        const count = await File.find().where("hash").equals(self.hash).countDocuments();
         if (count === 1) {
             await unlink(self.getPath());
         }
@@ -71,25 +74,25 @@ BFileSchema.methods.setFile = async function(path: string) {
     if (path) {
         self.hash = await MD5(path);
         self.size = await getFileSize(path);
-        const count = await BFile.find().where("hash").equals(self.hash).countDocuments();
+        const count = await File.find().where("hash").equals(self.hash).countDocuments();
         if (count === 0) {
             await move(path, self.getPath());
         }
     }
 };
 
-BFileSchema.pre("save", async function(next) {
-    const self = this as IBFileModel;
+FileSchema.pre("save", async function(next) {
+    const self = this as IFileModel;
     if (!self.created) {
         self.created = new Date();
     }
     next();
 });
 
-BFileSchema.pre("remove", async function(next) {
-    const self = this as IBFileModel;
+FileSchema.pre("remove", async function(next) {
+    const self = this as IFileModel;
     await self.setFile(null);
     next();
 });
 
-export const BFile: Model<IBFileModel> = model<IBFileModel>("File", BFileSchema);
+export const File: Model<IFileModel> = model<IFileModel>("File", FileSchema);

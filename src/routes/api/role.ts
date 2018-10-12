@@ -1,6 +1,6 @@
 import { Response, Router } from "express";
-import { IConfiguration } from "../../interfaces/config/user";
 import { IAuthorizedRequest } from "../../interfaces/requests";
+import { IConfiguration } from "../../interfaces/user";
 import { Role } from "../../schemas/role";
 import { validPaginate } from "../common";
 

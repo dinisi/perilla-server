@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "fs-extra";
-import { ISystemConfig } from "./interfaces/config/system";
+import { ISystemConfig } from "./interfaces/system";
 
 if (!existsSync("config.json")) { throw new Error("No config.json found"); }
 const sysconfig = JSON.parse(readFileSync("config.json").toString());

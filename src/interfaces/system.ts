@@ -29,7 +29,7 @@ export const ISystemConfig = Record({
             config: IConfiguration,
         }),
         user: Record({
-            roles: Array(String),
+            roleIDs: Array(String),
             config: IConfiguration,
         }),
         file: Record({

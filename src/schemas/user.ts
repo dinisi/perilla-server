@@ -1,9 +1,9 @@
 import * as crypto from "crypto";
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
-import { IConfiguration } from "../interfaces/config/user";
+import { IConfiguration } from "../interfaces/user";
 import { validateRoles } from "../utils";
-import { BFile } from "./file";
+import { File } from "./file";
 import { Problem } from "./problem";
 import { Solution } from "./solution";
 
@@ -15,7 +15,7 @@ export interface IUserModel extends Document {
     hash: string;
     salt: string;
     created: Date;
-    roles: string[];
+    roleIDs: string[];
     config: IConfiguration;
     _protected: boolean;
     setPassword(password: string): string;
@@ -28,27 +28,34 @@ export let UserSchema: Schema = new Schema(
             type: String,
             required: true,
             unique: true,
+            minlength: 1,
         },
         realname: {
             type: String,
             required: true,
             unique: true,
+            minlength: 1,
         },
         email: {
             type: String,
             required: true,
             unique: true,
+            minlength: 1,
+            maxlength: 50,
+            validate: (v: string) => /^[a-zA-Z0-9_-]+@([a-zA-Z0-9]+\.)+(com|cn|net|org)$/.test(v),
         },
         bio: {
             type: String,
             required: true,
             default: "No bio",
+            minlength: 1,
+            maxlength: 200,
         },
         created: Date,
-        roles: {
+        roleIDs: {
             type: [String],
             required: true,
-            default: config.defaults.user.roles,
+            default: config.defaults.user.roleIDs,
             validate: validateRoles,
         },
         hash: String,
@@ -80,19 +87,19 @@ UserSchema.methods.validPassword = function(password: string) {
 UserSchema.pre("remove", async function(next) {
     const This = this as IUserModel;
     if (This._protected) { return; }
-    const badFiles = await BFile.find({ owner: this.id });
+    const badFiles = await File.find({ ownerID: this.id });
     for (const badFile of badFiles) {
-        badFile.owner = config.reservedUserID;
+        badFile.ownerID = config.reservedUserID;
         await badFile.save();
     }
-    const badProblems = await Problem.find({ owner: this.id });
+    const badProblems = await Problem.find({ ownerID: this.id });
     for (const badProblem of badProblems) {
-        badProblem.owner = config.reservedUserID;
+        badProblem.ownerID = config.reservedUserID;
         await badProblem.save();
     }
-    const badSolutions = await Solution.find({ owner: this.id });
+    const badSolutions = await Solution.find({ ownerID: this.id });
     for (const badSolution of badSolutions) {
-        badSolution.owner = config.reservedUserID;
+        badSolution.ownerID = config.reservedUserID;
         await badSolution.save();
     }
     next();

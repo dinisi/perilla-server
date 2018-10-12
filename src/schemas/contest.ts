@@ -1,30 +1,15 @@
 import { Document, model, Model, Schema } from "mongoose";
 import { config } from "../config";
-import { validateACE, validateProblem } from "../utils";
-
-export enum ContestResultCalcType {
-    CodeForces,
-    IOI,
-    NOI,
-    ACM,
-}
-
-export interface IContestPhrase {
-    name: string;
-    duration: number;                  // Phrase duration, in seconds
-    allowSeeRank: boolean;             // Wheather allow contest players see their rank
-    allowSeeResult: boolean;           // Wheather allow contest players see their personal result
-    allowSeeProblem: boolean;          // Wheather allow contest players see contest problem
-    allowSubmit: boolean;              // Wheather allow contest players submit on problems
-}
+import { ContestResultCalcType, IContestPhrase } from "../interfaces/contest";
+import { validateACES, validateProblems, validateUser } from "../utils";
 
 export interface IContestModel extends Document {
-    owner: string;
+    ownerID: string;
     title: string;
     description: string;
     start: Date;
     created: Date;
-    problems: string[];
+    problemIDs: string[];
     resultCalcType: ContestResultCalcType;
     phrases: IContestPhrase[];
     allowedRead: string[];
@@ -34,27 +19,32 @@ export interface IContestModel extends Document {
 
 export let ContestSchema = new Schema(
     {
-        owner: {
+        ownerID: {
             type: String,
             required: true,
+            validate: validateUser,
         },
-        created: Date,
-        contestname: {
+        title: {
             type: String,
             required: true,
+            minlength: 1,
+            maxlength: 50,
         },
         description: {
             type: String,
             required: true,
+            default: "No description",
+            minlength: 1,
+            maxlength: 200,
         },
         start: {
             type: Date,
             required: true,
         },
-        problem: {
+        problemIDs: {
             type: [String],
             required: true,
-            validate: validateProblem,
+            validate: validateProblems,
         },
         resultCalcType: {
             type: Number,
@@ -66,19 +56,26 @@ export let ContestSchema = new Schema(
             type: [Object],
             required: true,
             default: [],
+            validate: (v: object[]) => {
+                for (const p of v) {
+                    if (!IContestPhrase.validate(p).success) { return false; }
+                }
+                return true;
+            },
         },
+        created: Date,
         allowedRead: {
             type: [String],
             required: true,
             default: config.defaults.contest.allowedRead,
-            validate: validateACE,
+            validate: validateACES,
             index: true,
         },
         allowedModify: {
             type: [String],
             required: true,
             default: config.defaults.contest.allowedModify,
-            validate: validateACE,
+            validate: validateACES,
             index: true,
         },
     },

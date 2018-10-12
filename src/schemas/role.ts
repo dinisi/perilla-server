@@ -1,11 +1,12 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
-import { IConfiguration } from "../interfaces/config/user";
+import { IConfiguration } from "../interfaces/user";
 
 export interface IRoleModel extends Document {
     rolename: string;
     description: string;
     config: IConfiguration;
+    father?: string;
     _protected: boolean;
 }
 

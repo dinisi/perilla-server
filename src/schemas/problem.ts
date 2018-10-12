@@ -1,16 +1,16 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
+import { validateACES, validateFiles } from "../utils";
 import { Solution } from "./solution";
 
 export interface IProblemModel extends Document {
     title: string;
     content: string;
-    files: string[];
+    fileIDs: string[];
     data?: object;
-    meta?: object;
     channel?: string;
     tags: string[];
-    owner: string;
+    ownerID: string;
     created: Date;
     allowedRead: string[];
     allowedModify: string[];
@@ -23,24 +23,28 @@ export let ProblemSchema: Schema = new Schema(
             type: String,
             required: true,
             unique: true,
+            minlength: 1,
+            maxlength: 50,
         },
         content: {
             type: String,
             required: true,
             default: "No content",
+            minlength: 1,
+            maxlength: 40960,
         },
-        owner: {
+        ownerID: {
             type: String,
             required: true,
         },
         created: Date,
-        files: {
+        fileIDs: {
             type: [String],
             required: true,
+            validate: validateFiles,
         },
-        channel: String,
         data: Object,
-        meta: Object,
+        channel: String,
         tags: {
             type: [String],
             required: true,
@@ -51,18 +55,21 @@ export let ProblemSchema: Schema = new Schema(
             type: [String],
             required: true,
             default: config.defaults.problem.allowedRead,
+            validate: validateACES,
             index: true,
         },
         allowedModify: {
             type: [String],
             required: true,
             default: config.defaults.problem.allowedModify,
+            validate: validateACES,
             index: true,
         },
         allowedSubmit: {
             type: [String],
             required: true,
             default: config.defaults.problem.allowedSubmit,
+            validate: validateACES,
             index: true,
         },
     },

@@ -4,6 +4,7 @@ import { setClient } from "../../redis";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
 import { validPaginate } from "../common";
+import { MAGIC_STRING } from "./solution";
 
 export let problemRouter = Router();
 
@@ -14,13 +15,12 @@ problemRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
 
         problem.title = req.body.title;
         problem.content = req.body.content;
-        problem.files = req.body.files;
+        problem.fileIDs = req.body.fileIDs;
         problem.data = req.body.data;
-        problem.meta = req.body.meta;
         problem.tags = req.body.tags;
         problem.channel = req.body.channel;
 
-        problem.owner = req.client.userID;
+        problem.ownerID = req.client.userID;
         // Problem writers should be allowed to
         // read, modify and submit to the problem
         problem.allowedRead.push(req.client.userID);
@@ -37,7 +37,7 @@ problemRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = Problem.find().where("allowedRead").in(req.client.roles);
 
-        if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
+        if (req.query.ownerID) { query = query.where("ownerID").equals(req.query.ownerID); }
         if (req.query.search) { query = query.where("title").regex(new RegExp(req.query.search)); }
         if (req.query.tags) { query = query.where("tags").all(req.query.tags); }
 
@@ -51,12 +51,12 @@ problemRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: R
     try {
         let query = Problem.find().where("allowedRead").in(req.client.roles);
 
-        if (req.query.owner) { query = query.where("owner").equals(req.query.owner); }
+        if (req.query.ownerID) { query = query.where("ownerID").equals(req.query.ownerID); }
         if (req.query.search) { query = query.where("title").regex(new RegExp(req.query.search)); }
         if (req.query.tags) { query = query.where("tags").all(req.query.tags); }
 
         query = query.skip(req.query.skip).limit(req.query.limit);
-        const problems = await query.select("_id title tags created owner").exec();
+        const problems = await query.select("_id title tags created ownerID").exec();
         res.send({ status: "success", payload: problems });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
@@ -89,9 +89,8 @@ problemRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
         if (!problem) { throw new Error("Not found"); }
         problem.title = req.body.title;
         problem.content = req.body.content;
-        problem.files = req.body.files;
+        problem.fileIDs = req.body.fileIDs;
         problem.data = req.body.data;
-        problem.meta = req.body.meta;
         problem.tags = req.body.tags;
         problem.channel = req.body.channel;
         if (req.client.config.manageSystem) {
@@ -126,19 +125,18 @@ problemRouter.post("/:id/submit", async (req: IAuthorizedRequest, res: Response)
             throw new Error("Too many solutions");
         }
         const solution = new Solution();
-        solution.owner = req.client.userID;
+        solution.ownerID = req.client.userID;
         solution.problemID = req.body.problemID;
-        solution.files = req.body.files;
+        solution.fileIDs = req.body.fileIDs;
+        // Use magic string
+        solution.contestID = MAGIC_STRING;
         // We allow user see their results by default
         solution.allowedRead.push(req.client.userID);
-        if (req.client.config.defaultSolutionResult) {
-            solution.allowedReadResult.push(req.client.userID);
-        }
         await solution.save();
         await solution.judge();
         req.client.lastSolutionCreation = +new Date();
         await setClient(req.client);
-        res.send({ status: "success" });
+        res.send({ status: "success", payload: solution.id });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }

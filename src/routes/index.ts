@@ -22,7 +22,7 @@ MainRouter.post("/login", async (req, res) => {
         // tslint:disable-next-line:no-shadowed-variable
         const config = user.config;
         const roles: string[] = [user.id];
-        for (const roleID of user.roles) {
+        for (const roleID of user.roleIDs) {
             const role = await Role.findById(roleID);
             if (role) {
                 roles.push(roleID);
