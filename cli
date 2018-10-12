@@ -1,4 +1,4 @@
-#!/bin/node
+#!/usr/bin/env node
 
 let argv = process.argv.splice(2);
 const fs = require("fs-extra");
@@ -10,7 +10,7 @@ const crypto = require("crypto");
 const generate = require("randomstring").generate;
 
 const oldLog = console.log;
-console.log = function (message) {
+console.log = (message) => {
     oldLog(message);
     fs.appendFileSync("cli.log", `[${(new Date()).toLocaleString()}] ${message}\n`);
 };
@@ -61,34 +61,39 @@ console.log = function (message) {
         await mongoose.connect(dbURL, dbOptions);
 
         // Step 2 - 2: define database models
-        const UserSchema = new mongoose.Schema({
-            username: { type: String, required: true, unique: true },
-            bio: { type: String, required: true, default: "No bio" },
-            email: { type: String, required: true, unique: true },
-            realname: { type: String, required: true, unique: true },
-            roles: { type: [String], required: true },
-            hash: String,
-            salt: String,
-            config: { type: Object, required: true },
-            _protected: { type: Boolean, required: true },
-        });
+        // User
+        let UserSchema = new Schema(
+            {
+                username: { type: String, required: true, unique: true, minlength: 1, },
+                realname: { type: String, required: true, unique: true, minlength: 1, },
+                email: { type: String, required: true, unique: true, minlength: 1, maxlength: 50 },
+                bio: { type: String, required: true, default: "No bio", minlength: 1, maxlength: 200, },
+                created: Date, roleIDs: { type: [String], required: true, },
+                hash: String,
+                salt: String,
+                config: { type: Object, required: true, },
+                _protected: { type: Boolean, required: true, default: false, },
+            },
+        );
         UserSchema.methods.setPassword = function (password) {
             this.salt = crypto.randomBytes(16).toString("hex");
             this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, "sha512").toString("hex");
         };
+        UserSchema.pre("save", function (next) {
+            const self = this;
+            if (!self.created) {
+                self.created = new Date();
+            }
+            next();
+        });
         const User = mongoose.model("User", UserSchema);
+
+        // Role
         const RoleSchema = new mongoose.Schema({
             rolename: { type: String, unique: true, required: true },
             description: { type: String, required: true },
             config: { type: Object, required: true },
             _protected: { type: Boolean, required: true },
-        });
-        RoleSchema.pre("remove", function (next) {
-            const This = this;
-            if (This._protected) {
-                return;
-            }
-            next();
         });
         const Role = mongoose.model("Role", RoleSchema);
 
@@ -100,7 +105,6 @@ console.log = function (message) {
             createContest: false,
             manageSystem: false,
             minSolutionCreationInterval: 10000,
-            defaultSolutionResult: false
         };
         const best = {
             createFile: true,
@@ -109,7 +113,6 @@ console.log = function (message) {
             createContest: true,
             manageSystem: true,
             minSolutionCreationInterval: 0,
-            defaultSolutionResult: true
         };
         // Roles
         const adminRole = new Role();
@@ -189,28 +192,13 @@ console.log = function (message) {
                 user: {
                     config: worst,
                     roles: [userRole.id]
-                },
-                file: {
-                    allowedRead: [adminRole.id, judgerRole.id],
-                    allowedModify: [adminRole.id]
-                },
-                problem: {
-                    allowedRead: [adminRole.id, judgerRole.id],
-                    allowedModify: [adminRole.id],
-                    allowedSubmit: [adminRole.id]
-                },
-                solution: {
-                    allowedRead: [adminRole.id, judgerRole.id],
-                    allowedReadResult: [adminRole.id],
-                    allowedModify: [adminRole.id, judgerRole.id],
-                    allowedRejudge: [adminRole.id]
-                },
-                contest: {
-                    allowedRead: [adminRole.id, judgerRole.id],
-                    allowedModify: [adminRole.id]
                 }
             },
-            reservedUserID: removedUser.id
+            reservedUserID: removedUser.id,
+            system: {
+                root: admin.id,
+                wheel: adminRole.id
+            }
         };
         // Step 4
         console.log("[INFO] [STEP 4/4] Writing config.json");

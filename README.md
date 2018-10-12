@@ -4,7 +4,7 @@
 
 Light-weight Online Judge Platform
 
-- RBAC Access control
+- Linux-styled Access control
 - MEVN Full javascript stack
 - RESTFul API Design
 

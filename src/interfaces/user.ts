@@ -8,7 +8,6 @@ export const IConfiguration = Record(
         createContest: Boolean,
         manageSystem: Boolean,
         minSolutionCreationInterval: Number,
-        defaultSolutionResult: Boolean,
     },
 );
 

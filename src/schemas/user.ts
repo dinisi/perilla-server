@@ -74,17 +74,25 @@ export let UserSchema: Schema = new Schema(
     },
 );
 
-UserSchema.methods.setPassword = function(password: string) {
+UserSchema.methods.setPassword = function (password: string) {
     this.salt = crypto.randomBytes(16).toString("hex");
     this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, "sha512").toString("hex");
 };
 
-UserSchema.methods.validPassword = function(password: string) {
+UserSchema.methods.validPassword = function (password: string) {
     const hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, "sha512").toString("hex");
     return this.hash === hash;
 };
 
-UserSchema.pre("remove", async function(next) {
+UserSchema.pre("save", function (next) {
+    const self = this as IUserModel;
+    if (!self.created) {
+        self.created = new Date();
+    }
+    next();
+});
+
+UserSchema.pre("remove", async function (next) {
     const This = this as IUserModel;
     if (This._protected) { return; }
     const badFiles = await File.find({ ownerID: this.id });
