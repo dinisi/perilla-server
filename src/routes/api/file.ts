@@ -161,7 +161,7 @@ fileRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response) =>
         const file = await File.findById(req.params.id);
         if (!file || !canRead(getAccess(file, req.client))) { throw new Error("Not found"); }
 
-        res.send({ status: "success", payload: file });
+        res.send({ status: "success", payload: { filename: file.filename } });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }

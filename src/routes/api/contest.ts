@@ -14,8 +14,6 @@ contestRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
         if (!req.client.config.createContest) { throw new Error("Access denied"); }
         const contest = new Contest();
-
-        contest.ownerID = req.client.userID;
         contest.title = req.body.title;
         contest.description = req.body.description;
         contest.start = new Date(req.body.start);
@@ -28,6 +26,9 @@ contestRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
         }
         contest.resultCalcType = req.body.resultCalcType;
         contest.phrases = req.body.phrases;
+
+        contest.ownerID = req.client.userID;
+        contest.groupID = config.system.wheel;
         contest.permission = 56;  // rwr---
         await contest.save();
         res.send({ status: "failed", payload: contest._id });
@@ -130,7 +131,7 @@ contestRouter.get("/:id/problem/:pid", async (req: IAuthorizedRequest, res) => {
         if (!contest || !canRead(getAccess(contest, req.client))) { throw new Error("Not found"); }
 
         const phrase = contest.getPhrase();
-        if (!phrase.allowSeeProblem) { throw new Error("Operation not permitted"); }
+        if (!phrase.seeProblem) { throw new Error("Operation not permitted"); }
         const problem = await Problem.findById(contest.problemIDs[req.params.pid]);
         if (!problem) { throw new Error("Not found"); }
         res.send({ status: "success", payload: problem });
@@ -145,7 +146,7 @@ contestRouter.post("/:id/problem/:pid/submit", async (req: IAuthorizedRequest, r
         if (!contest || !canRead(getAccess(contest, req.client))) { throw new Error("Not found"); }
 
         const phrase = contest.getPhrase();
-        if (!phrase.allowSubmit) { throw new Error("Operation not permitted"); }
+        if (!phrase.submit) { throw new Error("Operation not permitted"); }
         const problem = await Problem.findById(contest.problemIDs[req.params.pid]);
         if (!problem) { throw new Error("Not found"); }
 
@@ -156,7 +157,7 @@ contestRouter.post("/:id/problem/:pid/submit", async (req: IAuthorizedRequest, r
         const solution = new Solution();
         solution.ownerID = req.client.userID;
         solution.groupID = config.system.wheel;
-        solution.permission = 0;
+        solution.permission = 0; // ------
         solution.problemID = problem.id;
         solution.contestID = contest.id;
         solution.fileIDs = req.body.fileIDs;
@@ -176,7 +177,7 @@ contestRouter.get("/:id/solution/count", async (req: IAuthorizedRequest, res) =>
         if (!contest || !canRead(getAccess(contest, req.client))) { throw new Error("Not found"); }
 
         const phrase = contest.getPhrase();
-        if (!phrase.allowSeeResult) { throw new Error("Operation not permitted"); }
+        if (phrase.seeResult === "none") { throw new Error("Operation not permitted"); }
 
         let query = Solution.find().where("contestID").equals(contest.id);
 
@@ -196,7 +197,7 @@ contestRouter.get("/:id/solution/list", async (req: IAuthorizedRequest, res) => 
         if (!contest || !canRead(getAccess(contest, req.client))) { throw new Error("Not found"); }
 
         const phrase = contest.getPhrase();
-        if (!phrase.allowSeeResult) { throw new Error("Operation not permitted"); }
+        if (phrase.seeResult === "none") { throw new Error("Operation not permitted"); }
 
         let query = Solution.find().where("contestID").equals(contest.id);
 
@@ -218,10 +219,13 @@ contestRouter.get("/:id/solution/:sid", async (req: IAuthorizedRequest, res) => 
         if (!contest || !canRead(getAccess(contest, req.client))) { throw new Error("Not found"); }
 
         const phrase = contest.getPhrase();
-        if (!phrase.allowSeeResult) { throw new Error("Operation not permitted"); }
+        if (phrase.seeResult === "none") { throw new Error("Operation not permitted"); }
 
+        // NOTICE: Contest solutions are controled only by contest phrases
         // Must specifiy a contestID to prevent toxic user stell his solution result XD
         const solution = await Solution.findById(req.params.sid).where("contestID").equals(contest.id);
+        if (!solution) { throw new Error("Not found"); }
+        if (solution.ownerID !== req.client.userID && phrase.seeResult === "own") { throw new Error("Not found"); }
         res.send({ status: "success", payload: solution });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
@@ -234,7 +238,7 @@ contestRouter.get("/:id/ranklist", async (req: IAuthorizedRequest, res) => {
         if (!contest || !canRead(getAccess(contest, req.client))) { throw new Error("Not found"); }
 
         const phrase = contest.getPhrase();
-        if (!phrase.allowSeeRank) { throw new Error("Operation not permitted"); }
+        if (!phrase.seeRank) { throw new Error("Operation not permitted"); }
         //
     } catch (e) {
         res.send({ status: "failed", payload: e.message });

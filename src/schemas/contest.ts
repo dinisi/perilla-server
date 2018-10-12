@@ -2,6 +2,8 @@ import { Document, model, Model, Schema } from "mongoose";
 import { config } from "../config";
 import { ContestResultCalcType, IContestPhrase } from "../interfaces/contest";
 import { validateACES, validateProblems, validateRole, validateUser } from "../utils";
+import { Player } from "./player";
+import { ISolutionModel } from "./solution";
 
 export interface IContestModel extends Document {
     title: string;
@@ -15,6 +17,7 @@ export interface IContestModel extends Document {
     groupID: string;
     permission: number;
     getPhrase(): IContestPhrase;
+    updatePlayer(solution: ISolutionModel): Promise<void>;
 }
 
 export let ContestSchema = new Schema(
@@ -87,11 +90,32 @@ ContestSchema.methods.getPhrase = function(): IContestPhrase {
     return {
         name: "Finished",
         duration: -1,
-        allowSeeRank: true,
-        allowSeeResult: true,
-        allowSeeProblem: true,
-        allowSubmit: false,
+        seeRank: true,
+        seeResult: "all",
+        seeProblem: true,
+        submit: false,
     };
+};
+
+ContestSchema.methods.updatePlayer = async function(solution: ISolutionModel) {
+    const self = this as IContestModel;
+    let player = await Player.findOne().where("userID").equals(solution.ownerID).where("contestID").equals(self.id);
+    if (!player) {
+        player = new Player();
+        player.userID = solution.ownerID;
+        player.contestID = self.id;
+    }
+    switch (self.resultCalcType) {
+        case ContestResultCalcType.ACM:
+            break;
+        case ContestResultCalcType.CodeForces:
+            break;
+        case ContestResultCalcType.IOI:
+            break;
+        case ContestResultCalcType.NOI:
+            break;
+    }
+    await player.save();
 };
 
 ContestSchema.pre("save", async function(next) {

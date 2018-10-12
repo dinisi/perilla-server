@@ -7,7 +7,7 @@ export interface IPlayerModel extends Document {
     contestID: string;
     userID: string;
     score: number;
-    details: number[];
+    details: object;
 }
 
 export let PlayerSchema = new Schema({
@@ -28,9 +28,9 @@ export let PlayerSchema = new Schema({
         index: true,
     },
     details: {
-        type: [Object],
+        type: Object,
         required: true,
-        default: [],
+        default: {},
     },
 });
 

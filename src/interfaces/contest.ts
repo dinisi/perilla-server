@@ -1,4 +1,4 @@
-import { Boolean, Number, Record, Static, String } from "runtypes";
+import { Boolean, Literal, Number, Record, Static, String, Union } from "runtypes";
 
 export enum ContestResultCalcType {
     CodeForces,
@@ -7,15 +7,21 @@ export enum ContestResultCalcType {
     ACM,
 }
 
+export const ContestResultControlType = Union(
+    Literal("none"),
+    Literal("own"),
+    Literal("all"),
+);
+
+export type ContestResultControlType = Static<typeof ContestResultControlType>;
+
 export const IContestPhrase = Record({
     name: String,
-    duration: Number,                  // Phrase duration, in seconds
-    allowSeeRank: Boolean,             // Wheather allow contest players see their rank
-    allowSeeResult: Boolean,           // Wheather allow contest players see their personal result
-    allowSeeProblem: Boolean,          // Wheather allow contest players see contest problem
-    allowSubmit: Boolean,              // Wheather allow contest players submit on problems
+    duration: Number,                       // Phrase duration, in seconds
+    seeRank: Boolean,                  // Wheather allow contest players see their rank
+    seeResult: ContestResultControlType,    // Wheather allow contest players see their personal result
+    seeProblem: Boolean,               // Wheather allow contest players see contest problem
+    submit: Boolean,                   // Wheather allow contest players submit on problems
 });
 
-export interface IContestPhrase extends Static<typeof IContestPhrase> {
-    [key: string]: boolean | number | string;
-}
+export type IContestPhrase =  Static<typeof IContestPhrase>;

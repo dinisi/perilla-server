@@ -1,8 +1,10 @@
 import { Response, Router } from "express";
 import { IAuthorizedRequest } from "../../interfaces/requests";
 import { setClient } from "../../redis";
+import { Contest } from "../../schemas/contest";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
+import { canRead, canWrite, getAccess } from "../../utils";
 import { validPaginate } from "../common";
 
 export let solutionRouter = Router();
@@ -13,7 +15,7 @@ export const MAGIC_STRING = "none";
 
 solutionRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        let query = Solution.find().where("allowedRead").in(req.client.roles).where("contestID").equals(MAGIC_STRING);
+        let query = Solution.find().where("contestID").equals(MAGIC_STRING);
 
         if (req.query.ownerID) { query = query.where("ownerID").equals(req.query.ownerID); }
         if (req.query.problemID) { query = query.where("problemID").equals(req.query.problemID); }
@@ -27,7 +29,7 @@ solutionRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
 
 solutionRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
-        let query = Solution.find().sort("-_id").where("allowedRead").in(req.client.roles).where("contestID").equals(MAGIC_STRING);
+        let query = Solution.find().where("contestID").equals(MAGIC_STRING);
 
         if (req.query.ownerID) { query = query.where("ownerID").equals(req.query.ownerID); }
         if (req.query.problemID) { query = query.where("problemID").equals(req.query.problemID); }
@@ -45,7 +47,9 @@ solutionRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: 
 // Do not need to specify ownerID
 solutionRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const solution = await Solution.findById(req.params.id).where("allowedRead").in(req.client.roles).select("-result");
+        const solution = await Solution.findById(req.params.id);
+        if (!solution || !canRead(getAccess(solution, req.client))) { throw new Error("Not found"); }
+
         res.send({ status: "success", payload: solution });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
@@ -54,17 +58,22 @@ solutionRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
 
 solutionRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const solution = await Solution.findById(req.params.id).where("allowedModify").in(req.client.roles).select("result");
-        if (!solution) { throw new Error("Not found"); }
+        const solution = await Solution.findById(req.params.id);
+        if (!solution || !canWrite(getAccess(solution, req.client))) { throw new Error("Not found"); }
+
         solution.status = req.body.status;
         solution.score = req.body.score;
         solution.log = req.body.log;
         if (req.client.config.manageSystem) {
-            solution.allowedModify = req.body.allowedModify;
-            solution.allowedRead = req.body.allowedRead;
-            solution.allowedRejudge = req.body.allowedRejudge;
+            solution.ownerID = req.body.ownerID;
+            solution.groupID = req.body.groupID;
+            solution.permission = req.body.permission;
         }
         await solution.save();
+        if (solution.contestID !== MAGIC_STRING) {
+            const contest = await Contest.findById(solution.contestID);
+            await contest.updatePlayer(solution);
+        }
         res.send({ status: "success" });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
@@ -73,8 +82,9 @@ solutionRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
 
 solutionRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const solution = await Solution.findById(req.params.id).where("allowedModify").in(req.client.roles).select("result");
-        if (!solution) { throw new Error("Not found"); }
+        const solution = await Solution.findById(req.params.id);
+        if (!solution || !canWrite(getAccess(solution, req.client))) { throw new Error("Not found"); }
+
         await solution.remove();
         res.send({ status: "success" });
     } catch (e) {
@@ -84,8 +94,9 @@ solutionRouter.delete("/:id", async (req: IAuthorizedRequest, res: Response) => 
 
 solutionRouter.post("/:id/rejudge", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const solution = await Solution.findById(req.params.id).where("allowedRejudge").in(req.client.roles).select("result");
-        if (!solution) { throw new Error("Not found"); }
+        const solution = await Solution.findById(req.params.id);
+        if (!solution || !canWrite(getAccess(solution, req.client))) { throw new Error("Not found"); }
+
         await solution.judge();
         res.send({ status: "success" });
     } catch (e) {
