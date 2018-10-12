@@ -5,7 +5,7 @@ import { setClient } from "../../redis";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
 import { canRead, canWrite, getAccess } from "../../utils";
-import { validPaginate } from "../common";
+import { verifyPaginate } from "../common";
 import { MAGIC_STRING } from "./solution";
 
 export let problemRouter = Router();
@@ -48,7 +48,7 @@ problemRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-problemRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
+problemRouter.get("/list", verifyPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = Problem.find();
 

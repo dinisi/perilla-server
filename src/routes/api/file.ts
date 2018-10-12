@@ -7,7 +7,7 @@ import { config } from "../../config";
 import { IAuthorizedRequest } from "../../interfaces/requests";
 import { File } from "../../schemas/file";
 import { canRead, canWrite, getAccess } from "../../utils";
-import { validPaginate } from "../common";
+import { verifyPaginate } from "../common";
 
 ensureDirSync("files/uploads/");
 const upload = multer({ dest: "files/uploads/" });
@@ -71,7 +71,7 @@ fileRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-fileRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
+fileRouter.get("/list", verifyPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = File.find();
 

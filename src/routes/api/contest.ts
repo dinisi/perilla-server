@@ -3,10 +3,11 @@ import { config } from "../../config";
 import { IAuthorizedRequest } from "../../interfaces/requests";
 import { setClient } from "../../redis";
 import { Contest } from "../../schemas/contest";
+import { Player } from "../../schemas/player";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
 import { canRead, canWrite, getAccess } from "../../utils";
-import { validPaginate } from "../common";
+import { verifyPaginate } from "../common";
 
 export let contestRouter = Router();
 
@@ -50,7 +51,7 @@ contestRouter.get("/count", async (req: IAuthorizedRequest, res) => {
     }
 });
 
-contestRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
+contestRouter.get("/list", verifyPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = Contest.find();
 
@@ -191,7 +192,7 @@ contestRouter.get("/:id/solution/count", async (req: IAuthorizedRequest, res) =>
     }
 });
 
-contestRouter.get("/:id/solution/list", async (req: IAuthorizedRequest, res) => {
+contestRouter.get("/:id/solution/list", verifyPaginate, async (req: IAuthorizedRequest, res) => {
     try {
         const contest = await Contest.findById(req.params.id);
         if (!contest || !canRead(getAccess(contest, req.client))) { throw new Error("Not found"); }
@@ -232,14 +233,33 @@ contestRouter.get("/:id/solution/:sid", async (req: IAuthorizedRequest, res) => 
     }
 });
 
-contestRouter.get("/:id/ranklist", async (req: IAuthorizedRequest, res) => {
+contestRouter.get("/:id/ranklist/count", async (req: IAuthorizedRequest, res) => {
     try {
         const contest = await Contest.findById(req.params.id);
         if (!contest || !canRead(getAccess(contest, req.client))) { throw new Error("Not found"); }
 
         const phrase = contest.getPhrase();
         if (!phrase.seeRank) { throw new Error("Operation not permitted"); }
-        //
+
+        const query = Player.find().where("contestID").equals(contest.id);
+        res.send({status: "success", payload: await query.countDocuments()});
+    } catch (e) {
+        res.send({ status: "failed", payload: e.message });
+    }
+});
+
+contestRouter.get("/:id/ranklist/list", verifyPaginate, async (req: IAuthorizedRequest, res) => {
+    try {
+        const contest = await Contest.findById(req.params.id);
+        if (!contest || !canRead(getAccess(contest, req.client))) { throw new Error("Not found"); }
+
+        const phrase = contest.getPhrase();
+        if (!phrase.seeRank) { throw new Error("Operation not permitted"); }
+
+        let query = Player.find().where("contestID").equals(contest.id);
+        query = query.skip(req.query.skip).limit(req.query.limit);
+        query = query.sort("-score penalty");
+        res.send({status: "success", payload: await query.countDocuments()});
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
     }

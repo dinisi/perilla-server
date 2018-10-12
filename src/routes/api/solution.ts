@@ -5,7 +5,7 @@ import { Contest } from "../../schemas/contest";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
 import { canRead, canWrite, getAccess } from "../../utils";
-import { validPaginate } from "../common";
+import { verifyPaginate } from "../common";
 
 export let solutionRouter = Router();
 
@@ -27,7 +27,7 @@ solutionRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-solutionRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
+solutionRouter.get("/list", verifyPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = Solution.find().where("contestID").equals(MAGIC_STRING);
 

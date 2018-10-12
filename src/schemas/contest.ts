@@ -1,9 +1,8 @@
 import { Document, model, Model, Schema } from "mongoose";
-import { config } from "../config";
 import { ContestResultCalcType, IContestPhrase } from "../interfaces/contest";
-import { validateACES, validateProblems, validateRole, validateUser } from "../utils";
+import { validateProblems, validateRole, validateUser } from "../utils";
 import { Player } from "./player";
-import { ISolutionModel } from "./solution";
+import { ISolutionModel, SolutionResult } from "./solution";
 
 export interface IContestModel extends Document {
     title: string;
@@ -98,6 +97,7 @@ ContestSchema.methods.getPhrase = function(): IContestPhrase {
 };
 
 ContestSchema.methods.updatePlayer = async function(solution: ISolutionModel) {
+    if (solution.status === SolutionResult.WaitingJudge || solution.status === SolutionResult.Judging) { return; }
     const self = this as IContestModel;
     let player = await Player.findOne().where("userID").equals(solution.ownerID).where("contestID").equals(self.id);
     if (!player) {
@@ -105,14 +105,48 @@ ContestSchema.methods.updatePlayer = async function(solution: ISolutionModel) {
         player.userID = solution.ownerID;
         player.contestID = self.id;
     }
+    if (!player.details.hasOwnProperty(solution.id)) {
+        player.details[solution.id] = {};
+    }
     switch (self.resultCalcType) {
         case ContestResultCalcType.ACM:
+            if (player.details[solution.id].accepted) {
+                // Don't need to update a AKed player
+                return;
+            } else {
+                if (solution.status === SolutionResult.Accepted) {
+                    player.details[solution.id].accepted = true;
+                    player.score++;
+                    // 30 minutes per bad solution
+                    player.penalty += (player.details[solution.id].tried || 0) * 1800000;
+                    // And Accpeted time, in microseconds
+                    const delta = (+(solution.created) - +(self.start));
+                    player.penalty += delta;
+                } else {
+                    player.details[solution.id].tried = (player.details[solution.id].tried || 0) + 1;
+                }
+            }
             break;
         case ContestResultCalcType.CodeForces:
+            // CodeForces ???
             break;
         case ContestResultCalcType.IOI:
+            if (player.details[solution.id].accepted) {
+                return;
+            } else {
+                player.score -= (player.details[solution.id].score || 0);
+                player.score += (player.details[solution.id].score = solution.score);
+            }
             break;
         case ContestResultCalcType.NOI:
+            if (player.details[solution.id].submitted) {
+                // Ignore resubmissions
+                return;
+            } else {
+                player.score += solution.score;
+                player.details[solution.id].score = solution.score;
+                player.details[solution.id].submitted = true;
+            }
             break;
     }
     await player.save();

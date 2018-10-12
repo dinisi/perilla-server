@@ -7,25 +7,28 @@ export interface IPlayerModel extends Document {
     contestID: string;
     userID: string;
     score: number;
-    details: object;
+    penalty: number;
+    details: { [key: string]: any };
 }
 
 export let PlayerSchema = new Schema({
     userID: {
         type: String,
         required: true,
-        index: true,
     },
     contestID: {
         type: String,
         required: true,
-        index: true,
     },
     score: {
         type: Number,
         required: true,
         default: 0,
-        index: true,
+    },
+    penalty: {
+        type: Number,
+        required: true,
+        default: 0,
     },
     details: {
         type: Object,
@@ -33,5 +36,6 @@ export let PlayerSchema = new Schema({
         default: {},
     },
 });
+PlayerSchema.index({ score: -1, penalty: 1 });
 
 export const Player = model<IPlayerModel>("Player", PlayerSchema);

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
-export const validPaginate = (req: Request, res: Response, next: NextFunction) => {
+export const verifyPaginate = (req: Request, res: Response, next: NextFunction) => {
     try {
         if (!req.query.skip) { throw new Error("Paginate: invalid skip"); }
         if (!req.query.limit) { throw new Error("Paginate: invalid limit"); }

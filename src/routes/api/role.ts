@@ -2,7 +2,7 @@ import { Response, Router } from "express";
 import { IAuthorizedRequest } from "../../interfaces/requests";
 import { IConfiguration } from "../../interfaces/user";
 import { Role } from "../../schemas/role";
-import { validPaginate } from "../common";
+import { verifyPaginate } from "../common";
 
 export let roleRouter = Router();
 
@@ -35,7 +35,7 @@ roleRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-roleRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
+roleRouter.get("/list", verifyPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = Role.find();
         if (req.query.rolename) {

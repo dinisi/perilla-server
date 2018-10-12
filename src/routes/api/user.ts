@@ -2,7 +2,7 @@ import { Response, Router } from "express";
 import { IAuthorizedRequest } from "../../interfaces/requests";
 import { IConfiguration } from "../../interfaces/user";
 import { User } from "../../schemas/user";
-import { validPaginate } from "../common";
+import { verifyPaginate } from "../common";
 
 export let userRouter = Router();
 
@@ -38,7 +38,7 @@ userRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     }
 });
 
-userRouter.get("/list", validPaginate, async (req: IAuthorizedRequest, res: Response) => {
+userRouter.get("/list", verifyPaginate, async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = User.find();
 
