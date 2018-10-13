@@ -8,19 +8,19 @@ import { Role } from "./role";
 import { File } from "./file";
 
 export enum SolutionResult {
-    WaitingJudge,       // Wating Judge
-    Judging,            // Judging
-    Skipped,            // Skipped
-    Accepted,           // Accepted
-    WrongAnswer,        // Wrong Answer
-    TimeLimitError,     // Time Limit Error
-    MemoryLimitError,   // Memory Limit Error
-    RuntimeError,       // Runtime Error
-    CompileError,       // Compile Error
-    PresentationError,  // Presentation Error
-    JudgementFailed,    // Judgement Failed (Judge program error)
-    SystemError,        // System Error     (Judge framwork & Judge plugin error)
-    OtherError,         // Other Error
+    WaitingJudge,            // Wating Judge
+    Judging,                 // Judging
+    Skipped,                 // Skipped
+    Accepted,                // Accepted
+    WrongAnswer,             // Wrong Answer
+    TimeLimitExceeded,       // Time Limit Exceeded
+    MemoryLimitExceeded,     // Memory Limit Exceeded
+    RuntimeError,            // Runtime Error
+    CompileError,            // Compile Error
+    PresentationError,       // Presentation Error
+    JudgementFailed,         // Judgement Failed (Judge program error)
+    SystemError,             // System Error     (Judge framwork & Judge plugin error)
+    OtherError,              // Other Error
 }
 
 export interface ISolutionModel extends Document {
@@ -92,7 +92,9 @@ SolutionSchema.methods.judge = async function () {
     const self = this as ISolutionModel;
     const channel = (await Problem.findById(self.problemID).select("channel")).channel;
     if (!channel) { return; }
-    return addJudgeTask(self.id, channel);
+    self.status = SolutionResult.WaitingJudge;
+    await self.save();
+    await addJudgeTask(self.id, channel);
 };
 
 SolutionSchema.pre("save", function (next) {
