@@ -6,9 +6,9 @@ import { IClient } from "./interfaces/cache";
 import { IContestModel } from "./schemas/contest";
 import { IFileModel } from "./schemas/file";
 import { IProblemModel } from "./schemas/problem";
+import { IRoleModel } from "./schemas/role";
 import { ISolutionModel } from "./schemas/solution";
 import { IUserModel } from "./schemas/user";
-import { IRoleModel } from "./schemas/role";
 
 export const getBaseURL = (hostname: string, port: number) => {
     return "http://" + hostname + (port === 80 ? "" : ":" + port);
@@ -40,13 +40,13 @@ export const getFileSize = (path: string): Promise<number> => {
 type IExModel = IContestModel | IFileModel | IProblemModel | ISolutionModel;
 type IModel  = IExModel | IUserModel | IRoleModel;
 
-export const validateOne = async(model: Model<IModel>, ID: string) => {
+export const validateOne = async (model: Model<IModel>, ID: string) => {
     return !!(await model.findById(ID).countDocuments());
-}
+};
 
-export const validateMany = async(model: Model<IModel>, IDs: string[]) => {
+export const validateMany = async (model: Model<IModel>, IDs: string[]) => {
     return (await model.find().where("_id").in(IDs).countDocuments()) === IDs.length;
-}
+};
 
 // Linux-style Access config
 // rwrwrw user group

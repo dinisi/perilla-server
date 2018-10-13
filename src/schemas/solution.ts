@@ -1,11 +1,11 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
 import { addJudgeTask } from "../redis";
-import { validateOne, validateMany } from "../utils";
-import { Problem } from "./problem";
-import { User } from "./user";
-import { Role } from "./role";
+import { validateMany, validateOne } from "../utils";
 import { File } from "./file";
+import { Problem } from "./problem";
+import { Role } from "./role";
+import { User } from "./user";
 
 export enum SolutionResult {
     WaitingJudge,            // Wating Judge
@@ -88,7 +88,7 @@ export let SolutionSchema: Schema = new Schema(
     },
 );
 
-SolutionSchema.methods.judge = async function () {
+SolutionSchema.methods.judge = async function() {
     const self = this as ISolutionModel;
     const channel = (await Problem.findById(self.problemID).select("channel")).channel;
     if (!channel) { return; }
@@ -97,7 +97,7 @@ SolutionSchema.methods.judge = async function () {
     await addJudgeTask(self.id, channel);
 };
 
-SolutionSchema.pre("save", function (next) {
+SolutionSchema.pre("save", function(next) {
     const This = this as ISolutionModel;
     if (!This.created) {
         This.created = new Date();

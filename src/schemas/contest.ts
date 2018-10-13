@@ -1,11 +1,11 @@
 import { Document, model, Model, Schema } from "mongoose";
 import { ContestResultCalcType, IContestPhrase } from "../interfaces/contest";
-import { Player } from "./player";
-import { ISolutionModel, SolutionResult } from "./solution";
 import { validateMany, validateOne } from "../utils";
+import { Player } from "./player";
 import { Problem } from "./problem";
-import { User } from "./user";
 import { Role } from "./role";
+import { ISolutionModel, SolutionResult } from "./solution";
+import { User } from "./user";
 
 export interface IContestModel extends Document {
     title: string;
@@ -82,7 +82,7 @@ export let ContestSchema = new Schema(
     },
 );
 
-ContestSchema.methods.getPhrase = function (): IContestPhrase {
+ContestSchema.methods.getPhrase = function(): IContestPhrase {
     const self = this as IContestModel;
     const now = +new Date();
     for (let i = 0, time = +self.start; i < self.phrases.length; i++) {
@@ -100,7 +100,7 @@ ContestSchema.methods.getPhrase = function (): IContestPhrase {
     };
 };
 
-ContestSchema.methods.updatePlayer = async function (solution: ISolutionModel) {
+ContestSchema.methods.updatePlayer = async function(solution: ISolutionModel) {
     if (solution.status === SolutionResult.WaitingJudge || solution.status === SolutionResult.Judging) { return; }
     const self = this as IContestModel;
     let player = await Player.findOne().where("userID").equals(solution.ownerID).where("contestID").equals(self.id);
@@ -156,7 +156,7 @@ ContestSchema.methods.updatePlayer = async function (solution: ISolutionModel) {
     await player.save();
 };
 
-ContestSchema.pre("save", async function (next) {
+ContestSchema.pre("save", async function(next) {
     const self = this as IContestModel;
     if (!self.created) {
         self.created = new Date();

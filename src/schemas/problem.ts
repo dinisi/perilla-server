@@ -1,9 +1,9 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { Solution } from "./solution";
-import { validateOne, validateMany } from "../utils";
-import { User } from "./user";
-import { Role } from "./role";
+import { validateMany, validateOne } from "../utils";
 import { File } from "./file";
+import { Role } from "./role";
+import { Solution } from "./solution";
+import { User } from "./user";
 
 export interface IProblemModel extends Document {
     title: string;

@@ -3,8 +3,8 @@ import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
 import { config } from "../config";
 import { getFileSize, MD5, validateOne} from "../utils";
-import { User } from "./user";
 import { Role } from "./role";
+import { User } from "./user";
 ensureDirSync("files/managed");
 
 export interface IFileModel extends Document {

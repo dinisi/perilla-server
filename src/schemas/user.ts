@@ -2,11 +2,11 @@ import * as crypto from "crypto";
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
 import { IConfiguration } from "../interfaces/user";
+import { validateMany } from "../utils";
 import { File } from "./file";
 import { Problem } from "./problem";
-import { Solution } from "./solution";
-import { validateMany } from "../utils";
 import { Role } from "./role";
+import { Solution } from "./solution";
 
 export interface IUserModel extends Document {
     username: string;
@@ -75,17 +75,17 @@ export let UserSchema: Schema = new Schema(
     },
 );
 
-UserSchema.methods.setPassword = function (password: string) {
+UserSchema.methods.setPassword = function(password: string) {
     this.salt = crypto.randomBytes(16).toString("hex");
     this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, "sha512").toString("hex");
 };
 
-UserSchema.methods.validPassword = function (password: string) {
+UserSchema.methods.validPassword = function(password: string) {
     const hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, "sha512").toString("hex");
     return this.hash === hash;
 };
 
-UserSchema.pre("save", function (next) {
+UserSchema.pre("save", function(next) {
     const self = this as IUserModel;
     if (!self.created) {
         self.created = new Date();
@@ -93,7 +93,7 @@ UserSchema.pre("save", function (next) {
     next();
 });
 
-UserSchema.pre("remove", async function (next) {
+UserSchema.pre("remove", async function(next) {
     const This = this as IUserModel;
     if (This._protected) { return; }
     const badFiles = await File.find({ ownerID: this.id });
