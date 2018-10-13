@@ -2,10 +2,11 @@ import * as crypto from "crypto";
 import { Document, Model, model, Schema } from "mongoose";
 import { config } from "../config";
 import { IConfiguration } from "../interfaces/user";
-import { validateRoles } from "../utils";
 import { File } from "./file";
 import { Problem } from "./problem";
 import { Solution } from "./solution";
+import { validateMany } from "../utils";
+import { Role } from "./role";
 
 export interface IUserModel extends Document {
     username: string;
@@ -56,7 +57,7 @@ export let UserSchema: Schema = new Schema(
             type: [String],
             required: true,
             default: config.defaults.user.roleIDs,
-            validate: validateRoles,
+            validate: (v: string[]) => validateMany(Role, v),
         },
         hash: String,
         salt: String,

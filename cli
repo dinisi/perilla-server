@@ -62,7 +62,7 @@ console.log = (message) => {
 
         // Step 2 - 2: define database models
         // User
-        let UserSchema = new Schema(
+        let UserSchema = new mongoose.Schema(
             {
                 username: { type: String, required: true, unique: true, minlength: 1, },
                 realname: { type: String, required: true, unique: true, minlength: 1, },
@@ -186,7 +186,7 @@ console.log = (message) => {
                 https: false
             },
             defaults: {
-                role: {
+                roleIDs: {
                     config: worst
                 },
                 user: {

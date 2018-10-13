@@ -1,7 +1,9 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { config } from "../config";
-import { validateACES, validateFiles, validateRole, validateUser } from "../utils";
 import { Solution } from "./solution";
+import { validateOne, validateMany } from "../utils";
+import { User } from "./user";
+import { Role } from "./role";
+import { File } from "./file";
 
 export interface IProblemModel extends Document {
     title: string;
@@ -35,7 +37,7 @@ export let ProblemSchema: Schema = new Schema(
         fileIDs: {
             type: [String],
             required: true,
-            validate: validateFiles,
+            validate: (v: string[]) => validateMany(File, v),
         },
         data: Object,
         channel: String,
@@ -49,12 +51,12 @@ export let ProblemSchema: Schema = new Schema(
         ownerID: {
             type: String,
             required: true,
-            validate: validateUser,
+            validate: (v: string) => validateOne(User, v),
         },
         groupID: {
             type: String,
             required: true,
-            validate: validateRole,
+            validate: (v: string) => validateOne(Role, v),
         },
         permission: {
             type: Number,

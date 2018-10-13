@@ -1,14 +1,14 @@
 import { createHash } from "crypto";
-import { createReadStream, readFileSync, stat } from "fs-extra";
+import { createReadStream, stat } from "fs-extra";
 import { Model } from "mongoose";
 import { config } from "./config";
 import { IClient } from "./interfaces/cache";
 import { IContestModel } from "./schemas/contest";
-import { File, IFileModel } from "./schemas/file";
-import { IProblemModel, Problem } from "./schemas/problem";
-import { Role } from "./schemas/role";
+import { IFileModel } from "./schemas/file";
+import { IProblemModel } from "./schemas/problem";
 import { ISolutionModel } from "./schemas/solution";
-import { User } from "./schemas/user";
+import { IUserModel } from "./schemas/user";
+import { IRoleModel } from "./schemas/role";
 
 export const getBaseURL = (hostname: string, port: number) => {
     return "http://" + hostname + (port === 80 ? "" : ":" + port);
@@ -37,38 +37,16 @@ export const getFileSize = (path: string): Promise<number> => {
     });
 };
 
-export const validateRoles = async (roles: string[]) => {
-    const count = await Role.find().where("_id").in(roles).countDocuments();
-    return count === roles.length;
-};
+type IExModel = IContestModel | IFileModel | IProblemModel | ISolutionModel;
+type IModel  = IExModel | IUserModel | IRoleModel;
 
-export const validateRole = async (role: string) => {
-    return !!(await Role.findById(role).countDocuments());
-};
+export const validateOne = async(model: Model<IModel>, ID: string) => {
+    return !!(await model.findById(ID).countDocuments());
+}
 
-export const validateUser = async (user: string[]) => {
-    return !!(await User.findById(user).countDocuments());
-};
-
-export const validateACES = async (aces: string[]) => {
-    const users = await User.find().where("_id").in(aces).countDocuments();
-    const roles = await Role.find().where("_id").in(aces).countDocuments();
-    return (users + roles) === aces.length;
-};
-
-export const validateProblems = async (problems: string[]) => {
-    const count = await Problem.find().where("_id").in(problems).countDocuments();
-    return count === problems.length;
-};
-
-export const validateProblem = async (problem: string) => {
-    return !!(await Problem.findById(problem).countDocuments());
-};
-
-export const validateFiles = async (files: string[]) => {
-    const count = await File.find().where("_id").in(files).countDocuments();
-    return count === files.length;
-};
+export const validateMany = async(model: Model<IModel>, IDs: string[]) => {
+    return (await model.find().where("_id").in(IDs).countDocuments()) === IDs.length;
+}
 
 // Linux-style Access config
 // rwrwrw user group
@@ -78,7 +56,7 @@ export const validateFiles = async (files: string[]) => {
 // Group `wheel` and user `root` have super power!!!
 // See code below
 
-export const getAccess = (resource: IContestModel | IFileModel | IProblemModel | ISolutionModel, client: IClient) => {
+export const getAccess = (resource: IExModel, client: IClient) => {
     // Special User
     if (client.userID === config.system.root || client.roles.includes(config.system.wheel)) {
         return 3; // RW

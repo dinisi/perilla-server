@@ -1,8 +1,11 @@
 import { Document, model, Model, Schema } from "mongoose";
 import { ContestResultCalcType, IContestPhrase } from "../interfaces/contest";
-import { validateProblems, validateRole, validateUser } from "../utils";
 import { Player } from "./player";
 import { ISolutionModel, SolutionResult } from "./solution";
+import { validateMany, validateOne } from "../utils";
+import { Problem } from "./problem";
+import { User } from "./user";
+import { Role } from "./role";
 
 export interface IContestModel extends Document {
     title: string;
@@ -41,7 +44,7 @@ export let ContestSchema = new Schema(
         problemIDs: {
             type: [String],
             required: true,
-            validate: validateProblems,
+            validate: (v: string[]) => validateMany(Problem, v),
         },
         resultCalcType: {
             type: Number,
@@ -64,12 +67,12 @@ export let ContestSchema = new Schema(
         ownerID: {
             type: String,
             required: true,
-            validate: validateUser,
+            validate: (v: string) => validateOne(User, v),
         },
         groupID: {
             type: String,
             required: true,
-            validate: validateRole,
+            validate: (v: string) => validateOne(Role, v),
         },
         permission: {
             type: Number,
@@ -79,7 +82,7 @@ export let ContestSchema = new Schema(
     },
 );
 
-ContestSchema.methods.getPhrase = function(): IContestPhrase {
+ContestSchema.methods.getPhrase = function (): IContestPhrase {
     const self = this as IContestModel;
     const now = +new Date();
     for (let i = 0, time = +self.start; i < self.phrases.length; i++) {
@@ -97,7 +100,7 @@ ContestSchema.methods.getPhrase = function(): IContestPhrase {
     };
 };
 
-ContestSchema.methods.updatePlayer = async function(solution: ISolutionModel) {
+ContestSchema.methods.updatePlayer = async function (solution: ISolutionModel) {
     if (solution.status === SolutionResult.WaitingJudge || solution.status === SolutionResult.Judging) { return; }
     const self = this as IContestModel;
     let player = await Player.findOne().where("userID").equals(solution.ownerID).where("contestID").equals(self.id);
@@ -153,7 +156,7 @@ ContestSchema.methods.updatePlayer = async function(solution: ISolutionModel) {
     await player.save();
 };
 
-ContestSchema.pre("save", async function(next) {
+ContestSchema.pre("save", async function (next) {
     const self = this as IContestModel;
     if (!self.created) {
         self.created = new Date();
