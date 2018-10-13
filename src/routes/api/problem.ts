@@ -86,6 +86,17 @@ problemRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response)
     }
 });
 
+problemRouter.get("/:id/data", async (req: IAuthorizedRequest, res: Response) => {
+    try {
+        const problem = await Problem.findById(req.params.id);
+        if (!problem || !canRead(getAccess(problem, req.client))) { throw new Error("Not found"); }
+
+        res.send({ status: "success", payload: { fileIDs: problem.fileIDs, data: problem.data } });
+    } catch (e) {
+        res.send({ status: "failed", payload: e.message });
+    }
+});
+
 problemRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
     try {
         const problem = await Problem.findById(req.params.id);
