@@ -27,7 +27,7 @@ console.log = (message) => {
 
         // Step 0
         if (fs.existsSync("config.json")) {
-            console.log("[INFO] config.json exists.")
+            console.log("[INFO] config.json exists.");
             if ((await prompts({ type: "confirm", name: "value", message: "continue will overwrite exist data. confirm?", initial: false })).value) {
                 console.log("[INFO] removing managed files...");
                 const oldConfig = JSON.parse(fs.readFileSync("config.json").toString());
@@ -38,7 +38,7 @@ console.log = (message) => {
                     fs.unlinkSync("cli.log");
                 } catch (e) {
                     console.log("[ERROR] " + e.message);
-                    if (!(await prompts({ type: "confirm", name: "value", message: "continue?", initial: false })).value) process.exit(0);
+                    if (!(await prompts({ type: "confirm", name: "value", message: "continue?", initial: false })).value) { process.exit(0); }
                 }
                 console.log("[INFO] Droping database...");
                 await mongoose.connect(oldConfig.db.url, oldConfig.db.options);
@@ -51,6 +51,7 @@ console.log = (message) => {
         console.log("[INFO] Initializing the system...");
         // Step 1
         console.log("[INFO] [STEP 1/4] Compiling typescript code...");
+        // tslint:disable-next-line:variable-name
         const tsc_path = path.join(__dirname, "node_modules", ".bin", "tsc");
         await child_process.execSync(tsc_path);
         // Step 2
@@ -62,24 +63,24 @@ console.log = (message) => {
 
         // Step 2 - 2: define database models
         // User
-        let UserSchema = new mongoose.Schema(
+        const UserSchema = new mongoose.Schema(
             {
-                username: { type: String, required: true, unique: true, minlength: 1, },
-                realname: { type: String, required: true, unique: true, minlength: 1, },
+                username: { type: String, required: true, unique: true, minlength: 1 },
+                realname: { type: String, required: true, unique: true, minlength: 1 },
                 email: { type: String, required: true, unique: true, minlength: 1, maxlength: 50 },
-                bio: { type: String, required: true, default: "No bio", minlength: 1, maxlength: 200, },
-                created: Date, roleIDs: { type: [String], required: true, },
+                bio: { type: String, required: true, default: "No bio", minlength: 1, maxlength: 200 },
+                created: Date, roleIDs: { type: [String], required: true },
                 hash: String,
                 salt: String,
-                config: { type: Object, required: true, },
-                _protected: { type: Boolean, required: true, default: false, },
+                config: { type: Object, required: true },
+                _protected: { type: Boolean, required: true, default: false },
             },
         );
-        UserSchema.methods.setPassword = function (password) {
+        UserSchema.methods.setPassword = function(password) {
             this.salt = crypto.randomBytes(16).toString("hex");
             this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, "sha512").toString("hex");
         };
-        UserSchema.pre("save", function (next) {
+        UserSchema.pre("save", function(next) {
             const self = this;
             if (!self.created) {
                 self.created = new Date();
@@ -171,38 +172,38 @@ console.log = (message) => {
         const config = {
             db: {
                 url: dbURL,
-                options: dbOptions
+                options: dbOptions,
             },
             redis: {
                 prefix: "PERILLA",
-                options: {}
+                options: {},
             },
             mail: {
-                enabled: false
+                enabled: false,
             },
             http: {
                 port: 3000,
                 hostname: "localhost",
-                https: false
+                https: false,
             },
             defaults: {
-                roleIDs: {
-                    config: worst
+                role: {
+                    config: worst,
                 },
                 user: {
                     config: worst,
-                    roles: [userRole.id]
-                }
+                    roleIDs: [userRole.id],
+                },
             },
             reservedUserID: removedUser.id,
             system: {
                 root: admin.id,
-                wheel: adminRole.id
-            }
+                wheel: adminRole.id,
+            },
         };
         // Step 4
         console.log("[INFO] [STEP 4/4] Writing config.json");
-        fs.writeFileSync("config.json", JSON.stringify(config, null, '\t'));
+        fs.writeFileSync("config.json", JSON.stringify(config, null, "\t"));
         console.log("[INFO] ✔️ Done");
         console.log("[TIP] use `yarn start` to start perilla");
         console.log("[TIP] Edit config.json to customize perilla.");
@@ -210,6 +211,7 @@ console.log = (message) => {
         process.exit(0);
     } else if (argv[0] === "recompile") {
         console.log("[INFO] Compiling");
+        // tslint:disable-next-line:variable-name
         const tsc_path = path.join(__dirname, "node_modules", ".bin", "tsc");
         await child_process.execSync(tsc_path);
         console.log("[INFO] Done");
