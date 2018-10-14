@@ -15,6 +15,7 @@ export let RoleSchema: Schema = new Schema(
             type: String,
             required: true,
             minlength: 1,
+            validate: (v: string) => /^[A-Za-z0-9]*$/.test(v),
         },
         description: {
             type: String,

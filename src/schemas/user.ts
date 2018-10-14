@@ -29,6 +29,7 @@ export let UserSchema: Schema = new Schema(
             type: String,
             required: true,
             minlength: 1,
+            validate: (v: string) => /^[A-Za-z0-9]*$/.test(v),
         },
         realname: {
             type: String,
