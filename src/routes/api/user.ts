@@ -10,9 +10,9 @@ userRouter.post("/new", async (req: IAuthorizedRequest, res: Response) => {
     try {
         if (!req.client.config.manageSystem) { throw new Error("Access denied"); }
         const user = new User();
-        user.username = req.body.username;
+        user._id = req.body._id;
         user.realname = req.body.realname;
-        user.roleIDs = req.body.roleIDs;
+        user.roles = req.body.roles;
         user.email = req.body.email;
         user.setPassword(req.body.password);
         await user.save();
@@ -26,11 +26,10 @@ userRouter.get("/count", async (req: IAuthorizedRequest, res: Response) => {
     try {
         let query = User.find();
 
-        if (req.query.username) { query = query.where("username").equals(req.query.username); }
         if (req.query.realname) { query = query.where("realname").equals(req.query.realname); }
         if (req.query.email) { query = query.where("email").equals(req.query.email); }
         if (req.query.roles) { query = query.where("roles").all(req.query.roles); }
-        if (req.query.search) { query = query.where("username").regex(new RegExp(req.query.search)); }
+        if (req.query.search) { query = query.where("_id").regex(new RegExp(req.query.search)); }
 
         res.send({ status: "success", payload: await query.countDocuments() });
     } catch (e) {
@@ -42,14 +41,13 @@ userRouter.get("/list", verifyPaginate, async (req: IAuthorizedRequest, res: Res
     try {
         let query = User.find();
 
-        if (req.query.username) { query = query.where("username").equals(req.query.username); }
         if (req.query.realname) { query = query.where("realname").equals(req.query.realname); }
         if (req.query.email) { query = query.where("email").equals(req.query.email); }
         if (req.query.roles) { query = query.where("roles").all(req.query.roles); }
-        if (req.query.search) { query = query.where("username").regex(new RegExp(req.query.search)); }
+        if (req.query.search) { query = query.where("_id").regex(new RegExp(req.query.search)); }
 
         query = query.skip(req.query.skip).limit(req.query.limit);
-        const users = await query.select("username realname email roles").exec();
+        const users = await query.select("_id realname email roles").exec();
         res.send({ status: "success", payload: users });
     } catch (e) {
         res.send({ status: "failed", payload: e.message });
@@ -68,7 +66,7 @@ userRouter.get("/:id", async (req: IAuthorizedRequest, res: Response) => {
 
 userRouter.get("/:id/summary", async (req: IAuthorizedRequest, res: Response) => {
     try {
-        const user = await User.findById(req.params.id).select("username email").exec();
+        const user = await User.findById(req.params.id).select("_id email").exec();
         if (!user) { throw new Error("Not found"); }
         res.send({ status: "success", payload: user });
     } catch (e) {
@@ -88,7 +86,7 @@ userRouter.post("/:id", async (req: IAuthorizedRequest, res: Response) => {
         user.email = req.body.email;
         user.bio = req.body.bio;
         if (allowedManage) {
-            user.roleIDs = req.body.roleIDs;
+            user.roles = req.body.roles;
             user.config = req.body.config;
         }
         if (req.body.password) { user.setPassword(req.body.password); }

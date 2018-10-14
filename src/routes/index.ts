@@ -16,13 +16,13 @@ export let MainRouter = Router();
 MainRouter.post("/login", async (req, res) => {
     try {
         if (req.query.a) { throw new Error("Already logged in"); }
-        const user = await User.findOne().where("username").equals(req.body.username).exec();
+        const user = await User.findById(req.body._id).exec();
         if (!user) { throw new Error("Not found"); }
         if (!user.validPassword(req.body.password)) { throw new Error("Unknow Error"); }
         // tslint:disable-next-line:no-shadowed-variable
         const config = user.config;
         const roles: string[] = [user.id];
-        for (const roleID of user.roleIDs) {
+        for (const roleID of user.roles) {
             const role = await Role.findById(roleID);
             if (role) {
                 roles.push(roleID);
@@ -58,7 +58,7 @@ if (config.mail.enabled) {
             if (req.query.a) { throw new Error("Already logged in"); }
             const token = await generateRegisterToken();
             const user: IPendingUser = {
-                username: req.body.username,
+                _id: req.body._id,
                 realname: req.body.realname,
                 email: req.body.email,
                 password: req.body.password,
@@ -77,7 +77,7 @@ if (config.mail.enabled) {
             const pendingUser = await getPendingUser(token);
             await setPendingUser(pendingUser, token, 0);
             const user = new User();
-            user.username = pendingUser.username;
+            user._id = pendingUser._id;
             user.realname = pendingUser.realname;
             user.email = pendingUser.email;
             user.setPassword(pendingUser.password);
@@ -92,7 +92,7 @@ if (config.mail.enabled) {
         try {
             if (req.query.a) { throw new Error("Already logged in"); }
             const user = new User();
-            user.username = req.body.username;
+            user._id = req.body._id;
             user.realname = req.body.realname;
             user.email = req.body.email;
             user.setPassword(req.body.password);

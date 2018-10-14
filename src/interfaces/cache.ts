@@ -12,7 +12,7 @@ export interface IClient {
 }
 
 export interface IPendingUser {
-    username: string;
+    _id: string;
     realname: string;
     email: string;
     password: string;

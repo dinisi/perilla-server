@@ -3,7 +3,7 @@ import { config } from "../config";
 import { IConfiguration } from "../interfaces/user";
 
 export interface IRoleModel extends Document {
-    rolename: string;
+    _id: string;
     description: string;
     config: IConfiguration;
     _protected: boolean;
@@ -11,10 +11,10 @@ export interface IRoleModel extends Document {
 
 export let RoleSchema: Schema = new Schema(
     {
-        rolename: {
+        _id: {
             type: String,
-            unique: true,
             required: true,
+            minlength: 1,
         },
         description: {
             type: String,

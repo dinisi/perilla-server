@@ -9,14 +9,14 @@ import { Role } from "./role";
 import { Solution } from "./solution";
 
 export interface IUserModel extends Document {
-    username: string;
+    _id: string;
     realname: string;
     email: string;
     bio: string;
     hash: string;
     salt: string;
     created: Date;
-    roleIDs: string[];
+    roles: string[];
     config: IConfiguration;
     _protected: boolean;
     setPassword(password: string): string;
@@ -25,10 +25,9 @@ export interface IUserModel extends Document {
 
 export let UserSchema: Schema = new Schema(
     {
-        username: {
+        _id: {
             type: String,
             required: true,
-            unique: true,
             minlength: 1,
         },
         realname: {
@@ -53,10 +52,10 @@ export let UserSchema: Schema = new Schema(
             maxlength: 200,
         },
         created: Date,
-        roleIDs: {
+        roles: {
             type: [String],
             required: true,
-            default: config.defaults.user.roleIDs,
+            default: config.defaults.user.roles,
             validate: (v: string[]) => validateMany(Role, v),
         },
         hash: String,
