@@ -1,23 +1,20 @@
 import { Document, model, Model, Schema } from "mongoose";
 import { ContestResultCalcType, IContestPhrase } from "../interfaces/contest";
-import { validateMany, validateOne } from "../utils";
+import { validateMany } from "../utils";
 import { Player } from "./player";
 import { Problem } from "./problem";
-import { Role } from "./role";
 import { ISolutionModel, SolutionResult } from "./solution";
-import { User } from "./user";
 
 export interface IContestModel extends Document {
     title: string;
     description: string;
     start: Date;
     created: Date;
-    problemIDs: string[];
+    problems: string[];
     resultCalcType: ContestResultCalcType;
     phrases: IContestPhrase[];
-    ownerID: string;
-    groupID: string;
-    permission: number;
+    group: string;
+    public: boolean;
     getPhrase(): IContestPhrase;
     updatePlayer(solution: ISolutionModel): Promise<void>;
 }
@@ -41,7 +38,7 @@ export let ContestSchema = new Schema(
             type: Date,
             required: true,
         },
-        problemIDs: {
+        problems: {
             type: [String],
             required: true,
             validate: (v: string[]) => validateMany(Problem, v),
@@ -64,20 +61,14 @@ export let ContestSchema = new Schema(
             },
         },
         created: Date,
-        ownerID: {
+        group: {
             type: String,
             required: true,
-            validate: (v: string) => validateOne(User, v),
         },
-        groupID: {
-            type: String,
+        public: {
+            type: Boolean,
             required: true,
-            validate: (v: string) => validateOne(Role, v),
-        },
-        permission: {
-            type: Number,
-            min: 0,
-            max: 127,
+            default: true,
         },
     },
 );
@@ -103,10 +94,10 @@ ContestSchema.methods.getPhrase = function(): IContestPhrase {
 ContestSchema.methods.updatePlayer = async function(solution: ISolutionModel) {
     if (solution.status === SolutionResult.WaitingJudge || solution.status === SolutionResult.Judging) { return; }
     const self = this as IContestModel;
-    let player = await Player.findOne().where("userID").equals(solution.ownerID).where("contestID").equals(self.id);
+    let player = await Player.findOne().where("userID").equals(solution.owner).where("contestID").equals(self.id);
     if (!player) {
         player = new Player();
-        player.userID = solution.ownerID;
+        player.userID = solution.owner;
         player.contestID = self.id;
     }
     if (!player.details.hasOwnProperty(solution.id)) {

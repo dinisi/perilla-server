@@ -1,21 +1,18 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { validateMany, validateOne } from "../utils";
+import { validateMany } from "../utils";
 import { File } from "./file";
-import { Role } from "./role";
 import { Solution } from "./solution";
-import { User } from "./user";
 
 export interface IProblemModel extends Document {
     title: string;
     content: string;
-    fileIDs: string[];
+    files: string[];
     data?: object;
     channel?: string;
     tags: string[];
     created: Date;
-    ownerID: string;
-    groupID: string;
-    permission: number;
+    group: string;
+    public: boolean;
 }
 
 export let ProblemSchema: Schema = new Schema(
@@ -34,7 +31,7 @@ export let ProblemSchema: Schema = new Schema(
             minlength: 1,
             maxlength: 40960,
         },
-        fileIDs: {
+        files: {
             type: [String],
             required: true,
             validate: (v: string[]) => validateMany(File, v),
@@ -48,20 +45,14 @@ export let ProblemSchema: Schema = new Schema(
             index: true,
         },
         created: Date,
-        ownerID: {
+        group: {
             type: String,
             required: true,
-            validate: (v: string) => validateOne(User, v),
         },
-        groupID: {
-            type: String,
+        public: {
+            type: Boolean,
             required: true,
-            validate: (v: string) => validateOne(Role, v),
-        },
-        permission: {
-            type: Number,
-            min: 0,
-            max: 127,
+            default: true,
         },
     },
 );

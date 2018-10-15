@@ -96,21 +96,21 @@ UserSchema.pre("save", function(next) {
 UserSchema.pre("remove", async function(next) {
     const This = this as IUserModel;
     if (This._protected) { return; }
-    const badFiles = await File.find({ ownerID: this.id });
-    for (const badFile of badFiles) {
-        badFile.ownerID = config.reservedUserID;
-        await badFile.save();
-    }
-    const badProblems = await Problem.find({ ownerID: this.id });
-    for (const badProblem of badProblems) {
-        badProblem.ownerID = config.reservedUserID;
-        await badProblem.save();
-    }
-    const badSolutions = await Solution.find({ ownerID: this.id });
-    for (const badSolution of badSolutions) {
-        badSolution.ownerID = config.reservedUserID;
-        await badSolution.save();
-    }
+    // const badFiles = await File.find({ ownerID: this.id });
+    // for (const badFile of badFiles) {
+    //     badFile.owner = config.reservedUserID;
+    //     await badFile.save();
+    // }
+    // const badProblems = await Problem.find({ ownerID: this.id });
+    // for (const badProblem of badProblems) {
+    //     badProblem.owner = config.reservedUserID;
+    //     await badProblem.save();
+    // }
+    // const badSolutions = await Solution.find({ ownerID: this.id });
+    // for (const badSolution of badSolutions) {
+    //     badSolution.owner = config.reservedUserID;
+    //     await badSolution.save();
+    // }
     next();
 });
 
