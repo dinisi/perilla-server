@@ -1,24 +1,13 @@
 import * as crypto from "crypto";
-import { Document, Model, model, Schema } from "mongoose";
-import { config } from "../config";
-import { IConfiguration } from "../interfaces/user";
-import { validateMany } from "../utils";
-import { File } from "./file";
-import { Problem } from "./problem";
-import { Role } from "./role";
-import { Solution } from "./solution";
+import { Document, model, Schema } from "mongoose";
 
 export interface IUserModel extends Document {
     _id: string;
     realname: string;
-    email: string;
-    bio: string;
     hash: string;
     salt: string;
     created: Date;
-    roles: string[];
-    config: IConfiguration;
-    _protected: boolean;
+    admin: boolean;
     setPassword(password: string): string;
     validPassword(password: string): boolean;
 }
@@ -37,41 +26,14 @@ export let UserSchema: Schema = new Schema(
             unique: true,
             minlength: 1,
         },
-        email: {
-            type: String,
-            required: true,
-            unique: true,
-            minlength: 1,
-            maxlength: 50,
-            validate: (v: string) => /^[a-zA-Z0-9_-]+@([a-zA-Z0-9]+\.)+(com|cn|net|org)$/.test(v),
-        },
-        bio: {
-            type: String,
-            required: true,
-            default: "No bio",
-            minlength: 1,
-            maxlength: 200,
-        },
-        created: Date,
-        roles: {
-            type: [String],
-            required: true,
-            default: config.defaults.user.roles,
-            validate: (v: string[]) => validateMany(Role, v),
-        },
-        hash: String,
-        salt: String,
-        config: {
-            type: Object,
-            required: true,
-            default: config.defaults.user.config,
-            validate: (v: any) => IConfiguration.validate(v).success,
-        },
-        _protected: {
+        admin: {
             type: Boolean,
             required: true,
             default: false,
         },
+        created: Date,
+        hash: String,
+        salt: String,
     },
 );
 
@@ -94,8 +56,6 @@ UserSchema.pre("save", function(next) {
 });
 
 UserSchema.pre("remove", async function(next) {
-    const This = this as IUserModel;
-    if (This._protected) { return; }
     // const badFiles = await File.find({ ownerID: this.id });
     // for (const badFile of badFiles) {
     //     badFile.owner = config.reservedUserID;

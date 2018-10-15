@@ -20,21 +20,6 @@ MainRouter.post("/login", async (req, res) => {
         if (!user) { throw new Error("Not found"); }
         if (!user.validPassword(req.body.password)) { throw new Error("Unknow Error"); }
         // tslint:disable-next-line:no-shadowed-variable
-        const config = user.config;
-        const roles: string[] = [user.id];
-        for (const roleID of user.roles) {
-            const role = await Role.findById(roleID);
-            if (role) {
-                roles.push(roleID);
-                for (const name in config) {
-                    if (typeof config[name] === "boolean") {
-                        config[name] = config[name] || role.config[name];
-                    } else if (typeof config[name] === "number") {
-                        config[name] = Math.min(config[name] as number, role.config[name] as number);
-                    }
-                }
-            }
-        }
         const client: IClient = {
             userID: user.id,
             accessToken: await generateAccessToken(),

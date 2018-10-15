@@ -1,5 +1,4 @@
 import { Always, Array, Boolean, Number, Partial, Record, Static, String } from "runtypes";
-import { IConfiguration } from "./user";
 
 export const ISystemConfig = Record({
     db: Record({
@@ -24,20 +23,9 @@ export const ISystemConfig = Record({
         certificate: String,
         privatekey: String,
     })),
-    defaults: Record({
-        role: Record({
-            config: IConfiguration,
-        }),
-        user: Record({
-            roles: Array(String),
-            config: IConfiguration,
-        }),
-    }),
-    reservedUserID: String,
-    system: Record({
-        root: String,
-        wheel: String,
-    }),
+    reservedUser: String,
+    reservedGroup: String,
+    sessionSecret: String,
 });
 
 export interface ISystemConfig extends Static<typeof ISystemConfig> {
