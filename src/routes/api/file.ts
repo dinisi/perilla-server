@@ -4,7 +4,7 @@ import { lookup } from "mime-types";
 import * as multer from "multer";
 import * as tmp from "tmp";
 import { config } from "../../config";
-import { IAuthorizedRequest } from "../../interfaces/requests";
+import { IAuthorizedRequest } from "../../interfaces/route";
 import { File } from "../../schemas/file";
 import { canRead, canWrite, getAccess } from "../../utils";
 import { verifyPaginate } from "../common";
