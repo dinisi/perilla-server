@@ -8,6 +8,7 @@ import * as validator from "express-validator";
 import { appendFileSync, readFileSync } from "fs-extra";
 import * as http from "http";
 import * as https from "https";
+import * as passport from "passport";
 import { config } from "./config";
 import { REDISInstance } from "./redis";
 import { MainRouter } from "./routes";
@@ -29,6 +30,8 @@ app.use(session({
     store: new store({client: REDISInstance}),
     secret: config.sessionSecret,
 }));
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");

@@ -1,5 +1,6 @@
 import * as crypto from "crypto";
 import { Document, model, Schema } from "mongoose";
+import { EntryMap } from "./entryMap";
 
 export enum EntryType {
     user,
@@ -32,6 +33,7 @@ export const EntrySchema: Schema = new Schema(
             type: String,
             required: true,
             minlength: 1,
+            unique: true,
         },
         hash: String,
         salt: String,
@@ -68,10 +70,17 @@ EntrySchema.methods.validPassword = function(password: string) {
     }
 };
 
-EntrySchema.pre("save", function(next) {
+EntrySchema.pre("save", async function(next) {
     const self = this as IEntryModel;
     if (!self.created) {
         self.created = new Date();
+        if (self.type === EntryType.user) {
+            // Add self entry-map
+            const map = new EntryMap();
+            map.from = map.to = self._id;
+            map.admin = true;
+            await map.save();
+        }
     }
     next();
 });

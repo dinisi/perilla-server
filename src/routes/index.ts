@@ -1,10 +1,7 @@
-import { NextFunction, Response, Router } from "express";
-import express = require("express");
+import { Router } from "express";
+import * as express from "express";
 import { join } from "path";
-import { config } from "../config";
 import { IRESTResponse } from "../interfaces/route";
-import { sendMail } from "../mail";
-import { getBaseURL } from "../utils";
 import { APIRouter } from "./api";
 
 export let MainRouter = Router();
@@ -30,6 +27,6 @@ MainRouter.get("/*", (req, res) => {
     res.sendFile(join(UIPath, "index.html"));
 });
 
-MainRouter.use((err: Error, req: express.Request, res: IRESTResponse, next: NextFunction) => {
+MainRouter.use((err: Error, req: express.Request, res: IRESTResponse) => {
     res.RESTFail(err.message);
 });
