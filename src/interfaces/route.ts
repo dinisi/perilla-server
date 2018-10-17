@@ -3,9 +3,14 @@ import { Request, Response } from "express";
 export interface IRESTResponse extends Response {
     RESTSend(value: any): void;
     RESTFail(message: any): void;
+    RESTEnd(): void;
 }
 
-export interface IPrivateRequest extends Request {
-    entry: string;
-    admin: boolean;
+export interface IRESTRequest extends Request {
+    entry?: string;
+    admin?: boolean;
+    pagination: {
+        skip: number;
+        limit: number;
+    };
 }

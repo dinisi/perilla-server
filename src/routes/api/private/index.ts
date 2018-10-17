@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { IPrivateRequest, IRESTResponse } from "../../../interfaces/route";
+import { IRESTRequest, IRESTResponse } from "../../../interfaces/route";
 import { EntryMap } from "../../../schemas/entryMap";
 
 export const PrivateAPIRouter = Router();
 const PrivateAPI = Router();
 
-PrivateAPIRouter.use("/:entry", (req: IPrivateRequest, res: IRESTResponse, next) => {
+PrivateAPIRouter.use("/:entry", (req: IRESTRequest, res: IRESTResponse, next) => {
     if (req.isAuthenticated()) {
         EntryMap.findOne({ from: req.user, to: req.params.entry })
             .then((map) => {
@@ -20,6 +20,6 @@ PrivateAPIRouter.use("/:entry", (req: IPrivateRequest, res: IRESTResponse, next)
     }
 }, PrivateAPI);
 
-PrivateAPI.get("/", (req: IPrivateRequest, res: IRESTResponse) => {
+PrivateAPI.get("/", (req: IRESTRequest, res: IRESTResponse) => {
     res.RESTSend({ entry: req.entry, admin: req.admin });
 });

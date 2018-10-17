@@ -13,6 +13,9 @@ MainRouter.use((req, res: IRESTResponse, next) => {
     res.RESTFail = (message: any) => {
         res.send({ status: "failed", payload: message });
     };
+    res.RESTEnd = () => {
+        res.send({ status: "success" });
+    };
     next();
 });
 
