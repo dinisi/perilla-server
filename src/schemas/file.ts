@@ -10,7 +10,7 @@ export interface IFileModel extends Document {
     hash: string;
     size: number;
     created: Date;
-    group: string;
+    owner: string;
     public: boolean;
     getPath(): string;
     setFile(path: string): Promise<void>;
@@ -31,7 +31,7 @@ export let FileSchema = new Schema(
         hash: String,
         size: String,
         created: Date,
-        group: {
+        owner: {
             type: String,
             required: true,
         },
