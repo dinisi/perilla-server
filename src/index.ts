@@ -29,6 +29,8 @@ const store = REDISStore(session);
 app.use(session({
     store: new store({client: REDISInstance}),
     secret: config.sessionSecret,
+    resave: false,
+    saveUninitialized: false,
 }));
 app.use(passport.initialize());
 app.use(passport.session());

@@ -12,9 +12,9 @@ PrivateAPIRouter.use("/:entry", (req: IPrivateRequest, res: IRESTResponse, next)
                 if (!map) { return res.RESTFail("not such resource"); }
                 req.entry = req.params.entry;
                 req.admin = map.admin;
+                return next();
             })
             .catch((err) => res.RESTFail(err.message));
-        next();
     } else {
         res.RESTFail("please login");
     }
