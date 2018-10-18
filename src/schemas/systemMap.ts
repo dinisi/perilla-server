@@ -11,6 +11,7 @@ export const SystemMapSchema = new Schema(
             type: String,
             required: true,
             validate: validateUser,
+            unique: true,
         },
     },
 );
