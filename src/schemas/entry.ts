@@ -5,6 +5,7 @@ import { EntryMap } from "./entryMap";
 import { File } from "./file";
 import { Problem } from "./problem";
 import { Solution } from "./solution";
+import { SystemMap } from "./systemMap";
 
 export enum EntryType {
     user,
@@ -18,7 +19,6 @@ export interface IEntryModel extends Document {
     hash?: string;
     salt?: string;
     created: Date;
-    enable: boolean;
     type: EntryType;
     setPassword(password: string): string;
     validPassword(password: string): boolean;
@@ -42,11 +42,6 @@ export const EntrySchema: Schema = new Schema(
         hash: String,
         salt: String,
         created: Date,
-        enable: {
-            type: Boolean,
-            required: true,
-            default: true,
-        },
         type: {
             type: Number,
             required: true,
@@ -94,9 +89,11 @@ EntrySchema.pre("remove", async function(next) {
     await FileCounter.remove({ _id: self._id });
     await SolutionCounter.remove({ _id: self._id });
     await ProblemCounter.remove({ _id: self._id });
+    await EntryMap.remove({ $or: [{ from: self._id }, { to: self._id }] });
     await File.remove({ owner: self._id });
     await Problem.remove({ owner: self._id });
     await Solution.remove({ owner: self._id });
+    await SystemMap.remove({ user: self._id });
 });
 
 export const Entry = model<IEntryModel>("Entry", EntrySchema);

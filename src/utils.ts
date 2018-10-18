@@ -2,7 +2,11 @@ import { createHash } from "crypto";
 import { createReadStream, stat } from "fs-extra";
 import { Document, Model } from "mongoose";
 import { SHA3Hash } from "sha3";
-import { Entry, EntryType } from "./schemas/entry";
+import { Entry, EntryType, IEntryModel } from "./schemas/entry";
+import { EntryMap, IEntryMapModel } from "./schemas/entryMap";
+import { IFileModel } from "./schemas/file";
+import { IProblemModel } from "./schemas/problem";
+import { ISolutionModel } from "./schemas/solution";
 
 export const getBaseURL = (hostname: string, port: number) => {
     return "http://" + hostname + (port === 80 ? "" : ":" + port);
@@ -52,4 +56,15 @@ export const validateGroup = async (ID: string) => {
     const group = await Entry.findById(ID);
     if (!group) { return false; }
     return group.type === EntryType.group;
+};
+
+interface ICommonModel extends Document {
+    public?: boolean;
+    admin?: boolean;
+}
+export const validateAccess = async (resource: ICommonModel, entry: string, admin: boolean) => {
+    if (!admin && resource.public) { return true; }
+    const map = await EntryMap.findOne({ from: entry, to: resource.owner });
+    if (admin) { return (!!map) && map.admin; }
+    return resource.public || (!!map);
 };

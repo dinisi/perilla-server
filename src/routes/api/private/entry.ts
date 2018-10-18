@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { IRESTRequest } from "../../../interfaces/route";
 import { Entry, EntryType } from "../../../schemas/entry";
 import { RESTWarp } from "../wrap";
 
@@ -7,7 +6,7 @@ export const privateEntryRouter = Router();
 
 privateEntryRouter.get("/", RESTWarp(async (req, res) => {
     const entry = await Entry.findById(req.entry).select("-hash -salt");
-    res.RESTSend(entry);
+    return res.RESTSend(entry);
 }));
 
 privateEntryRouter.post("/", RESTWarp(async (req, res) => {
@@ -23,5 +22,5 @@ privateEntryRouter.post("/", RESTWarp(async (req, res) => {
         entry.setPassword(req.body.password);
     }
     await entry.save();
-    res.RESTEnd();
+    return res.RESTEnd();
 }));

@@ -51,6 +51,18 @@ privateFileRouter.delete("/", RESTWarp(async (req, res) => {
     return res.RESTEnd();
 }));
 
+privateFileRouter.get("/raw", RESTWarp(async (req, res) => {
+    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
+    const errors = req.validationErrors();
+    if (errors) {
+        throw new Error(normalizeValidatorError(errors));
+    }
+    const file = await File.findOne({ owner: req.entry, id: req.query.id });
+    if (!file) { throw new Error("Not found"); }
+    if (!req.admin && req.user !== file.creator) { throw new Error("Access denied"); }
+    return res.sendFile(file.getPath(), { headers: { "Content-Type": file.filename } });
+}));
+
 privateFileRouter.post("/upload", upload.single("file"), RESTWarp(async (req, res) => {
     const file = new File();
     await file.setFile(req.file.path);
@@ -60,7 +72,7 @@ privateFileRouter.post("/upload", upload.single("file"), RESTWarp(async (req, re
     file.type = lookup(req.file.originalname) || "text/plain";
     file.description = req.file.originalname;
     await file.save();
-    res.RESTSend(file.id);
+    return res.RESTSend(file.id);
 }));
 
 privateFileRouter.post("/new", RESTWarp(async (req, res) => {
@@ -83,7 +95,7 @@ privateFileRouter.post("/new", RESTWarp(async (req, res) => {
     file.type = req.body.type || lookup(req.body.filename) || "text/plain";
     file.public = req.body.public;
     await file.save();
-    res.RESTSend(file.id);
+    return res.RESTSend(file.id);
 }));
 
 privateFileRouter.get("/count", RESTWarp(async (req, res) => {
@@ -92,7 +104,8 @@ privateFileRouter.get("/count", RESTWarp(async (req, res) => {
 }));
 
 privateFileRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
-    const query = File.find().where("owner").equals(req.entry);
+    let query = File.find().where("owner").equals(req.entry);
+    query = query.select("id filename type description size created owner creator public");
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

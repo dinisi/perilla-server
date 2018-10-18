@@ -61,7 +61,7 @@ privateProblemRouter.post("/new", RESTWarp(async (req, res) => {
     problem.owner = req.entry;
     problem.creator = req.user;
     await problem.save();
-    res.RESTSend(problem.id);
+    return res.RESTSend(problem.id);
 }));
 
 privateProblemRouter.post("/submit", RESTWarp(async (req, res) => {
@@ -80,7 +80,7 @@ privateProblemRouter.post("/submit", RESTWarp(async (req, res) => {
     solution.owner = req.entry;
     await solution.save();
     await solution.judge();
-    res.RESTSend(solution.id);
+    return res.RESTSend(solution.id);
 }));
 
 privateProblemRouter.get("/count", RESTWarp(async (req, res) => {
@@ -89,7 +89,8 @@ privateProblemRouter.get("/count", RESTWarp(async (req, res) => {
 }));
 
 privateProblemRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
-    const query = Problem.find().where("owner").equals(req.entry);
+    let query = Problem.find().where("owner").equals(req.entry);
+    query = query.select("id title content tags created owner creator public");
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { IRESTRequest, IRESTResponse } from "../../../interfaces/route";
 import { EntryMap } from "../../../schemas/entryMap";
+import { normalizeValidatorError, RESTWarp } from "../wrap";
 import { privateEntryRouter } from "./entry";
 import { privateEntrymapRouter } from "./entrymap";
 import { privateFileRouter } from "./file";
@@ -8,29 +9,26 @@ import { privateProblemRouter } from "./problem";
 import { privateSolutionRouter } from "./solution";
 
 export const PrivateAPIRouter = Router();
-const PrivateAPI = Router();
 
-PrivateAPIRouter.use("/:entry", (req: IRESTRequest, res: IRESTResponse, next) => {
-    if (req.isAuthenticated()) {
-        EntryMap.findOne({ from: req.user, to: req.params.entry })
-            .then((map) => {
-                if (!map) { return res.RESTFail("not such resource"); }
-                req.entry = req.params.entry;
-                req.admin = map.admin;
-                return next();
-            })
-            .catch((err) => res.RESTFail(err.message));
-    } else {
-        res.RESTFail("please login");
+PrivateAPIRouter.use(RESTWarp(async (req, res, next) => {
+    req.checkQuery("entry", "Invalid entry").isString().notEmpty();
+    const errors = req.validationErrors();
+    if (errors) {
+        throw new Error(normalizeValidatorError(errors));
     }
-}, PrivateAPI);
+    const map = await EntryMap.findOne({ from: req.user, to: req.query.entry });
+    if (!map) { throw new Error("Access denied"); }
+    req.entry = map.to;
+    req.admin = map.admin;
+    return next();
+}));
 
-PrivateAPI.get("/", (req: IRESTRequest, res: IRESTResponse) => {
+PrivateAPIRouter.get("/", (req: IRESTRequest, res: IRESTResponse) => {
     res.RESTSend({ entry: req.entry, admin: req.admin });
 });
 
-PrivateAPI.use("/entry", privateEntryRouter);
-PrivateAPI.use("/entrymap", privateEntrymapRouter);
-PrivateAPI.use("/file", privateFileRouter);
-PrivateAPI.use("/problem", privateProblemRouter);
-PrivateAPI.use("/solution", privateSolutionRouter);
+PrivateAPIRouter.use("/entry", privateEntryRouter);
+PrivateAPIRouter.use("/entrymap", privateEntrymapRouter);
+PrivateAPIRouter.use("/file", privateFileRouter);
+PrivateAPIRouter.use("/problem", privateProblemRouter);
+PrivateAPIRouter.use("/solution", privateSolutionRouter);
