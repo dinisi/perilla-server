@@ -1,5 +1,5 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { validateMany, validateOne } from "../utils";
+import { validateMany, validateOne, validateUser } from "../utils";
 import { ProblemCounter } from "./counter";
 import { Entry } from "./entry";
 import { File } from "./file";
@@ -15,6 +15,7 @@ export interface IProblemModel extends Document {
     tags: string[];
     created: Date;
     owner: string;
+    creator: string;
     public: boolean;
 }
 
@@ -53,6 +54,11 @@ export let ProblemSchema: Schema = new Schema(
             type: String,
             required: true,
             validate: (id: string) => validateOne(Entry, id),
+        },
+        creator: {
+            type: String,
+            required: true,
+            validate: validateUser,
         },
         public: {
             type: Boolean,

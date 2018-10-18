@@ -29,6 +29,7 @@ export interface ISolutionModel extends Document {
     log?: string;
     created: Date;
     owner: string;
+    creator: string;
     public: boolean;
     judge(): Promise<void>;
 }
@@ -68,6 +69,11 @@ export let SolutionSchema: Schema = new Schema(
             required: true,
             validate: validateUser,
         },
+        creator: {
+            type: String,
+            required: true,
+            validate: validateUser,
+        },
         public: {
             type: Boolean,
             required: true,
@@ -91,6 +97,7 @@ SolutionSchema.pre("save", async function(next) {
         self.created = new Date();
         const counter = await SolutionCounter.findByIdAndUpdate(self.owner, { $inc: { count: 1 } }, { upsert: true, new: true });
         self.id = counter.count;
+        self.status = SolutionResult.WaitingJudge;
     }
     next();
 });

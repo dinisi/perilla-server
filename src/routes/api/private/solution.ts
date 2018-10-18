@@ -5,7 +5,7 @@ import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
 export const privateSolutionRouter = Router();
 
 privateSolutionRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -16,14 +16,14 @@ privateSolutionRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 privateSolutionRouter.delete("/", RESTWarp(async (req, res) => {
-    if (!req.admin) { throw new Error("Access denied"); }
-    req.checkQuery("id").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
     const solution = await Solution.findOne({ owner: req.entry, id: req.query.id });
     if (!solution) { throw new Error("Not found"); }
+    if (!req.admin && req.user !== solution.creator) { throw new Error("Access denied"); }
     await solution.remove();
     return res.RESTEnd();
 }));

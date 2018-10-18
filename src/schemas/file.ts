@@ -1,7 +1,7 @@
 import { ensureDirSync, move, unlink } from "fs-extra";
 import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
-import { getFileSize, getHash, validateOne } from "../utils";
+import { getFileSize, getHash, validateOne, validateUser } from "../utils";
 import { FileCounter } from "./counter";
 import { Entry } from "./entry";
 ensureDirSync("files/managed");
@@ -15,6 +15,7 @@ export interface IFileModel extends Document {
     size: number;
     created: Date;
     owner: string;
+    creator: string;
     public: boolean;
     getPath(): string;
     setFile(path: string): Promise<void>;
@@ -46,6 +47,11 @@ export let FileSchema = new Schema(
             type: String,
             required: true,
             validate: (id: string) => validateOne(Entry, id),
+        },
+        creator: {
+            type: String,
+            required: true,
+            validate: validateUser,
         },
         public: {
             type: Boolean,

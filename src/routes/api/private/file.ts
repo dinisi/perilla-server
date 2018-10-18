@@ -11,7 +11,7 @@ ensureDirSync("files/uploads/");
 const upload = multer({ dest: "files/uploads/" });
 
 privateFileRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -22,14 +22,14 @@ privateFileRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 privateFileRouter.post("/", RESTWarp(async (req, res) => {
-    if (!req.admin) { throw new Error("Access denied"); }
-    req.checkQuery("id").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
     const file = await File.findOne({ owner: req.entry, id: req.query.id });
     if (!file) { throw new Error("Not found"); }
+    if (!req.admin && req.user !== file.creator) { throw new Error("Access denied"); }
     file.filename = req.body.filename;
     file.type = req.body.type;
     file.description = req.body.description;
@@ -39,23 +39,23 @@ privateFileRouter.post("/", RESTWarp(async (req, res) => {
 }));
 
 privateFileRouter.delete("/", RESTWarp(async (req, res) => {
-    if (!req.admin) { throw new Error("Access denied"); }
-    req.checkQuery("id").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
     const file = await File.findOne({ owner: req.entry, id: req.query.id });
     if (!file) { throw new Error("Not found"); }
+    if (!req.admin && req.user !== file.creator) { throw new Error("Access denied"); }
     await file.remove();
     return res.RESTEnd();
 }));
 
 privateFileRouter.post("/upload", upload.single("file"), RESTWarp(async (req, res) => {
-    if (!req.admin) { throw new Error("Access denied"); }
     const file = new File();
     await file.setFile(req.file.path);
     file.owner = req.entry;
+    file.creator = req.user;
     file.filename = req.file.originalname;
     file.type = lookup(req.file.originalname) || "text/plain";
     file.description = req.file.originalname;
@@ -64,7 +64,6 @@ privateFileRouter.post("/upload", upload.single("file"), RESTWarp(async (req, re
 }));
 
 privateFileRouter.post("/new", RESTWarp(async (req, res) => {
-    if (!req.admin) { throw new Error("Access denied"); }
     const path = await new Promise<string>((resolve, reject) => {
         tmp.file((err, filepath) => {
             if (err) {
@@ -78,6 +77,7 @@ privateFileRouter.post("/new", RESTWarp(async (req, res) => {
     const file = new File();
     await file.setFile(path);
     file.owner = req.entry;
+    file.creator = req.user;
     file.filename = req.body.filename;
     file.description = req.body.description;
     file.type = req.body.type || lookup(req.body.filename) || "text/plain";

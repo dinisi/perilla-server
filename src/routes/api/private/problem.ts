@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { Problem } from "../../../schemas/problem";
+import { Solution } from "../../../schemas/solution";
 import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
 
 export const privateProblemRouter = Router();
 
 privateProblemRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -16,14 +17,14 @@ privateProblemRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 privateProblemRouter.post("/", RESTWarp(async (req, res) => {
-    if (!req.admin) { throw new Error("Access denied"); }
-    req.checkQuery("id").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
     const problem = await Problem.findOne({ owner: req.entry, id: req.query.id });
     if (!problem) { throw new Error("Not found"); }
+    if (!req.admin && req.user !== problem.creator) { throw new Error("Access denied"); }
     problem.title = req.body.title;
     problem.content = req.body.content;
     problem.files = req.body.files;
@@ -36,20 +37,19 @@ privateProblemRouter.post("/", RESTWarp(async (req, res) => {
 }));
 
 privateProblemRouter.delete("/", RESTWarp(async (req, res) => {
-    if (!req.admin) { throw new Error("Access denied"); }
-    req.checkQuery("id").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
     const problem = await Problem.findOne({ owner: req.entry, id: req.query.id });
     if (!problem) { throw new Error("Not found"); }
+    if (!req.admin && req.user !== problem.creator) { throw new Error("Access denied"); }
     await problem.remove();
     return res.RESTEnd();
 }));
 
 privateProblemRouter.post("/new", RESTWarp(async (req, res) => {
-    if (!req.admin) { throw new Error("Access denied"); }
     const problem = new Problem();
     problem.title = req.body.title;
     problem.content = req.body.content;
@@ -59,14 +59,28 @@ privateProblemRouter.post("/new", RESTWarp(async (req, res) => {
     problem.tags = req.body.tags;
     problem.public = req.body.public;
     problem.owner = req.entry;
+    problem.creator = req.user;
     await problem.save();
     res.RESTSend(problem.id);
 }));
 
 privateProblemRouter.post("/submit", RESTWarp(async (req, res) => {
-    // TODO
-    // Submit on this problem
-    // return res.RESTSend()
+    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
+    const errors = req.validationErrors();
+    if (errors) {
+        throw new Error(normalizeValidatorError(errors));
+    }
+    const problem = await Problem.findOne({ owner: req.entry, id: req.query.id });
+    if (!problem) { throw new Error("Not found"); }
+    const solution = new Solution();
+    solution.problem = problem.id;
+    solution.files = req.body.files;
+    solution.public = req.body.public;
+    solution.creator = req.user;
+    solution.owner = req.entry;
+    await solution.save();
+    await solution.judge();
+    res.RESTSend(solution.id);
 }));
 
 privateProblemRouter.get("/count", RESTWarp(async (req, res) => {
