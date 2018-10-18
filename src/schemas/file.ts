@@ -24,7 +24,6 @@ export let FileSchema = new Schema(
     {
         id: {
             type: Number,
-            required: true,
             index: true,
         },
         filename: {

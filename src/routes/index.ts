@@ -20,16 +20,3 @@ MainRouter.use((req, res: IRESTResponse, next) => {
 });
 
 MainRouter.use("/api", APIRouter);
-
-const UIPath = join(__dirname, "..", "..", "ui", "dist");
-
-MainRouter.use(express.static(join(UIPath)));
-
-// Redirt all unmatched routes to root
-MainRouter.get("/*", (req, res) => {
-    res.sendFile(join(UIPath, "index.html"));
-});
-
-MainRouter.use((err: Error, req: express.Request, res: IRESTResponse) => {
-    res.RESTFail(err.message);
-});

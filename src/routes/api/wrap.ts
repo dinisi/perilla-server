@@ -14,12 +14,16 @@ export const RESTWarp = (handle: IHandleFunction) => {
 };
 
 export const PaginationGuard = (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
-    req.checkQuery("skip").isNumeric();
-    req.checkQuery("limit").isNumeric();
+    req.checkQuery("skip", "Invalid skip").isNumeric();
+    req.checkQuery("limit", "Invalid limit").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         return res.RESTFail(errors.map((_: any) => _.msg).join());
     } else {
+        req.pagination = {
+            skip: parseInt(req.query.skip, 10),
+            limit: parseInt(req.query.limit, 10),
+        };
         return next();
     }
 };

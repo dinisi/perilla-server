@@ -1,3 +1,4 @@
+### Register
 POST http://127.0.0.1:3000/api/register
 content-type: application/json
 
@@ -7,7 +8,7 @@ content-type: application/json
     "email": "admin@zhangzisu.cn"
 }
 
-###
+### Login
 POST http://127.0.0.1:3000/api/login
 Content-Type: application/json
 
@@ -16,5 +17,21 @@ Content-Type: application/json
     "password": "123456"
 }
 
-###
+### Get private route access details
 GET http://127.0.0.1:3000/api/private/zzs/
+
+# Private route - file
+### Fetch all files
+GET http://127.0.0.1:3000/api/private/zzs/file/list?skip=0&limit=512
+###
+GET http://127.0.0.1:3000/api/private/zzs/file/count
+### Create a new file
+POST http://127.0.0.1:3000/api/private/zzs/file/new
+Content-Type: application/json
+
+{
+    "filename": "test.c",
+    "description": "test - for system test",
+    "public": true,
+    "content": "#include<stdio.h>"
+}

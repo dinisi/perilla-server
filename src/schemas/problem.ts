@@ -22,7 +22,6 @@ export let ProblemSchema: Schema = new Schema(
     {
         id: {
             type: Number,
-            required: true,
             index: true,
         },
         title: {

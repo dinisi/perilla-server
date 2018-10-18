@@ -37,7 +37,7 @@ export let SolutionSchema: Schema = new Schema(
     {
         id: {
             type: Number,
-            required: true,
+            index: true,
         },
         problem: {
             type: Number,
