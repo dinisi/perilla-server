@@ -1,6 +1,10 @@
 import * as crypto from "crypto";
 import { Document, model, Schema } from "mongoose";
+import { FileCounter, ProblemCounter, SolutionCounter } from "./counter";
 import { EntryMap } from "./entryMap";
+import { File } from "./file";
+import { Problem } from "./problem";
+import { Solution } from "./solution";
 
 export enum EntryType {
     user,
@@ -83,6 +87,16 @@ EntrySchema.pre("save", async function(next) {
         }
     }
     next();
+});
+
+EntrySchema.pre("remove", async function(next) {
+    const self = this as IEntryModel;
+    await FileCounter.remove({ _id: self._id });
+    await SolutionCounter.remove({ _id: self._id });
+    await ProblemCounter.remove({ _id: self._id });
+    await File.remove({ owner: self._id });
+    await Problem.remove({ owner: self._id });
+    await Solution.remove({ owner: self._id });
 });
 
 export const Entry = model<IEntryModel>("Entry", EntrySchema);

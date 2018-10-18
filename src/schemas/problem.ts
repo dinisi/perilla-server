@@ -1,9 +1,12 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { validateMany } from "../utils";
+import { validateMany, validateOne } from "../utils";
+import { ProblemCounter } from "./counter";
+import { Entry } from "./entry";
 import { File } from "./file";
 import { Solution } from "./solution";
 
 export interface IProblemModel extends Document {
+    id: number;
     title: string;
     content: string;
     files: string[];
@@ -11,16 +14,20 @@ export interface IProblemModel extends Document {
     channel?: string;
     tags: string[];
     created: Date;
-    group: string;
+    owner: string;
     public: boolean;
 }
 
 export let ProblemSchema: Schema = new Schema(
     {
+        id: {
+            type: Number,
+            required: true,
+            index: true,
+        },
         title: {
             type: String,
             required: true,
-            unique: true,
             minlength: 1,
             maxlength: 50,
         },
@@ -34,7 +41,6 @@ export let ProblemSchema: Schema = new Schema(
         files: {
             type: [String],
             required: true,
-            validate: (v: string[]) => validateMany(File, v),
         },
         data: Object,
         channel: String,
@@ -42,25 +48,27 @@ export let ProblemSchema: Schema = new Schema(
             type: [String],
             required: true,
             default: ["No tags"],
-            index: true,
         },
         created: Date,
-        group: {
+        owner: {
             type: String,
             required: true,
+            validate: (id: string) => validateOne(Entry, id),
         },
         public: {
             type: Boolean,
             required: true,
-            default: true,
+            default: false,
         },
     },
 );
 
 ProblemSchema.pre("save", async function(next) {
-    const This = this as IProblemModel;
-    if (!This.created) {
-        This.created = new Date();
+    const self = this as IProblemModel;
+    if (!self.created) {
+        self.created = new Date();
+        const counter = await ProblemCounter.findByIdAndUpdate(self.owner, { $inc: { count: 1 } }, { upsert: true, new: true });
+        self.id = counter.count;
     }
     next();
 });

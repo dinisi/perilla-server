@@ -1,11 +1,15 @@
 import { ensureDirSync, move, unlink } from "fs-extra";
 import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
-import { getFileSize, MD5 } from "../utils";
+import { getFileSize, getHash, validateOne } from "../utils";
+import { FileCounter } from "./counter";
+import { Entry } from "./entry";
 ensureDirSync("files/managed");
 
 export interface IFileModel extends Document {
+    id: number;
     filename: string;
+    type: string;
     description: string;
     hash: string;
     size: number;
@@ -18,10 +22,18 @@ export interface IFileModel extends Document {
 
 export let FileSchema = new Schema(
     {
+        id: {
+            type: Number,
+            required: true,
+            index: true,
+        },
         filename: {
             type: String,
             required: true,
-            index: true,
+        },
+        type: {
+            type: String,
+            required: true,
         },
         description: {
             type: String,
@@ -34,11 +46,12 @@ export let FileSchema = new Schema(
         owner: {
             type: String,
             required: true,
+            validate: (id: string) => validateOne(Entry, id),
         },
         public: {
             type: Boolean,
             required: true,
-            default: true,
+            default: false,
         },
     },
 );
@@ -59,7 +72,7 @@ FileSchema.methods.setFile = async function(path: string) {
         self.size = null;
     }
     if (path) {
-        self.hash = await MD5(path);
+        self.hash = await getHash(path);
         self.size = await getFileSize(path);
         const count = await File.find().where("hash").equals(self.hash).countDocuments();
         if (count === 0) {
@@ -72,6 +85,8 @@ FileSchema.pre("save", async function(next) {
     const self = this as IFileModel;
     if (!self.created) {
         self.created = new Date();
+        const counter = await FileCounter.findByIdAndUpdate(self.owner, { $inc: { count: 1 } }, { upsert: true, new: true });
+        self.id = counter.count;
     }
     next();
 });
