@@ -4,6 +4,7 @@ import { Entry, EntryType } from "../../schemas/entry";
 import "./passport";
 import { PrivateAPIRouter } from "./private";
 import { PublicAPIRouter } from "./public";
+import { SystemAPIRouter } from "./system";
 import { normalizeValidatorError, RESTWarp } from "./wrap";
 
 export const APIRouter = Router();
@@ -14,7 +15,7 @@ APIRouter.post("/register", RESTWarp((req, res) => {
     req.checkBody("email", "Invalid email").isEmail();
     const errors = req.validationErrors();
     if (errors) {
-        res.RESTFail(normalizeValidatorError(errors));
+        return res.RESTFail(normalizeValidatorError(errors));
     } else {
         const entry = new Entry();
         entry._id = req.body._id;
@@ -28,8 +29,9 @@ APIRouter.post("/register", RESTWarp((req, res) => {
 }));
 
 APIRouter.post("/login", authenticate("local"), RESTWarp((req, res) => {
-    res.RESTSend(req.user);
+    return res.RESTSend(req.user);
 }));
 
 APIRouter.use("/public", PublicAPIRouter);
 APIRouter.use("/private", PrivateAPIRouter);
+APIRouter.use("/system", SystemAPIRouter);

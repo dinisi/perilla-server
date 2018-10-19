@@ -25,7 +25,7 @@ PrivateAPIRouter.use(RESTWarp(async (req, res, next) => {
 }));
 
 PrivateAPIRouter.get("/", (req: IRESTRequest, res: IRESTResponse) => {
-    res.RESTSend({ entry: req.entry, admin: req.admin });
+    return  res.RESTSend({ entry: req.entry, admin: req.admin });
 });
 
 PrivateAPIRouter.use("/entry", privateEntryRouter);

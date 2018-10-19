@@ -8,7 +8,7 @@ export const RESTWarp = (handle: IHandleFunction) => {
         try {
             await handle(req, res, next);
         } catch (e) {
-            res.RESTFail(e.message);
+            return  res.RESTFail(e.message);
         }
     };
 };

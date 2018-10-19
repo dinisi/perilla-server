@@ -26,7 +26,7 @@ publicFileRouter.get("/", RESTWarp(async (req, res) => {
     }
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
     if (!file || !file.public) { throw new Error("Not found"); }
-    res.RESTSend(file);
+    return  res.RESTSend(file);
 }));
 
 publicFileRouter.get("/raw", RESTWarp(async (req, res) => {
