@@ -1,7 +1,9 @@
+import "./passport";
+
 import { Router } from "express";
 import { authenticate } from "passport";
 import { Entry, EntryType } from "../../schemas/entry";
-import "./passport";
+import { commonRouter } from "./common";
 import { PrivateAPIRouter } from "./private";
 import { PublicAPIRouter } from "./public";
 import { SystemAPIRouter } from "./system";
@@ -10,9 +12,9 @@ import { normalizeValidatorError, RESTWarp } from "./wrap";
 export const APIRouter = Router();
 
 APIRouter.post("/register", RESTWarp((req, res) => {
-    req.checkBody("username", "Invalid username");
-    req.checkBody("password", "Invalid password").isString();
-    req.checkBody("email", "Invalid email").isEmail();
+    req.checkBody("username", "Invalid body: username");
+    req.checkBody("password", "Invalid body: password").isString();
+    req.checkBody("email", "Invalid body: email").isEmail();
     const errors = req.validationErrors();
     if (errors) {
         return res.RESTFail(normalizeValidatorError(errors));
@@ -35,3 +37,4 @@ APIRouter.post("/login", authenticate("local"), RESTWarp((req, res) => {
 APIRouter.use("/public", PublicAPIRouter);
 APIRouter.use("/private", PrivateAPIRouter);
 APIRouter.use("/system", SystemAPIRouter);
+APIRouter.use("/common", commonRouter);

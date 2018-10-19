@@ -22,11 +22,11 @@ GET http://127.0.0.1:3000/api/private/zzs/
 
 # Private route - file
 ### Fetch all files
-GET http://127.0.0.1:3000/api/private/zzs/file/list?skip=0&limit=512
+GET http://127.0.0.1:3000/api/private/file/list?skip=0&limit=512&entry=zzs
 ###
-GET http://127.0.0.1:3000/api/private/zzs/file/count
+GET http://127.0.0.1:3000/api/private/file/count?entry=zzs
 ### Create a new file
-POST http://127.0.0.1:3000/api/private/zzs/file/new
+POST http://127.0.0.1:3000/api/private/file/new?entry=zzs
 Content-Type: application/json
 
 {
@@ -35,3 +35,40 @@ Content-Type: application/json
     "public": true,
     "content": "#include<stdio.h>"
 }
+### Fetch a exists file
+GET http://127.0.0.1:3000/api/private/file?entry=zzs&id=2
+### Modify a exists file
+POST http://127.0.0.1:3000/api/private/file?entry=zzs&id=2
+Content-Type: application/json
+
+{
+    "description": "DDD",
+    "public": false,
+    "filename": "test.c",
+    "type": "text/x-c"
+}
+### Fetch a no-exist file
+GET http://127.0.0.1:3000/api/private/file?entry=zzs&id=0
+# Public route
+### Fetch public files
+GET http://127.0.0.1:3000/api/public/file/count
+###
+GET http://127.0.0.1:3000/api/public/file/list?skip=0&limit=512
+# System route
+### Try to use system route
+GET http://127.0.0.1:3000/api/system/file/count
+### Try to fetch entries
+GET http://127.0.0.1:3000/api/system/entry/list?skip=0&limit=512
+###
+GET http://127.0.0.1:3000/api/system/systemmap/list?skip=0&limit=512
+### Common routes
+### Create a new entry
+POST http://127.0.0.1:3000/api/common/entry/create
+Content-Type: application/json
+
+{
+    "name": "DDD",
+    "email": "admin@zhangzisu.com"
+}
+###
+GET http://127.0.0.1:3000/api/system/entrymap/list?skip=0&limit=512

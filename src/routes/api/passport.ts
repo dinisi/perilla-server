@@ -1,7 +1,6 @@
 import * as passport from "passport";
 import * as local from "passport-local";
 import { Entry, EntryType } from "../../schemas/entry";
-import { IEntryMapModel } from "../../schemas/entryMap";
 
 passport.serializeUser((user, done) => {
     return done(null, user);

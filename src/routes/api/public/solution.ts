@@ -17,8 +17,8 @@ publicSolutionRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => 
 }));
 
 publicSolutionRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid `ID`").isNumeric();
-    req.checkQuery("entry", "Invalid `entry`").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
+    req.checkQuery("entry", "Invalid query: entry").isString().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));

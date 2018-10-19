@@ -57,14 +57,3 @@ export const validateGroup = async (ID: string) => {
     if (!group) { return false; }
     return group.type === EntryType.group;
 };
-
-interface ICommonModel extends Document {
-    public?: boolean;
-    admin?: boolean;
-}
-export const validateAccess = async (resource: ICommonModel, entry: string, admin: boolean) => {
-    if (!admin && resource.public) { return true; }
-    const map = await EntryMap.findOne({ from: entry, to: resource.owner });
-    if (admin) { return (!!map) && map.admin; }
-    return resource.public || (!!map);
-};

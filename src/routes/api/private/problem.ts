@@ -6,7 +6,7 @@ import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
 export const privateProblemRouter = Router();
 
 privateProblemRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -17,7 +17,7 @@ privateProblemRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 privateProblemRouter.post("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -37,7 +37,7 @@ privateProblemRouter.post("/", RESTWarp(async (req, res) => {
 }));
 
 privateProblemRouter.delete("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -65,7 +65,7 @@ privateProblemRouter.post("/new", RESTWarp(async (req, res) => {
 }));
 
 privateProblemRouter.post("/submit", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));

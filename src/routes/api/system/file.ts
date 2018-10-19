@@ -55,7 +55,7 @@ systemFileRouter.post("/", RESTWarp(async (req, res) => {
 }));
 
 systemFileRouter.delete("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));

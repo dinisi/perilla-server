@@ -10,7 +10,7 @@ privateEntryRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 privateEntryRouter.post("/", RESTWarp(async (req, res) => {
-    req.checkBody("email").isEmail();
+    req.checkBody("email", "Invalid body: email").isEmail();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));

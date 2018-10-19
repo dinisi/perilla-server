@@ -10,10 +10,11 @@ import { SystemMapRouter } from "./systemmap";
 
 export const SystemAPIRouter = Router();
 
-SystemAPIRouter.use(RESTWarp((req, res, next) => {
+SystemAPIRouter.use(RESTWarp(async (req, res, next) => {
     if (!req.isAuthenticated()) { throw new Error("Not logged in"); }
-    const map = SystemMap.findOne({ user: req.user });
+    const map = await SystemMap.findOne({ user: req.user });
     if (!map) { throw new Error("Access denied"); }
+    next();
 }));
 
 SystemAPIRouter.use("/entry", systemEntryRouter);

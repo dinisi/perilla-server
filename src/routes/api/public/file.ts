@@ -18,8 +18,8 @@ publicFileRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
 }));
 
 publicFileRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
-    req.checkQuery("entry", "Invalid `entry`").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("entry", "Invalid query: entry").isString().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -30,8 +30,8 @@ publicFileRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 publicFileRouter.get("/raw", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid `ID`").isNumeric().notEmpty();
-    req.checkQuery("entry", "Invalid `entry`").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("entry", "Invalid query: entry").isString().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));

@@ -20,7 +20,7 @@ privateEntrymapRouter.get("/", RESTWarp(async (req, res) => {
 privateEntrymapRouter.post("/", RESTWarp(async (req, res) => {
     if (!req.admin) { throw new Error("Access denied"); }
     req.checkQuery("id").isString().notEmpty();
-    req.checkBody("admin").isBoolean();
+    req.checkBody("admin", "Invalid body: admin").isBoolean();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
