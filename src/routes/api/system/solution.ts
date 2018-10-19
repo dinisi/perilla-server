@@ -35,10 +35,25 @@ SystemSolutionRouter.post("/", RESTWarp(async (req, res) => {
     }
     const solution = await Solution.findOne({ owner: req.entry, id: req.query.id });
     if (!solution) { throw new Error("Not found"); }
+    solution.files = req.body.files;
     solution.status = req.body.status;
     solution.score = req.body.score;
     solution.log = req.body.log;
     solution.public = req.body.public;
+    return res.RESTEnd();
+}));
+
+SystemSolutionRouter.post("/update", RESTWarp(async (req, res) => {
+    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    const errors = req.validationErrors();
+    if (errors) {
+        throw new Error(normalizeValidatorError(errors));
+    }
+    const solution = await Solution.findOne({ owner: req.entry, id: req.query.id });
+    if (!solution) { throw new Error("Not found"); }
+    solution.status = req.body.status;
+    solution.score = req.body.score;
+    solution.log = req.body.log;
     return res.RESTEnd();
 }));
 
