@@ -57,6 +57,12 @@ GET http://127.0.0.1:3000/api/public/file/list?skip=0&limit=512
 # System route
 ### Try to use system route
 GET http://127.0.0.1:3000/api/system/file/count
+### Fetch file
+GET http://127.0.0.1:3000/api/system/file/list?skip=0&limit=512
+###
+GET http://127.0.0.1:3000/api/system/file?id=5bc9420a843ef97822d35001
+###
+GET http://127.0.0.1:3000/api/system/file/raw?id=5bc9420a843ef97822d35001
 ### Try to fetch entries
 GET http://127.0.0.1:3000/api/system/entry/list?skip=0&limit=512
 ###
