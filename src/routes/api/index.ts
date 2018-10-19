@@ -10,7 +10,7 @@ import { normalizeValidatorError, RESTWarp } from "./wrap";
 export const APIRouter = Router();
 
 APIRouter.post("/register", RESTWarp((req, res) => {
-    req.checkBody("_id", "Invalid username");
+    req.checkBody("username", "Invalid username");
     req.checkBody("password", "Invalid password").isString();
     req.checkBody("email", "Invalid email").isEmail();
     const errors = req.validationErrors();
@@ -18,7 +18,7 @@ APIRouter.post("/register", RESTWarp((req, res) => {
         return res.RESTFail(normalizeValidatorError(errors));
     } else {
         const entry = new Entry();
-        entry._id = req.body._id;
+        entry._id = req.body.username;
         entry.email = req.body.email;
         entry.type = EntryType.user;
         entry.setPassword(req.body.password);

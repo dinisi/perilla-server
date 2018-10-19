@@ -24,7 +24,18 @@ systemFileRouter.get("/", RESTWarp(async (req, res) => {
     }
     const file = await File.findById(req.query.id);
     if (!file) { throw new Error("Not error"); }
-    return  res.RESTSend(file);
+    return res.RESTSend(file);
+}));
+
+systemFileRouter.get("/raw", RESTWarp(async (req, res) => {
+    req.checkQuery("id").isString().notEmpty();
+    const errors = req.validationErrors();
+    if (errors) {
+        throw new Error(normalizeValidatorError(errors));
+    }
+    const file = await File.findById(req.query.id);
+    if (!file) { throw new Error("Not error"); }
+    res.sendFile(file.getPath(), { headers: { "Content-Type": file.type } });
 }));
 
 systemFileRouter.post("/", RESTWarp(async (req, res) => {
