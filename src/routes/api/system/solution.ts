@@ -27,6 +27,33 @@ SystemSolutionRouter.get("/", RESTWarp(async (req, res) => {
     return res.RESTSend(solution);
 }));
 
+SystemSolutionRouter.post("/", RESTWarp(async (req, res) => {
+    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    const errors = req.validationErrors();
+    if (errors) {
+        throw new Error(normalizeValidatorError(errors));
+    }
+    const solution = await Solution.findOne({ owner: req.entry, id: req.query.id });
+    if (!solution) { throw new Error("Not found"); }
+    solution.status = req.body.status;
+    solution.score = req.body.score;
+    solution.log = req.body.log;
+    solution.public = req.body.public;
+    return res.RESTEnd();
+}));
+
+SystemSolutionRouter.post("/rejudge", RESTWarp(async (req, res) => {
+    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    const errors = req.validationErrors();
+    if (errors) {
+        throw new Error(normalizeValidatorError(errors));
+    }
+    const solution = await Solution.findOne({ owner: req.entry, id: req.query.id });
+    if (!solution) { throw new Error("Not found"); }
+    await solution.judge();
+    return res.RESTEnd();
+}));
+
 SystemSolutionRouter.delete("/", RESTWarp(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
     const errors = req.validationErrors();

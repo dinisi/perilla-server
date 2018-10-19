@@ -1,7 +1,9 @@
 import { Document, Model, model, Schema } from "mongoose";
+import { IJudgeTask } from "../interfaces/judgetask";
 import { addJudgeTask } from "../redis";
 import { validateUser } from "../utils";
 import { SolutionCounter } from "./counter";
+import { File } from "./file";
 import { Problem } from "./problem";
 
 export enum SolutionResult {
@@ -84,11 +86,27 @@ export let SolutionSchema: Schema = new Schema(
 
 SolutionSchema.methods.judge = async function() {
     const self = this as ISolutionModel;
-    const channel = (await Problem.findById(self.problem).select("channel")).channel;
-    if (!channel) { return; }
+    const problem = await Problem.findById(self.problem);
+    if (!problem) { throw new Error("Invalid solution"); }
+    if (!problem.channel) { throw new Error("Problem do not have a valid data config"); }
+    if (problem.owner !== self.owner) { throw new Error("Bad solution"); }
     self.status = SolutionResult.WaitingJudge;
     await self.save();
-    await addJudgeTask("" + self._id, channel);
+    const problemFiles = [];
+    for (const id of problem.files) {
+        problemFiles.push((await File.findOne({ owner: problem.owner, id }))._id);
+    }
+    const solutionFiles = [];
+    for (const id of self.files) {
+        solutionFiles.push((await File.findById({ owner: self.owner, id }))._id);
+    }
+    const task: IJudgeTask = {
+        solutionID: "" + self._id,
+        problemFiles,
+        solutionFiles,
+        data: problem.data,
+    };
+    await addJudgeTask(task, problem.channel);
 };
 
 SolutionSchema.pre("save", async function(next) {
