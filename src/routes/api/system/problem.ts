@@ -21,7 +21,7 @@ systemProblemRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
 }));
 
 privateProblemRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -32,7 +32,7 @@ privateProblemRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 privateProblemRouter.post("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -51,7 +51,7 @@ privateProblemRouter.post("/", RESTWarp(async (req, res) => {
 }));
 
 systemProblemRouter.delete("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));

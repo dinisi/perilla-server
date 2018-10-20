@@ -3,7 +3,7 @@ POST http://127.0.0.1:3000/api/register
 content-type: application/json
 
 {
-    "_id": "zzs",
+    "username": "zzs",
     "password": "123456",
     "email": "admin@zhangzisu.cn"
 }
@@ -18,7 +18,7 @@ Content-Type: application/json
 }
 
 ### Get private route access details
-GET http://127.0.0.1:3000/api/private/zzs/
+GET http://127.0.0.1:3000/api/private?entry=zzs
 
 # Private route - file
 ### Fetch all files

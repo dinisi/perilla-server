@@ -20,7 +20,7 @@ SystemSolutionRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => 
 }));
 
 SystemSolutionRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -31,7 +31,7 @@ SystemSolutionRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 SystemSolutionRouter.post("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -47,7 +47,7 @@ SystemSolutionRouter.post("/", RESTWarp(async (req, res) => {
 }));
 
 SystemSolutionRouter.post("/update", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -61,7 +61,7 @@ SystemSolutionRouter.post("/update", RESTWarp(async (req, res) => {
 }));
 
 SystemSolutionRouter.post("/rejudge", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -73,7 +73,7 @@ SystemSolutionRouter.post("/rejudge", RESTWarp(async (req, res) => {
 }));
 
 SystemSolutionRouter.delete("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));

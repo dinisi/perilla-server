@@ -20,14 +20,14 @@ systemEntryRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
 }));
 
 systemEntryRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString();
     const entry = await Entry.findById(req.query.id);
     if (!entry) { throw new Error("Not found"); }
     return  res.RESTSend(entry);
 }));
 
 systemEntryRouter.post("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));

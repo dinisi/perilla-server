@@ -6,7 +6,7 @@ import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
 export const privateSolutionRouter = Router();
 
 privateSolutionRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -17,7 +17,7 @@ privateSolutionRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 privateSolutionRouter.post("/rejudge", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -30,7 +30,7 @@ privateSolutionRouter.post("/rejudge", RESTWarp(async (req, res) => {
 }));
 
 privateSolutionRouter.delete("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));

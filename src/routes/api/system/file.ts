@@ -20,7 +20,7 @@ systemFileRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
 }));
 
 systemFileRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -31,7 +31,7 @@ systemFileRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 systemFileRouter.get("/raw", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -42,7 +42,7 @@ systemFileRouter.get("/raw", RESTWarp(async (req, res) => {
 }));
 
 systemFileRouter.post("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -58,7 +58,7 @@ systemFileRouter.post("/", RESTWarp(async (req, res) => {
 }));
 
 systemFileRouter.delete("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));

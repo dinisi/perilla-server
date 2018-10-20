@@ -19,7 +19,7 @@ SystemMapRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
 }));
 
 SystemMapRouter.post("/", RESTWarp(async (req, res) => {
-    req.checkQuery("user").isString().notEmpty();
+    req.checkQuery("user").isString();
     if (!await SystemMap.findOne({ user: req.query.user })) {
         const map = new SystemMap();
         map.user = req.query.user;
@@ -29,7 +29,7 @@ SystemMapRouter.post("/", RESTWarp(async (req, res) => {
 }));
 
 SystemMapRouter.delete("/", RESTWarp(async (req, res) => {
-    req.checkQuery("user").isString().notEmpty();
+    req.checkQuery("user").isString();
     const map = await SystemMap.findOne({ user: req.query.user });
     if (!map) { throw new Error("Not found"); }
     await map.remove();

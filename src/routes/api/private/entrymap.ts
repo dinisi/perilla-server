@@ -8,7 +8,7 @@ import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
 export const privateEntrymapRouter = Router();
 
 privateEntrymapRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -20,7 +20,7 @@ privateEntrymapRouter.get("/", RESTWarp(async (req, res) => {
 
 privateEntrymapRouter.post("/", RESTWarp(async (req, res) => {
     if (!req.admin) { throw new Error("Access denied"); }
-    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString();
     req.checkBody("admin", "Invalid body: admin").isBoolean();
     const errors = req.validationErrors();
     if (errors) {
@@ -40,7 +40,7 @@ privateEntrymapRouter.post("/", RESTWarp(async (req, res) => {
 
 privateEntrymapRouter.delete("/", RESTWarp(async (req, res) => {
     if (!req.admin) { throw new Error("Access denied"); }
-    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
