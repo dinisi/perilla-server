@@ -34,6 +34,12 @@ APIRouter.post("/login", authenticate("local"), RESTWarp((req, res) => {
     return res.RESTSend(req.user);
 }));
 
+APIRouter.post("/logout", RESTWarp((req, res) => {
+    if (!req.isAuthenticated()) { throw new Error("Not logged in"); }
+    req.logout();
+    res.RESTEnd();
+}));
+
 APIRouter.use("/public", PublicAPIRouter);
 APIRouter.use("/private", PrivateAPIRouter);
 APIRouter.use("/system", SystemAPIRouter);

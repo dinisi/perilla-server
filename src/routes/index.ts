@@ -8,13 +8,13 @@ export let MainRouter = Router();
 
 MainRouter.use((req, res: IRESTResponse, next) => {
     res.RESTSend = (value: any) => {
-        res.send({ status: "success", payload: value });
+        res.json({ status: "success", payload: value });
     };
     res.RESTFail = (message: any) => {
-        res.send({ status: "failed", payload: message });
+        res.json({ status: "failed", payload: message });
     };
     res.RESTEnd = () => {
-        res.send({ status: "success" });
+        res.json({ status: "success" });
     };
     next();
 });
