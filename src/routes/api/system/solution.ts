@@ -22,7 +22,7 @@ SystemSolutionRouter.get("/", RESTWarp(async (req, res) => {
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
-    const solution = await Solution.findOne({ owner: req.entry, id: req.query.id });
+    const solution = await Solution.findById(req.query.id);
     if (!solution) { throw new Error("Not found"); }
     return res.RESTSend(solution);
 }));
@@ -33,7 +33,7 @@ SystemSolutionRouter.post("/", RESTWarp(async (req, res) => {
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
-    const solution = await Solution.findOne({ owner: req.entry, id: req.query.id });
+    const solution = await Solution.findById(req.query.id);
     if (!solution) { throw new Error("Not found"); }
     solution.files = req.body.files;
     solution.status = req.body.status;
@@ -49,7 +49,7 @@ SystemSolutionRouter.post("/update", RESTWarp(async (req, res) => {
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
-    const solution = await Solution.findOne({ owner: req.entry, id: req.query.id });
+    const solution = await Solution.findById(req.query.id);
     if (!solution) { throw new Error("Not found"); }
     solution.status = req.body.status;
     solution.score = req.body.score;
@@ -63,7 +63,7 @@ SystemSolutionRouter.post("/rejudge", RESTWarp(async (req, res) => {
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
-    const solution = await Solution.findOne({ owner: req.entry, id: req.query.id });
+    const solution = await Solution.findById(req.query.id);
     if (!solution) { throw new Error("Not found"); }
     await solution.judge();
     return res.RESTEnd();
@@ -75,7 +75,7 @@ SystemSolutionRouter.delete("/", RESTWarp(async (req, res) => {
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
-    const solution = await Solution.findOne({ owner: req.entry, id: req.query.id });
+    const solution = await Solution.findById(req.query.id);
     if (!solution) { throw new Error("Not found"); }
     if (!req.admin && req.user !== solution.creator) { throw new Error("Access denied"); }
     await solution.remove();

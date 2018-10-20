@@ -19,7 +19,7 @@ export interface IProblemModel extends Document {
     public: boolean;
 }
 
-export let ProblemSchema: Schema = new Schema(
+export const ProblemSchema: Schema = new Schema(
     {
         id: {
             type: Number,

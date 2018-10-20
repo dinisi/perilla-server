@@ -21,7 +21,7 @@ export interface IFileModel extends Document {
     setFile(path: string): Promise<void>;
 }
 
-export let FileSchema = new Schema(
+export const FileSchema = new Schema(
     {
         id: {
             type: Number,

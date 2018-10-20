@@ -23,7 +23,7 @@ privateProblemRouter.get("/", RESTWarp(async (req, res) => {
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
-    const problem = await Problem.findOne({ owner: req.entry, id: req.query.id });
+    const problem = await Problem.findById(req.query.id);
     if (!problem) { throw new Error("Not found"); }
     return res.RESTSend(problem);
 }));
@@ -34,7 +34,7 @@ privateProblemRouter.post("/", RESTWarp(async (req, res) => {
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
-    const problem = await Problem.findOne({ owner: req.entry, id: req.query.id });
+    const problem = await Problem.findById(req.query.id);
     if (!problem) { throw new Error("Not found"); }
     problem.title = req.body.title;
     problem.content = req.body.content;
@@ -53,7 +53,7 @@ systemProblemRouter.delete("/", RESTWarp(async (req, res) => {
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
-    const problem = await Problem.findOne({ owner: req.entry, id: req.query.id });
+    const problem = await Problem.findById(req.query.id);
     if (!problem) { throw new Error("Not found"); }
     await problem.remove();
     return res.RESTEnd();

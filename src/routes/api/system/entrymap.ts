@@ -5,7 +5,7 @@ import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
 export const systemEntryMapRouter = Router();
 
 systemEntryMapRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -16,7 +16,7 @@ systemEntryMapRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 systemEntryMapRouter.post("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -29,7 +29,7 @@ systemEntryMapRouter.post("/", RESTWarp(async (req, res) => {
 }));
 
 systemEntryMapRouter.delete("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));

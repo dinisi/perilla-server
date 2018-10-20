@@ -17,7 +17,7 @@ systemFileRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
 }));
 
 systemFileRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -28,7 +28,7 @@ systemFileRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 systemFileRouter.get("/raw", RESTWarp(async (req, res) => {
-    req.checkQuery("id").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -39,7 +39,7 @@ systemFileRouter.get("/raw", RESTWarp(async (req, res) => {
 }));
 
 systemFileRouter.post("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -60,7 +60,7 @@ systemFileRouter.delete("/", RESTWarp(async (req, res) => {
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
-    const file = await File.findOne({ owner: req.entry, id: req.query.id });
+    const file = await File.findById(req.query.id);
     if (!file) { throw new Error("Not found"); }
     await file.remove();
     return res.RESTEnd();

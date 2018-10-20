@@ -36,7 +36,7 @@ export interface ISolutionModel extends Document {
     judge(): Promise<void>;
 }
 
-export let SolutionSchema: Schema = new Schema(
+export const SolutionSchema: Schema = new Schema(
     {
         id: {
             type: Number,
