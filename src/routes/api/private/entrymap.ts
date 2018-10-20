@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { extendQuery } from "../../../interfaces/query";
 import { Entry } from "../../../schemas/entry";
 import { EntryMap } from "../../../schemas/entryMap";
 import { validateOne } from "../../../utils";
@@ -51,12 +52,14 @@ privateEntrymapRouter.delete("/", RESTWarp(async (req, res) => {
 }));
 
 privateEntrymapRouter.get("/count", RESTWarp(async (req, res) => {
-    const query = EntryMap.find().where("to").equals(req.entry);
+    let query = EntryMap.find().where("to").equals(req.entry);
+    query = extendQuery(query, req.query.condition);
     return res.RESTSend(await query.countDocuments());
 }));
 
 privateEntrymapRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
-    const query = EntryMap.find().where("to").equals(req.entry);
+    let query = EntryMap.find().where("to").equals(req.entry);
+    query = extendQuery(query, req.query.condition);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

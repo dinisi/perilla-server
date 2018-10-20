@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { extendQuery } from "../../../interfaces/query";
 import { EntryMap } from "../../../schemas/entryMap";
 import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
 
@@ -41,12 +42,14 @@ systemEntryMapRouter.delete("/", RESTWarp(async (req, res) => {
 }));
 
 systemEntryMapRouter.get("/count", RESTWarp(async (req, res) => {
-    const query = EntryMap.find();
+    let query = EntryMap.find();
+    query = extendQuery(query, req.query.condition);
     return res.RESTSend(await query.countDocuments());
 }));
 
 systemEntryMapRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
-    const query = EntryMap.find();
+    let query = EntryMap.find();
+    query = extendQuery(query, req.query.condition);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

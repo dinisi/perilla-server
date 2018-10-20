@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { extendQuery } from "../../../interfaces/query";
 import { Message } from "../../../schemas/message";
 import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
 
@@ -43,12 +44,14 @@ privateMessageRouter.delete("/", RESTWarp(async (req, res) => {
 }));
 
 privateMessageRouter.get("/count", RESTWarp(async (req, res) => {
-    const query = Message.find().where("owner").equals(req.entry);
+    let query = Message.find().where("owner").equals(req.entry);
+    query = extendQuery(query, req.query.condition);
     return res.RESTSend(await query.countDocuments());
 }));
 
 privateMessageRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
-    const query = Message.find().where("owner").equals(req.entry);
+    let query = Message.find().where("owner").equals(req.entry);
+    query = extendQuery(query, req.query.condition);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));
