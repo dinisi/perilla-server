@@ -12,7 +12,7 @@ privateEntrymapRouter.get("/", RESTWarp(async (req, res) => {
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
-    const map = await EntryMap.findOne({ to: req.entry, from: req.query.id });
+    const map = await EntryMap.findOne({ to: req.query.entry, from: req.query.id });
     if (!map) { throw new Error("Not found"); }
     return res.RESTSend(map);
 }));
@@ -25,12 +25,12 @@ privateEntrymapRouter.post("/", RESTWarp(async (req, res) => {
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
-    let map = await EntryMap.findOne({ to: req.entry, from: req.query.id });
+    let map = await EntryMap.findOne({ to: req.query.entry, from: req.query.id });
     if (!map) {
         if (!await validateOne(Entry, req.query.id)) { throw new Error("Entry not found"); }
         map = new EntryMap();
         map.from = req.query.id;
-        map.to = req.entry;
+        map.to = req.query.entry;
     }
     map.admin = req.body.admin;
     await map.save();
@@ -44,19 +44,19 @@ privateEntrymapRouter.delete("/", RESTWarp(async (req, res) => {
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
-    const map = await EntryMap.findOne({ to: req.entry, from: req.query.id });
+    const map = await EntryMap.findOne({ to: req.query.entry, from: req.query.id });
     if (!map) { throw new Error("Not found"); }
     await map.remove();
     return res.RESTEnd();
 }));
 
 privateEntrymapRouter.get("/count", RESTWarp(async (req, res) => {
-    const query = EntryMap.find().where("to").equals(req.entry);
+    const query = EntryMap.find().where("to").equals(req.query.entry);
     return res.RESTSend(await query.countDocuments());
 }));
 
 privateEntrymapRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
-    const query = EntryMap.find().where("to").equals(req.entry);
+    const query = EntryMap.find().where("to").equals(req.query.entry);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

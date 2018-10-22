@@ -10,7 +10,7 @@ privateMessageRouter.get("/", RESTWarp(async (req, res) => {
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
-    const message = await Message.findOne({ owner: req.entry, from: req.query.id });
+    const message = await Message.findOne({ owner: req.query.entry, from: req.query.id });
     if (!message) { throw new Error("Not found"); }
     return res.RESTSend(message);
 }));
@@ -21,7 +21,7 @@ privateMessageRouter.post("/", RESTWarp(async (req, res) => {
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
-    const message = await Message.findOne({ owner: req.entry, id: req.query.id });
+    const message = await Message.findOne({ owner: req.query.entry, id: req.query.id });
     if (!message) { throw new Error("Not found"); }
     if (!req.admin && req.user !== message.creator) { throw new Error("Access denied"); }
     message.content = req.body.content;
@@ -35,7 +35,7 @@ privateMessageRouter.delete("/", RESTWarp(async (req, res) => {
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
     }
-    const message = await Message.findOne({ owner: req.entry, from: req.query.id });
+    const message = await Message.findOne({ owner: req.query.entry, from: req.query.id });
     if (!message) { throw new Error("Not found"); }
     if (!req.admin && req.user !== message.creator) { throw new Error("Access denied"); }
     await message.remove();
@@ -43,12 +43,12 @@ privateMessageRouter.delete("/", RESTWarp(async (req, res) => {
 }));
 
 privateMessageRouter.get("/count", RESTWarp(async (req, res) => {
-    const query = Message.find().where("owner").equals(req.entry);
+    const query = Message.find().where("owner").equals(req.query.entry);
     return res.RESTSend(await query.countDocuments());
 }));
 
 privateMessageRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
-    const query = Message.find().where("owner").equals(req.entry);
+    const query = Message.find().where("owner").equals(req.query.entry);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

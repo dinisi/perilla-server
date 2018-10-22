@@ -19,13 +19,12 @@ PrivateAPIRouter.use(RESTWarp(async (req, res, next) => {
     }
     const map = await EntryMap.findOne({ from: req.user, to: req.query.entry });
     if (!map) { throw new Error("Access denied"); }
-    req.entry = map.to;
     req.admin = map.admin;
     return next();
 }));
 
 PrivateAPIRouter.get("/", (req: IRESTRequest, res: IRESTResponse) => {
-    return  res.RESTSend({ entry: req.entry, admin: req.admin });
+    return res.RESTSend({ admin: req.admin });
 });
 
 PrivateAPIRouter.use("/entry", privateEntryRouter);
