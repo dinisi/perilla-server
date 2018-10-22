@@ -1,11 +1,12 @@
 import { Router } from "express";
+import { extendQuery } from "../../../interfaces/query";
 import { EntryMap } from "../../../schemas/entryMap";
 import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
 
 export const systemEntryMapRouter = Router();
 
 systemEntryMapRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -16,7 +17,7 @@ systemEntryMapRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 systemEntryMapRouter.post("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -29,7 +30,7 @@ systemEntryMapRouter.post("/", RESTWarp(async (req, res) => {
 }));
 
 systemEntryMapRouter.delete("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -41,12 +42,14 @@ systemEntryMapRouter.delete("/", RESTWarp(async (req, res) => {
 }));
 
 systemEntryMapRouter.get("/count", RESTWarp(async (req, res) => {
-    const query = EntryMap.find();
+    let query = EntryMap.find();
+    query = extendQuery(query, req.query.condition);
     return res.RESTSend(await query.countDocuments());
 }));
 
 systemEntryMapRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
-    const query = EntryMap.find();
+    let query = EntryMap.find();
+    query = extendQuery(query, req.query.condition);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

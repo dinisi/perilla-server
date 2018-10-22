@@ -46,10 +46,3 @@ MessageSchema.pre("save", async function(next) {
 });
 
 export const Message = model<IMessageModel>("Message", MessageSchema);
-
-export const generateQuery = (origin: DocumentQuery<IMessageModel[], IMessageModel>, query: any) => {
-    if (query.start) { origin = origin.where("created").gte(query.start); }
-    if (query.end) { origin = origin.where("created").lte(query.end); }
-    if (query.creator) { origin = origin.where("creator").equals(query.creator); }
-    if (query.owner) { origin = origin.where("owner").equals(query.owner); }
-};

@@ -1,11 +1,12 @@
 import { Router } from "express";
+import { extendQuery } from "../../../interfaces/query";
 import { Message } from "../../../schemas/message";
 import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
 
 export const systemMessageRouter = Router();
 
 systemMessageRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -16,7 +17,7 @@ systemMessageRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 systemMessageRouter.post("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -29,7 +30,7 @@ systemMessageRouter.post("/", RESTWarp(async (req, res) => {
 }));
 
 systemMessageRouter.delete("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isString().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isString();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -41,12 +42,14 @@ systemMessageRouter.delete("/", RESTWarp(async (req, res) => {
 }));
 
 systemMessageRouter.get("/count", RESTWarp(async (req, res) => {
-    const query = Message.find();
+    let query = Message.find();
+    query = extendQuery(query, req.query.condition);
     return res.RESTSend(await query.countDocuments());
 }));
 
 systemMessageRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
-    const query = Message.find();
+    let query = Message.find();
+    query = extendQuery(query, req.query.condition);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

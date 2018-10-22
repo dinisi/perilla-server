@@ -1,4 +1,4 @@
-import { Document, Model, model, Schema } from "mongoose";
+import { Document, DocumentQuery, Model, model, Schema } from "mongoose";
 import { validateMany, validateOne, validateUser } from "../utils";
 import { ProblemCounter } from "./counter";
 import { Entry } from "./entry";

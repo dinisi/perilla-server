@@ -12,7 +12,7 @@ export const PrivateAPIRouter = Router();
 
 PrivateAPIRouter.use(RESTWarp(async (req, res, next) => {
     if (!req.isAuthenticated()) { throw new Error("Not logged in"); }
-    req.checkQuery("entry", "Invalid entry").isString().notEmpty();
+    req.checkQuery("entry", "Invalid entry").isString();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));

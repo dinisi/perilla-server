@@ -1,23 +1,26 @@
 import { Router } from "express";
+import { extendQuery } from "../../../interfaces/query";
 import { Solution } from "../../../schemas/solution";
 import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
 
 export const SystemSolutionRouter = Router();
 
 SystemSolutionRouter.get("/count", RESTWarp(async (req, res) => {
-    const query = Solution.find();
+    let query = Solution.find();
+    query = extendQuery(query, req.query.condition);
     return res.RESTSend(await query.countDocuments());
 }));
 
 SystemSolutionRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = Solution.find();
     query = query.select("id problem status score created owner creator public");
+    query = extendQuery(query, req.query.condition);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));
 
 SystemSolutionRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -28,7 +31,7 @@ SystemSolutionRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 SystemSolutionRouter.post("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -44,7 +47,7 @@ SystemSolutionRouter.post("/", RESTWarp(async (req, res) => {
 }));
 
 SystemSolutionRouter.post("/update", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -58,7 +61,7 @@ SystemSolutionRouter.post("/update", RESTWarp(async (req, res) => {
 }));
 
 SystemSolutionRouter.post("/rejudge", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -70,7 +73,7 @@ SystemSolutionRouter.post("/rejudge", RESTWarp(async (req, res) => {
 }));
 
 SystemSolutionRouter.delete("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));

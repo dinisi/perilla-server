@@ -3,6 +3,7 @@ import { ensureDirSync, writeFile } from "fs-extra";
 import { lookup } from "mime-types";
 import * as multer from "multer";
 import * as tmp from "tmp";
+import { extendQuery } from "../../../interfaces/query";
 import { File } from "../../../schemas/file";
 import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
 
@@ -11,7 +12,7 @@ ensureDirSync("files/uploads/");
 const upload = multer({ dest: "files/uploads/" });
 
 privateFileRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -22,7 +23,7 @@ privateFileRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 privateFileRouter.post("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -39,7 +40,7 @@ privateFileRouter.post("/", RESTWarp(async (req, res) => {
 }));
 
 privateFileRouter.delete("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -52,7 +53,7 @@ privateFileRouter.delete("/", RESTWarp(async (req, res) => {
 }));
 
 privateFileRouter.get("/raw", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -99,13 +100,15 @@ privateFileRouter.post("/new", RESTWarp(async (req, res) => {
 }));
 
 privateFileRouter.get("/count", RESTWarp(async (req, res) => {
-    const query = File.find().where("owner").equals(req.query.entry);
+    let query = File.find().where("owner").equals(req.query.entry);
+    query = extendQuery(query, req.query.condition);
     return res.RESTSend(await query.countDocuments());
 }));
 
 privateFileRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = File.find().where("owner").equals(req.query.entry);
     query = query.select("id filename type description size created owner creator public");
+    query = extendQuery(query, req.query.condition);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

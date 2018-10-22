@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { extendQuery } from "../../../interfaces/query";
 import { Problem } from "../../../schemas/problem";
 import { privateProblemRouter } from "../private/problem";
 import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
@@ -6,19 +7,21 @@ import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
 export const systemProblemRouter = Router();
 
 systemProblemRouter.get("/count", RESTWarp(async (req, res) => {
-    const query = Problem.find();
+    let query = Problem.find();
+    query = extendQuery(query, req.query.condition);
     return res.RESTSend(await query.countDocuments());
 }));
 
 systemProblemRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = Problem.find();
     query = query.select("id title content tags created owner creator public");
+    query = extendQuery(query, req.query.condition);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));
 
 privateProblemRouter.get("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -29,7 +32,7 @@ privateProblemRouter.get("/", RESTWarp(async (req, res) => {
 }));
 
 privateProblemRouter.post("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
@@ -48,7 +51,7 @@ privateProblemRouter.post("/", RESTWarp(async (req, res) => {
 }));
 
 systemProblemRouter.delete("/", RESTWarp(async (req, res) => {
-    req.checkQuery("id", "Invalid query: ID").isNumeric().notEmpty();
+    req.checkQuery("id", "Invalid query: ID").isNumeric();
     const errors = req.validationErrors();
     if (errors) {
         throw new Error(normalizeValidatorError(errors));
