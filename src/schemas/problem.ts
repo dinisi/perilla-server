@@ -9,7 +9,7 @@ export interface IProblemModel extends Document {
     id: number;
     title: string;
     content: string;
-    files: string[];
+    files: number[];
     data?: object;
     channel?: string;
     tags: string[];
@@ -39,7 +39,7 @@ export const ProblemSchema: Schema = new Schema(
             maxlength: 40960,
         },
         files: {
-            type: [String],
+            type: [Number],
             required: true,
         },
         data: Object,
