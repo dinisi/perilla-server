@@ -27,25 +27,13 @@ app.use(urlencoded({ extended: false }));
 app.use(validator());
 const store = REDISStore(session);
 app.use(session({
-    store: new store({client: REDISInstance}),
+    store: new store({ client: REDISInstance }),
     secret: config.sessionSecret,
     resave: false,
     saveUninitialized: false,
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, auth, *");
-    res.header("Access-Control-Allow-Credentials", "true");
-    if (req.method === "OPTIONS") {
-        res.sendStatus(200);
-    } else {
-        next();
-    }
-});
 
 app.use(MainRouter);
 
