@@ -3,6 +3,7 @@ import "./passport";
 import { Router } from "express";
 import { authenticate } from "passport";
 import { Entry, EntryType } from "../../schemas/entry";
+import { EntryMap } from "../../schemas/entryMap";
 import { commonRouter } from "./common";
 import { PrivateAPIRouter } from "./private";
 import { PublicAPIRouter } from "./public";
@@ -38,6 +39,17 @@ APIRouter.post("/logout", RESTWarp((req, res) => {
     if (!req.isAuthenticated()) { throw new Error("Not logged in"); }
     req.logout();
     res.RESTEnd();
+}));
+
+APIRouter.get("/session", RESTWarp(async (req, res) => {
+    if (req.isAuthenticated()) {
+        const user = await Entry.findById(req.user);
+        let entries = await EntryMap.find({ from: req.user });
+        entries = entries.filter((x) => x.to);
+        res.send({ user, entries });
+    } else {
+        res.RESTFail({});
+    }
 }));
 
 APIRouter.use("/public", PublicAPIRouter);
