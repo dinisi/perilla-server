@@ -45,7 +45,7 @@ APIRouter.get("/session", RESTWarp(async (req, res) => {
     if (req.isAuthenticated()) {
         let entries = await EntryMap.find({ from: req.user });
         entries = entries.filter((x) => x.to);
-        res.send({ entries });
+        res.RESTSend({ user: req.user, entries });
     } else {
         res.RESTFail({});
     }
