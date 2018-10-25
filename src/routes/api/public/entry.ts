@@ -18,3 +18,9 @@ publicEntryRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));
+
+publicEntryRouter.get("/", RESTWarp(async (req, res) => {
+    req.checkQuery("entry", "Invalid query: entry").isString();
+    const entry = await Entry.findById(req.query.entry).select("-hash -salt");
+    return res.RESTSend(entry);
+}));

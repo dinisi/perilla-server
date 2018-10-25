@@ -78,5 +78,7 @@ Content-Type: application/json
 }
 ###
 GET http://127.0.0.1:3000/api/system/entrymap/list?skip=0&limit=512
+###
+GET http://127.0.0.1:3000/api/system/entry/list?skip=0&limit=512
 ### Logout
 POST http://127.0.0.1:3000/api/logout

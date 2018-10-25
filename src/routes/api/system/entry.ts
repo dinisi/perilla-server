@@ -21,7 +21,7 @@ systemEntryRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
 
 systemEntryRouter.get("/", RESTWarp(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isString();
-    const entry = await Entry.findById(req.query.id);
+    const entry = await Entry.findById(req.query.id).select("-hash -salt");
     if (!entry) { throw new Error("Not found"); }
     return  res.RESTSend(entry);
 }));
