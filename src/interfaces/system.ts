@@ -23,7 +23,6 @@ export const ISystemConfig = Record({
         certificate: String,
         privatekey: String,
     })),
-    reservedEntry: String,
     sessionSecret: String,
 });
 
