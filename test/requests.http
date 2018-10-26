@@ -18,7 +18,7 @@ Content-Type: application/json
 }
 
 ### Get private route access details
-GET http://127.0.0.1:3000/api/private?entry=zzs
+GET http://127.0.0.1:3000/api/private?entry=TheVoiceOfHA
 
 # Private route - file
 ### Fetch all files
@@ -73,8 +73,8 @@ POST http://127.0.0.1:3000/api/common/entry/create
 Content-Type: application/json
 
 {
-    "name": "DDD",
-    "email": "admin@zhangzisu.com"
+    "name": "TheVoiceOfHA",
+    "email": "admin@19260817.net"
 }
 ###
 GET http://127.0.0.1:3000/api/system/entrymap/list?skip=0&limit=512
