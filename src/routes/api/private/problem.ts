@@ -91,7 +91,7 @@ privateProblemRouter.get("/count", RESTWarp(async (req, res) => {
 
 privateProblemRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = Problem.find().where("owner").equals(req.query.entry);
-    query = query.select("id title content tags created owner creator public");
+    query = query.select("id title tags created owner creator public");
     query = extendQuery(query, req);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
