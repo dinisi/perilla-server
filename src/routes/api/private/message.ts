@@ -42,6 +42,15 @@ privateMessageRouter.delete("/", RESTWarp(async (req, res) => {
     return res.RESTEnd();
 }));
 
+privateMessageRouter.post("/new", RESTWarp(async (req, res) => {
+    const message = new Message();
+    message.content = req.body.content;
+    message.owner = req.query.entry;
+    message.creator = req.user;
+    await message.save();
+    return res.RESTSend(message.id);
+}));
+
 privateMessageRouter.get("/count", RESTWarp(async (req, res) => {
     let query = Message.find().where("owner").equals(req.query.entry);
     query = extendQuery(query, req);

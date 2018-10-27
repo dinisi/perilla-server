@@ -1,6 +1,6 @@
 import { Document, DocumentQuery, model, Schema } from "mongoose";
 import { validateOne, validateUser } from "../utils";
-import { messageCounter } from "./counter";
+import { MessageCounter } from "./counter";
 import { Entry } from "./entry";
 
 export interface IMessageModel extends Document {
@@ -39,7 +39,7 @@ MessageSchema.pre("save", async function(next) {
     const self = this as IMessageModel;
     if (!self.created) {
         self.created = new Date();
-        const counter = await messageCounter.findByIdAndUpdate(self.owner, { $inc: { counter: 1 } }, { upsert: true, new: true });
+        const counter = await MessageCounter.findByIdAndUpdate(self.owner, { $inc: { count: 1 } }, { upsert: true, new: true });
         self.id = counter.count;
     }
     next();

@@ -1,6 +1,6 @@
 import * as crypto from "crypto";
 import { Document, model, Schema } from "mongoose";
-import { FileCounter, messageCounter, ProblemCounter, SolutionCounter } from "./counter";
+import { FileCounter, MessageCounter, ProblemCounter, SolutionCounter } from "./counter";
 import { EntryMap } from "./entryMap";
 import { File } from "./file";
 import { Problem } from "./problem";
@@ -89,7 +89,7 @@ EntrySchema.pre("remove", async function(next) {
     await FileCounter.remove({ _id: self._id });
     await SolutionCounter.remove({ _id: self._id });
     await ProblemCounter.remove({ _id: self._id });
-    await messageCounter.remove({ _id: self._id });
+    await MessageCounter.remove({ _id: self._id });
     await EntryMap.remove({ $or: [{ from: self._id }, { to: self._id }] });
     await File.remove({ owner: self._id });
     await Problem.remove({ owner: self._id });

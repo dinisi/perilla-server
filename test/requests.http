@@ -22,7 +22,7 @@ GET http://127.0.0.1:3000/api/private?entry=TheVoiceOfHA
 
 # Private route - file
 ### Fetch all files
-GET http://127.0.0.1:3000/api/private/file/list?skip=0&limit=512&entry=zzs
+GET http://127.0.0.1:3000/api/private/file/list?skip=0&limit=512&entry=zzs&sort=%7B%22id%22%3A-1%7D
 ###
 GET http://127.0.0.1:3000/api/private/file/count?entry=zzs
 ### Create a new file
@@ -49,6 +49,13 @@ Content-Type: application/json
 }
 ### Fetch a no-exist file
 GET http://127.0.0.1:3000/api/private/file?entry=zzs&id=0
+### Create message
+POST http://127.0.0.1:3000/api/private/message/new?entry=zzs
+Content-Type: application/json
+
+{
+    "content": "I AK IOI"
+}
 # Public route
 ### Fetch public files
 GET http://127.0.0.1:3000/api/public/file/count

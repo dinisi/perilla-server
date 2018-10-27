@@ -22,4 +22,4 @@ export const CounterSchema = new Schema(
 export const FileCounter = model<ICounterModel>("filecounter", CounterSchema);
 export const SolutionCounter = model<ICounterModel>("solutioncounter", CounterSchema);
 export const ProblemCounter = model<ICounterModel>("problemcounter", CounterSchema);
-export const messageCounter = model<ICounterModel>("messagecounter", CounterSchema);
+export const MessageCounter = model<ICounterModel>("messagecounter", CounterSchema);

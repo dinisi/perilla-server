@@ -5,6 +5,7 @@ import { normalizeValidatorError, RESTWarp } from "../util";
 import { privateEntryRouter } from "./entry";
 import { privateEntrymapRouter } from "./entrymap";
 import { privateFileRouter } from "./file";
+import { privateMessageRouter } from "./message";
 import { privateProblemRouter } from "./problem";
 import { privateSolutionRouter } from "./solution";
 
@@ -32,3 +33,4 @@ PrivateAPIRouter.use("/entrymap", privateEntrymapRouter);
 PrivateAPIRouter.use("/file", privateFileRouter);
 PrivateAPIRouter.use("/problem", privateProblemRouter);
 PrivateAPIRouter.use("/solution", privateSolutionRouter);
+PrivateAPIRouter.use("/message", privateMessageRouter);
