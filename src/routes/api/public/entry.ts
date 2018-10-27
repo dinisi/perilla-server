@@ -6,14 +6,14 @@ export const publicEntryRouter = Router();
 
 publicEntryRouter.get("/count", RESTWarp(async (req, res) => {
     let query = Entry.find();
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     return res.RESTSend(await query.countDocuments());
 }));
 
 publicEntryRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = Entry.find();
     query = query.select("_id description email created type");
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

@@ -6,14 +6,14 @@ export const publicSolutionRouter = Router();
 
 publicSolutionRouter.get("/count", RESTWarp(async (req, res) => {
     let query = Solution.find().where("public").equals(true);
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     return res.RESTSend(await query.countDocuments());
 }));
 
 publicSolutionRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = Solution.find().where("public").equals(true);
     query = query.select("id problem status score created owner creator public");
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

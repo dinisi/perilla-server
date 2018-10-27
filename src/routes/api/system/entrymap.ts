@@ -42,13 +42,13 @@ systemEntryMapRouter.delete("/", RESTWarp(async (req, res) => {
 
 systemEntryMapRouter.get("/count", RESTWarp(async (req, res) => {
     let query = EntryMap.find();
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     return res.RESTSend(await query.countDocuments());
 }));
 
 systemEntryMapRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = EntryMap.find();
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

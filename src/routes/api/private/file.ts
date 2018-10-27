@@ -100,14 +100,14 @@ privateFileRouter.post("/new", RESTWarp(async (req, res) => {
 
 privateFileRouter.get("/count", RESTWarp(async (req, res) => {
     let query = File.find().where("owner").equals(req.query.entry);
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     return res.RESTSend(await query.countDocuments());
 }));
 
 privateFileRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = File.find().where("owner").equals(req.query.entry);
     query = query.select("id filename type description size created owner creator public");
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

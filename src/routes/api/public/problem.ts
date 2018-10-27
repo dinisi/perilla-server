@@ -6,14 +6,14 @@ export const publicProblemRouter = Router();
 
 publicProblemRouter.get("/count", RESTWarp(async (req, res) => {
     let query = Problem.find().where("public").equals(true);
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     return res.RESTSend(await query.countDocuments());
 }));
 
 publicProblemRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = Problem.find().where("public").equals(true);
     query = query.select("id title content tags created owner creator public");
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

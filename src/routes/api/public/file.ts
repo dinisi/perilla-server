@@ -6,14 +6,14 @@ export const publicFileRouter = Router();
 
 publicFileRouter.get("/count", RESTWarp(async (req, res) => {
     let query = File.find().where("public").equals(true);
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     return res.RESTSend(await query.countDocuments());
 }));
 
 publicFileRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = File.find().where("public").equals(true);
     query = query.select("id filename type description size created owner creator public");
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

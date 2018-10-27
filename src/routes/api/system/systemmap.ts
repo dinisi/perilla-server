@@ -6,13 +6,13 @@ export const SystemMapRouter = Router();
 
 SystemMapRouter.get("/count", RESTWarp(async (req, res) => {
     let query = SystemMap.find();
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     return res.RESTSend(await query.countDocuments());
 }));
 
 SystemMapRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = SystemMap.find();
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

@@ -44,13 +44,13 @@ privateMessageRouter.delete("/", RESTWarp(async (req, res) => {
 
 privateMessageRouter.get("/count", RESTWarp(async (req, res) => {
     let query = Message.find().where("owner").equals(req.query.entry);
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     return res.RESTSend(await query.countDocuments());
 }));
 
 privateMessageRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = Message.find().where("owner").equals(req.query.entry);
-    query = extendQuery(query, req.query.control);
+    query = extendQuery(query, req);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));
