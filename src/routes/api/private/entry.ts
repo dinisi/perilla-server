@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Entry, EntryType } from "../../../schemas/entry";
-import { normalizeValidatorError, RESTWarp } from "../wrap";
+import { normalizeValidatorError, RESTWarp } from "../util";
 
 export const privateEntryRouter = Router();
 

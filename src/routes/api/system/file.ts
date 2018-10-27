@@ -1,20 +1,19 @@
 import { Router } from "express";
-import { extendQuery } from "../../../interfaces/query";
 import { File } from "../../../schemas/file";
-import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
+import { extendQuery, normalizeValidatorError, PaginationGuard, RESTWarp } from "../util";
 
 export const systemFileRouter = Router();
 
 systemFileRouter.get("/count", RESTWarp(async (req, res) => {
     let query = File.find();
-    query = extendQuery(query, req.query.condition);
+    query = extendQuery(query, req.query.control);
     return res.RESTSend(await query.countDocuments());
 }));
 
 systemFileRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = File.find();
     query = query.select("id filename type description size created owner creator public");
-    query = extendQuery(query, req.query.condition);
+    query = extendQuery(query, req.query.control);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

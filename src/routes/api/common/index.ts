@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { RESTWarp } from "../wrap";
+import { RESTWarp } from "../util";
 import { commonEntryRouter } from "./entry";
 
 export const commonRouter = Router();

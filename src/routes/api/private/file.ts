@@ -3,9 +3,8 @@ import { ensureDirSync, writeFile } from "fs-extra";
 import { lookup } from "mime-types";
 import * as multer from "multer";
 import * as tmp from "tmp";
-import { extendQuery } from "../../../interfaces/query";
 import { File } from "../../../schemas/file";
-import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
+import { extendQuery, normalizeValidatorError, PaginationGuard, RESTWarp } from "../util";
 
 export const privateFileRouter = Router();
 ensureDirSync("files/uploads/");
@@ -101,14 +100,14 @@ privateFileRouter.post("/new", RESTWarp(async (req, res) => {
 
 privateFileRouter.get("/count", RESTWarp(async (req, res) => {
     let query = File.find().where("owner").equals(req.query.entry);
-    query = extendQuery(query, req.query.condition);
+    query = extendQuery(query, req.query.control);
     return res.RESTSend(await query.countDocuments());
 }));
 
 privateFileRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = File.find().where("owner").equals(req.query.entry);
     query = query.select("id filename type description size created owner creator public");
-    query = extendQuery(query, req.query.condition);
+    query = extendQuery(query, req.query.control);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

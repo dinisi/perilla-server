@@ -1,7 +1,6 @@
 import { Router } from "express";
-import { extendQuery } from "../../../interfaces/query";
 import { Message } from "../../../schemas/message";
-import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
+import { extendQuery, normalizeValidatorError, PaginationGuard, RESTWarp } from "../util";
 
 export const systemMessageRouter = Router();
 
@@ -43,13 +42,13 @@ systemMessageRouter.delete("/", RESTWarp(async (req, res) => {
 
 systemMessageRouter.get("/count", RESTWarp(async (req, res) => {
     let query = Message.find();
-    query = extendQuery(query, req.query.condition);
+    query = extendQuery(query, req.query.control);
     return res.RESTSend(await query.countDocuments());
 }));
 
 systemMessageRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = Message.find();
-    query = extendQuery(query, req.query.condition);
+    query = extendQuery(query, req.query.control);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

@@ -1,7 +1,6 @@
 import { Router } from "express";
-import { extendQuery } from "../../../interfaces/query";
 import { Solution } from "../../../schemas/solution";
-import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
+import { extendQuery, normalizeValidatorError, PaginationGuard, RESTWarp } from "../util";
 
 export const privateSolutionRouter = Router();
 
@@ -44,14 +43,14 @@ privateSolutionRouter.delete("/", RESTWarp(async (req, res) => {
 
 privateSolutionRouter.get("/count", RESTWarp(async (req, res) => {
     let query = Solution.find().where("owner").equals(req.query.entry);
-    query = extendQuery(query, req.query.condition);
+    query = extendQuery(query, req.query.control);
     return res.RESTSend(await query.countDocuments());
 }));
 
 privateSolutionRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = Solution.find().where("owner").equals(req.query.entry);
     query = query.select("id problem status score created owner creator public");
-    query = extendQuery(query, req.query.condition);
+    query = extendQuery(query, req.query.control);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

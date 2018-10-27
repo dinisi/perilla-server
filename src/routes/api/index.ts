@@ -8,7 +8,7 @@ import { commonRouter } from "./common";
 import { PrivateAPIRouter } from "./private";
 import { PublicAPIRouter } from "./public";
 import { SystemAPIRouter } from "./system";
-import { normalizeValidatorError, RESTWarp } from "./wrap";
+import { normalizeValidatorError, RESTWarp } from "./util";
 
 export const APIRouter = Router();
 

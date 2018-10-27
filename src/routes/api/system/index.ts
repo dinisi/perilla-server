@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { SystemMap } from "../../../schemas/systemMap";
-import { RESTWarp } from "../wrap";
+import { RESTWarp } from "../util";
 import { systemEntryRouter } from "./entry";
 import { systemEntryMapRouter } from "./entrymap";
 import { systemFileRouter } from "./file";

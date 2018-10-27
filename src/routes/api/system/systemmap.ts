@@ -1,19 +1,18 @@
 import { Router } from "express";
-import { extendQuery } from "../../../interfaces/query";
 import { SystemMap } from "../../../schemas/systemMap";
-import { PaginationGuard, RESTWarp } from "../wrap";
+import { extendQuery, PaginationGuard, RESTWarp } from "../util";
 
 export const SystemMapRouter = Router();
 
 SystemMapRouter.get("/count", RESTWarp(async (req, res) => {
     let query = SystemMap.find();
-    query = extendQuery(query, req.query.condition);
+    query = extendQuery(query, req.query.control);
     return res.RESTSend(await query.countDocuments());
 }));
 
 SystemMapRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = SystemMap.find();
-    query = extendQuery(query, req.query.condition);
+    query = extendQuery(query, req.query.control);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

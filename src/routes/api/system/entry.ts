@@ -1,20 +1,19 @@
 import { Router } from "express";
-import { extendQuery } from "../../../interfaces/query";
 import { Entry, EntryType } from "../../../schemas/entry";
-import { normalizeValidatorError, PaginationGuard, RESTWarp } from "../wrap";
+import { extendQuery, normalizeValidatorError, PaginationGuard, RESTWarp } from "../util";
 
 export const systemEntryRouter = Router();
 
 systemEntryRouter.get("/count", RESTWarp(async (req, res) => {
     let query = Entry.find();
-    query = extendQuery(query, req.query.condition);
+    query = extendQuery(query, req.query.control);
     return res.RESTSend(await query.countDocuments());
 }));
 
 systemEntryRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = Entry.find();
     query = query.select("_id description email created type");
-    query = extendQuery(query, req.query.condition);
+    query = extendQuery(query, req.query.control);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
     return res.RESTSend(result);
 }));

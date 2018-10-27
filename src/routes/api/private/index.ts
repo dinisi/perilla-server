@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { IRESTRequest, IRESTResponse } from "../../../interfaces/route";
 import { EntryMap } from "../../../schemas/entryMap";
-import { normalizeValidatorError, RESTWarp } from "../wrap";
+import { normalizeValidatorError, RESTWarp } from "../util";
 import { privateEntryRouter } from "./entry";
 import { privateEntrymapRouter } from "./entrymap";
 import { privateFileRouter } from "./file";

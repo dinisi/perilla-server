@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { Entry, EntryType } from "../../../schemas/entry";
 import { EntryMap } from "../../../schemas/entryMap";
-import { normalizeValidatorError, RESTWarp } from "../wrap";
+import { normalizeValidatorError, RESTWarp } from "../util";
 
 export const commonEntryRouter = Router();
 
