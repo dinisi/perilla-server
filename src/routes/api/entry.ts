@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { Entry, EntryType } from "../../schemas/entry";
 import { EntryMap } from "../../schemas/entryMap";
-import { isEntryAdmin, isLoggedin, normalizeValidatorError, RESTWarp, verifyValidation } from "./util";
+import { extendQuery, isEntryAdmin, isLoggedin, normalizeValidatorError, PaginationGuard, RESTWrap, verifyValidation } from "./util";
 
 export const EntryRouter = Router();
 
-EntryRouter.post("/create", isLoggedin, RESTWarp(async (req, res) => {
+EntryRouter.post("/create", isLoggedin, RESTWrap(async (req, res) => {
     req.checkBody("name", "Invalid body: name").isString();
     req.checkBody("email", "Invalid body: email").isEmail();
     verifyValidation(req.validationErrors());
@@ -24,12 +24,12 @@ EntryRouter.post("/create", isLoggedin, RESTWarp(async (req, res) => {
     res.RESTSend(entry._id);
 }));
 
-EntryRouter.get("/", RESTWarp(async (req, res) => {
+EntryRouter.get("/", RESTWrap(async (req, res) => {
     const entry = await Entry.findById(req.query.entry).select("-hash -salt");
     return res.RESTSend(entry);
 }));
 
-EntryRouter.post("/", isLoggedin, isEntryAdmin, RESTWarp(async (req, res) => {
+EntryRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     req.checkBody("email", "Invalid body: email").isEmail();
     verifyValidation(req.validationErrors());
 
@@ -41,4 +41,20 @@ EntryRouter.post("/", isLoggedin, isEntryAdmin, RESTWarp(async (req, res) => {
     }
     await entry.save();
     return res.RESTEnd();
+}));
+
+// Public to everyone
+
+EntryRouter.get("/count", RESTWrap(async (req, res) => {
+    let query = Entry.find();
+    query = extendQuery(query, req);
+    return res.RESTSend(await query.countDocuments());
+}));
+
+EntryRouter.get("/list", PaginationGuard, RESTWrap(async (req, res) => {
+    let query = Entry.find();
+    query = query.select("_id description email created type");
+    query = extendQuery(query, req);
+    const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
+    return res.RESTSend(result);
 }));

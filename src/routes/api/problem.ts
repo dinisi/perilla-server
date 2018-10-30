@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
-import { extendQuery, PaginationGuard, RESTWarp, verifyAccess, verifyValidation } from "./util";
+import { extendQuery, PaginationGuard, RESTWrap, verifyAccess, verifyValidation } from "./util";
 
 export const ProblemRouter = Router();
 
-ProblemRouter.get("/", RESTWarp(async (req, res) => {
+ProblemRouter.get("/", RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
@@ -14,7 +14,7 @@ ProblemRouter.get("/", RESTWarp(async (req, res) => {
     return res.RESTSend(problem);
 }));
 
-ProblemRouter.post("/", RESTWarp(async (req, res) => {
+ProblemRouter.post("/", RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
@@ -31,7 +31,7 @@ ProblemRouter.post("/", RESTWarp(async (req, res) => {
     return res.RESTEnd();
 }));
 
-ProblemRouter.delete("/", RESTWarp(async (req, res) => {
+ProblemRouter.delete("/", RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
@@ -41,7 +41,7 @@ ProblemRouter.delete("/", RESTWarp(async (req, res) => {
     return res.RESTEnd();
 }));
 
-ProblemRouter.post("/new", RESTWarp(async (req, res) => {
+ProblemRouter.post("/new", RESTWrap(async (req, res) => {
     req.checkQuery("entry", "Invalid query: entry").isString();
     verifyValidation(req.validationErrors());
 
@@ -59,7 +59,7 @@ ProblemRouter.post("/new", RESTWarp(async (req, res) => {
     return res.RESTSend(problem.id);
 }));
 
-ProblemRouter.post("/submit", RESTWarp(async (req, res) => {
+ProblemRouter.post("/submit", RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
@@ -76,13 +76,13 @@ ProblemRouter.post("/submit", RESTWarp(async (req, res) => {
     return res.RESTSend(solution.id);
 }));
 
-ProblemRouter.get("/count", RESTWarp(async (req, res) => {
+ProblemRouter.get("/count", RESTWrap(async (req, res) => {
     let query = Problem.find().where("owner").equals(req.query.entry);
     query = extendQuery(query, req);
     return res.RESTSend(await query.countDocuments());
 }));
 
-ProblemRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
+ProblemRouter.get("/list", PaginationGuard, RESTWrap(async (req, res) => {
     let query = Problem.find().where("owner").equals(req.query.entry);
     query = query.select("id title tags created owner creator public");
     query = extendQuery(query, req);

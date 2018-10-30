@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { Message } from "../../schemas/message";
-import { extendQuery, PaginationGuard, RESTWarp, verifyAccess, verifyValidation } from "./util";
+import { extendQuery, PaginationGuard, RESTWrap, verifyAccess, verifyValidation } from "./util";
 
 export const MessageRouter = Router();
 
-MessageRouter.get("/", RESTWarp(async (req, res) => {
+MessageRouter.get("/", RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isString();
     verifyValidation(req.validationErrors());
 
@@ -13,7 +13,7 @@ MessageRouter.get("/", RESTWarp(async (req, res) => {
     return res.RESTSend(message);
 }));
 
-MessageRouter.post("/", RESTWarp(async (req, res) => {
+MessageRouter.post("/", RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
@@ -24,7 +24,7 @@ MessageRouter.post("/", RESTWarp(async (req, res) => {
     return res.RESTEnd();
 }));
 
-MessageRouter.delete("/", RESTWarp(async (req, res) => {
+MessageRouter.delete("/", RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isString();
     verifyValidation(req.validationErrors());
 
@@ -34,7 +34,7 @@ MessageRouter.delete("/", RESTWarp(async (req, res) => {
     return res.RESTEnd();
 }));
 
-MessageRouter.post("/new", RESTWarp(async (req, res) => {
+MessageRouter.post("/new", RESTWrap(async (req, res) => {
     req.checkQuery("entry", "Invalid query: entry").isString();
     verifyValidation(req.validationErrors());
 
@@ -46,13 +46,13 @@ MessageRouter.post("/new", RESTWarp(async (req, res) => {
     return res.RESTSend(message.id);
 }));
 
-MessageRouter.get("/count", RESTWarp(async (req, res) => {
+MessageRouter.get("/count", RESTWrap(async (req, res) => {
     let query = Message.find().where("owner").equals(req.query.entry);
     query = extendQuery(query, req);
     return res.RESTSend(await query.countDocuments());
 }));
 
-MessageRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
+MessageRouter.get("/list", PaginationGuard, RESTWrap(async (req, res) => {
     let query = Message.find().where("owner").equals(req.query.entry);
     query = extendQuery(query, req);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);

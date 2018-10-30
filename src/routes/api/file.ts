@@ -4,13 +4,13 @@ import { lookup } from "mime-types";
 import * as multer from "multer";
 import * as tmp from "tmp";
 import { File } from "../../schemas/file";
-import { extendQuery, PaginationGuard, RESTWarp, verifyAccess, verifyValidation } from "./util";
+import { extendQuery, isLoggedin, PaginationGuard, RESTWrap, verifyAccess, verifyValidation } from "./util";
 
 export const FileRouter = Router();
 ensureDirSync("files/uploads/");
 const upload = multer({ dest: "files/uploads/" });
 
-FileRouter.get("/", RESTWarp(async (req, res) => {
+FileRouter.get("/", isLoggedin, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
@@ -19,7 +19,7 @@ FileRouter.get("/", RESTWarp(async (req, res) => {
     return res.RESTSend(file);
 }));
 
-FileRouter.post("/", RESTWarp(async (req, res) => {
+FileRouter.post("/", isLoggedin, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
@@ -33,7 +33,7 @@ FileRouter.post("/", RESTWarp(async (req, res) => {
     return res.RESTEnd();
 }));
 
-FileRouter.delete("/", RESTWarp(async (req, res) => {
+FileRouter.delete("/", isLoggedin, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
@@ -43,7 +43,7 @@ FileRouter.delete("/", RESTWarp(async (req, res) => {
     return res.RESTEnd();
 }));
 
-FileRouter.get("/raw", RESTWarp(async (req, res) => {
+FileRouter.get("/raw", isLoggedin, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
@@ -52,7 +52,7 @@ FileRouter.get("/raw", RESTWarp(async (req, res) => {
     return res.sendFile(file.getPath(), { headers: { "Content-Type": file.filename } });
 }));
 
-FileRouter.post("/upload", upload.single("file"), RESTWarp(async (req, res) => {
+FileRouter.post("/upload", isLoggedin, upload.single("file"), RESTWrap(async (req, res) => {
     req.checkQuery("entry", "Invalid query: entry").isString();
     verifyValidation(req.validationErrors());
 
@@ -67,7 +67,7 @@ FileRouter.post("/upload", upload.single("file"), RESTWarp(async (req, res) => {
     return res.RESTSend(file.id);
 }));
 
-FileRouter.post("/new", RESTWarp(async (req, res) => {
+FileRouter.post("/new", isLoggedin, RESTWrap(async (req, res) => {
     req.checkQuery("entry", "Invalid query: entry").isString();
     verifyValidation(req.validationErrors());
 
@@ -93,14 +93,14 @@ FileRouter.post("/new", RESTWarp(async (req, res) => {
     return res.RESTSend(file.id);
 }));
 
-FileRouter.get("/count", RESTWarp(async (req, res) => {
-    let query = File.find().where("owner").equals(req.query.entry);
+FileRouter.get("/count", RESTWrap(async (req, res) => {
+    let query = File.find({ public: true });
     query = extendQuery(query, req);
     return res.RESTSend(await query.countDocuments());
 }));
 
-FileRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
-    let query = File.find().where("owner").equals(req.query.entry);
+FileRouter.get("/list", PaginationGuard, RESTWrap(async (req, res) => {
+    let query = File.find({ public: true });
     query = query.select("id filename type description size created owner creator public");
     query = extendQuery(query, req);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);

@@ -10,7 +10,7 @@ import { SystemMap } from "../../schemas/systemMap";
 
 type IHandleFunction = (req: IRESTRequest, res: IRESTResponse, next?: NextFunction) => Promise<void> | void;
 
-export const RESTWarp = (handle: IHandleFunction) => {
+export const RESTWrap = (handle: IHandleFunction) => {
     return async (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
         try {
             await handle(req, res, next);
@@ -28,19 +28,22 @@ export const normalizeValidatorError = (errors: any[] | Record<string, any>) => 
     }
 };
 
-export const PaginationGuard = (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
-    req.checkQuery("skip", "Invalid skip").isNumeric();
-    req.checkQuery("limit", "Invalid limit").isNumeric();
-    const errors = req.validationErrors();
-    if (errors) {
-        return res.RESTFail(normalizeValidatorError(errors));
-    } else {
-        req.pagination = {
-            skip: parseInt(req.query.skip, 10),
-            limit: parseInt(req.query.limit, 10),
-        };
-        return next();
-    }
+type IPaginationHandleFunction = <T extends Document>(req: IRESTRequest) => DocumentQuery<T[], T>;
+
+export const PaginationWrap = (handle: IPaginationHandleFunction) => {
+    return RESTWrap((req, res) => {
+        let query = handle(req);
+        query = extendQuery(query, req);
+        if (req.query.noexec) {
+            //
+        } else {
+            req.checkQuery("skip", "Invalid skip").isNumeric();
+            req.checkQuery("limit", "Invalid limit").isNumeric();
+            const errors = req.validationErrors();
+            if (errors) { return res.RESTFail(normalizeValidatorError(errors)); }
+            //
+        }
+    });
 };
 
 export const extendQuery = <T extends Document>(origin: DocumentQuery<T[], T>, req: IRESTRequest) => {

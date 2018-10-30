@@ -11,11 +11,11 @@ import { MessageRouter } from "./message";
 import { ProblemRouter } from "./problem";
 import { SolutionRouter } from "./solution";
 import { SystemMapRouter } from "./systemmap";
-import { RESTWarp, verifyValidation } from "./util";
+import { RESTWrap, verifyValidation } from "./util";
 
 export const APIRouter = Router();
 
-APIRouter.post("/register", RESTWarp((req, res) => {
+APIRouter.post("/register", RESTWrap((req, res) => {
     req.checkBody("username", "Invalid body: username");
     req.checkBody("password", "Invalid body: password").isString();
     req.checkBody("email", "Invalid body: email").isEmail();
@@ -31,17 +31,17 @@ APIRouter.post("/register", RESTWarp((req, res) => {
         .catch((err) => res.RESTFail(err.message));
 }));
 
-APIRouter.post("/login", authenticate("local"), RESTWarp((req, res) => {
+APIRouter.post("/login", authenticate("local"), RESTWrap((req, res) => {
     return res.RESTSend(req.user);
 }));
 
-APIRouter.post("/logout", RESTWarp((req, res) => {
+APIRouter.post("/logout", RESTWrap((req, res) => {
     if (!req.isAuthenticated()) { throw new Error("Not logged in"); }
     req.logout();
     res.RESTEnd();
 }));
 
-APIRouter.get("/session", RESTWarp(async (req, res) => {
+APIRouter.get("/session", RESTWrap(async (req, res) => {
     if (req.isAuthenticated()) {
         const entries = await EntryMap.find({ from: req.user });
         res.RESTSend({ user: req.user, entries: entries.map((x) => x.to) });

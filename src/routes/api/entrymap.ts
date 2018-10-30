@@ -2,11 +2,11 @@ import { Router } from "express";
 import { Entry } from "../../schemas/entry";
 import { EntryMap } from "../../schemas/entryMap";
 import { validateOne } from "../../utils";
-import { extendQuery, isEntryAdmin, isLoggedin, normalizeValidatorError, PaginationGuard, RESTWarp, verifyValidation } from "./util";
+import { extendQuery, isEntryAdmin, isLoggedin, normalizeValidatorError, PaginationGuard, RESTWrap, verifyValidation } from "./util";
 
 export const EntrymapRouter = Router();
 
-EntrymapRouter.get("/", isLoggedin, RESTWarp(async (req, res) => {
+EntrymapRouter.get("/", isLoggedin, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isString();
     req.checkQuery("entry", "Invalid query: entry").isString();
     verifyValidation(req.validationErrors());
@@ -16,7 +16,7 @@ EntrymapRouter.get("/", isLoggedin, RESTWarp(async (req, res) => {
     return res.RESTSend(map);
 }));
 
-EntrymapRouter.post("/", isLoggedin, isEntryAdmin, RESTWarp(async (req, res) => {
+EntrymapRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isString();
     req.checkBody("admin", "Invalid body: admin").isBoolean();
     verifyValidation(req.validationErrors());
@@ -33,7 +33,7 @@ EntrymapRouter.post("/", isLoggedin, isEntryAdmin, RESTWarp(async (req, res) => 
     return res.RESTEnd();
 }));
 
-EntrymapRouter.delete("/", RESTWarp(async (req, res) => {
+EntrymapRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isString();
     verifyValidation(req.validationErrors());
 
@@ -43,13 +43,15 @@ EntrymapRouter.delete("/", RESTWarp(async (req, res) => {
     return res.RESTEnd();
 }));
 
-EntrymapRouter.get("/count", RESTWarp(async (req, res) => {
+// Public to everyone
+
+EntrymapRouter.get("/count", RESTWrap(async (req, res) => {
     let query = EntryMap.find().where("to").equals(req.query.entry);
     query = extendQuery(query, req);
     return res.RESTSend(await query.countDocuments());
 }));
 
-EntrymapRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
+EntrymapRouter.get("/list", PaginationGuard, RESTWrap(async (req, res) => {
     let query = EntryMap.find().where("to").equals(req.query.entry);
     query = extendQuery(query, req);
     const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);

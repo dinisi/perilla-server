@@ -1,16 +1,16 @@
 import { Router } from "express";
 import { Solution } from "../../schemas/solution";
-import { extendQuery, PaginationGuard, RESTWarp, verifyAccess, verifyValidation } from "./util";
+import { extendQuery, PaginationGuard, RESTWrap, verifyAccess, verifyValidation } from "./util";
 
 export const SolutionRouter = Router();
 
-SolutionRouter.get("/count", RESTWarp(async (req, res) => {
+SolutionRouter.get("/count", RESTWrap(async (req, res) => {
     let query = Solution.find();
     query = extendQuery(query, req);
     return res.RESTSend(await query.countDocuments());
 }));
 
-SolutionRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
+SolutionRouter.get("/list", PaginationGuard, RESTWrap(async (req, res) => {
     let query = Solution.find();
     query = query.select("id problem status score created owner creator public");
     query = extendQuery(query, req);
@@ -18,7 +18,7 @@ SolutionRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     return res.RESTSend(result);
 }));
 
-SolutionRouter.get("/", RESTWarp(async (req, res) => {
+SolutionRouter.get("/", RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
@@ -27,7 +27,7 @@ SolutionRouter.get("/", RESTWarp(async (req, res) => {
     return res.RESTSend(solution);
 }));
 
-SolutionRouter.post("/", RESTWarp(async (req, res) => {
+SolutionRouter.post("/", RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
@@ -41,7 +41,7 @@ SolutionRouter.post("/", RESTWarp(async (req, res) => {
     return res.RESTEnd();
 }));
 
-SolutionRouter.post("/update", RESTWarp(async (req, res) => {
+SolutionRouter.post("/update", RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
@@ -53,7 +53,7 @@ SolutionRouter.post("/update", RESTWarp(async (req, res) => {
     return res.RESTEnd();
 }));
 
-SolutionRouter.post("/rejudge", RESTWarp(async (req, res) => {
+SolutionRouter.post("/rejudge", RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
@@ -63,7 +63,7 @@ SolutionRouter.post("/rejudge", RESTWarp(async (req, res) => {
     return res.RESTEnd();
 }));
 
-SolutionRouter.delete("/", RESTWarp(async (req, res) => {
+SolutionRouter.delete("/", RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
