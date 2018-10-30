@@ -41,9 +41,11 @@ export const PaginationWrap = (handle: IPaginationHandleFunction) => {
         } else {
             req.checkQuery("skip", "Invalid skip").isNumeric();
             req.checkQuery("limit", "Invalid limit").isNumeric();
+            const skip = parseInt(req.query.skip, 10);
+            const limit = parseInt(req.query.limit, 10);
             const errors = req.validationErrors();
             if (errors) { return res.RESTFail(normalizeValidatorError(errors)); }
-            query.skip(req.query.skip).limit(req.query.limit)
+            query.skip(skip).limit(limit)
                 .then((result) => res.RESTSend(result))
                 .catch((err) => res.RESTFail(err.message));
         }
