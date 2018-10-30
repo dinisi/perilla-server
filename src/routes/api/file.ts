@@ -3,33 +3,28 @@ import { ensureDirSync, writeFile } from "fs-extra";
 import { lookup } from "mime-types";
 import * as multer from "multer";
 import * as tmp from "tmp";
-import { File } from "../../../schemas/file";
-import { extendQuery, normalizeValidatorError, PaginationGuard, RESTWarp } from "../util";
+import { File } from "../../schemas/file";
+import { extendQuery, PaginationGuard, RESTWarp, verifyAccess, verifyValidation } from "./util";
 
-export const privateFileRouter = Router();
+export const FileRouter = Router();
 ensureDirSync("files/uploads/");
 const upload = multer({ dest: "files/uploads/" });
 
-privateFileRouter.get("/", RESTWarp(async (req, res) => {
+FileRouter.get("/", RESTWarp(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
-    const errors = req.validationErrors();
-    if (errors) {
-        throw new Error(normalizeValidatorError(errors));
-    }
+    verifyValidation(req.validationErrors());
+
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
-    if (!file) { throw new Error("Not found"); }
+    verifyAccess(file, req.user);
     return res.RESTSend(file);
 }));
 
-privateFileRouter.post("/", RESTWarp(async (req, res) => {
+FileRouter.post("/", RESTWarp(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
-    const errors = req.validationErrors();
-    if (errors) {
-        throw new Error(normalizeValidatorError(errors));
-    }
+    verifyValidation(req.validationErrors());
+
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
-    if (!file) { throw new Error("Not found"); }
-    if (!req.admin && req.user !== file.creator) { throw new Error("Access denied"); }
+    verifyAccess(file, req.user, true);
     file.filename = req.body.filename;
     file.type = req.body.type;
     file.description = req.body.description;
@@ -38,32 +33,29 @@ privateFileRouter.post("/", RESTWarp(async (req, res) => {
     return res.RESTEnd();
 }));
 
-privateFileRouter.delete("/", RESTWarp(async (req, res) => {
+FileRouter.delete("/", RESTWarp(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
-    const errors = req.validationErrors();
-    if (errors) {
-        throw new Error(normalizeValidatorError(errors));
-    }
+    verifyValidation(req.validationErrors());
+
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
-    if (!file) { throw new Error("Not found"); }
-    if (!req.admin && req.user !== file.creator) { throw new Error("Access denied"); }
+    verifyAccess(file, req.user, true);
     await file.remove();
     return res.RESTEnd();
 }));
 
-privateFileRouter.get("/raw", RESTWarp(async (req, res) => {
+FileRouter.get("/raw", RESTWarp(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
-    const errors = req.validationErrors();
-    if (errors) {
-        throw new Error(normalizeValidatorError(errors));
-    }
+    verifyValidation(req.validationErrors());
+
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
-    if (!file) { throw new Error("Not found"); }
-    if (!req.admin && req.user !== file.creator) { throw new Error("Access denied"); }
+    verifyAccess(file, req.user);
     return res.sendFile(file.getPath(), { headers: { "Content-Type": file.filename } });
 }));
 
-privateFileRouter.post("/upload", upload.single("file"), RESTWarp(async (req, res) => {
+FileRouter.post("/upload", upload.single("file"), RESTWarp(async (req, res) => {
+    req.checkQuery("entry", "Invalid query: entry").isString();
+    verifyValidation(req.validationErrors());
+
     const file = new File();
     await file.setFile(req.file.path);
     file.owner = req.query.entry;
@@ -75,7 +67,10 @@ privateFileRouter.post("/upload", upload.single("file"), RESTWarp(async (req, re
     return res.RESTSend(file.id);
 }));
 
-privateFileRouter.post("/new", RESTWarp(async (req, res) => {
+FileRouter.post("/new", RESTWarp(async (req, res) => {
+    req.checkQuery("entry", "Invalid query: entry").isString();
+    verifyValidation(req.validationErrors());
+
     const path = await new Promise<string>((resolve, reject) => {
         tmp.file((err, filepath) => {
             if (err) {
@@ -98,13 +93,13 @@ privateFileRouter.post("/new", RESTWarp(async (req, res) => {
     return res.RESTSend(file.id);
 }));
 
-privateFileRouter.get("/count", RESTWarp(async (req, res) => {
+FileRouter.get("/count", RESTWarp(async (req, res) => {
     let query = File.find().where("owner").equals(req.query.entry);
     query = extendQuery(query, req);
     return res.RESTSend(await query.countDocuments());
 }));
 
-privateFileRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
+FileRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = File.find().where("owner").equals(req.query.entry);
     query = query.select("id filename type description size created owner creator public");
     query = extendQuery(query, req);

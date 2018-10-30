@@ -7,7 +7,6 @@ export interface IRESTResponse extends Response {
 }
 
 export interface IRESTRequest extends Request {
-    admin?: boolean;
     pagination?: {
         skip: number;
         limit: number;

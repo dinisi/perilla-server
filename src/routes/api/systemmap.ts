@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { SystemMap } from "../../../schemas/systemMap";
-import { extendQuery, PaginationGuard, RESTWarp } from "../util";
+import { SystemMap } from "../../schemas/systemMap";
+import { extendQuery, isLoggedin, isSystemAdmin, PaginationGuard, RESTWarp } from "./util";
 
 export const SystemMapRouter = Router();
 
@@ -17,7 +17,7 @@ SystemMapRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     return res.RESTSend(result);
 }));
 
-SystemMapRouter.post("/", RESTWarp(async (req, res) => {
+SystemMapRouter.post("/", isLoggedin, isSystemAdmin, RESTWarp(async (req, res) => {
     req.checkQuery("user").isString();
     if (!await SystemMap.findOne({ user: req.query.user })) {
         const map = new SystemMap();
@@ -27,7 +27,7 @@ SystemMapRouter.post("/", RESTWarp(async (req, res) => {
     return res.RESTEnd();
 }));
 
-SystemMapRouter.delete("/", RESTWarp(async (req, res) => {
+SystemMapRouter.delete("/", isLoggedin, isSystemAdmin, RESTWarp(async (req, res) => {
     req.checkQuery("user").isString();
     const map = await SystemMap.findOne({ user: req.query.user });
     if (!map) { throw new Error("Not found"); }

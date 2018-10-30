@@ -1,30 +1,25 @@
 import { Router } from "express";
-import { Problem } from "../../../schemas/problem";
-import { Solution } from "../../../schemas/solution";
-import { extendQuery, normalizeValidatorError, PaginationGuard, RESTWarp } from "../util";
+import { Problem } from "../../schemas/problem";
+import { Solution } from "../../schemas/solution";
+import { extendQuery, PaginationGuard, RESTWarp, verifyAccess, verifyValidation } from "./util";
 
-export const privateProblemRouter = Router();
+export const ProblemRouter = Router();
 
-privateProblemRouter.get("/", RESTWarp(async (req, res) => {
+ProblemRouter.get("/", RESTWarp(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
-    const errors = req.validationErrors();
-    if (errors) {
-        throw new Error(normalizeValidatorError(errors));
-    }
+    verifyValidation(req.validationErrors());
+
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    if (!problem) { throw new Error("Not found"); }
+    verifyAccess(problem, req.user);
     return res.RESTSend(problem);
 }));
 
-privateProblemRouter.post("/", RESTWarp(async (req, res) => {
+ProblemRouter.post("/", RESTWarp(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
-    const errors = req.validationErrors();
-    if (errors) {
-        throw new Error(normalizeValidatorError(errors));
-    }
+    verifyValidation(req.validationErrors());
+
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    if (!problem) { throw new Error("Not found"); }
-    if (!req.admin && req.user !== problem.creator) { throw new Error("Access denied"); }
+    verifyAccess(problem, req.user, true);
     problem.title = req.body.title;
     problem.content = req.body.content;
     problem.files = req.body.files;
@@ -36,20 +31,20 @@ privateProblemRouter.post("/", RESTWarp(async (req, res) => {
     return res.RESTEnd();
 }));
 
-privateProblemRouter.delete("/", RESTWarp(async (req, res) => {
+ProblemRouter.delete("/", RESTWarp(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
-    const errors = req.validationErrors();
-    if (errors) {
-        throw new Error(normalizeValidatorError(errors));
-    }
+    verifyValidation(req.validationErrors());
+
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    if (!problem) { throw new Error("Not found"); }
-    if (!req.admin && req.user !== problem.creator) { throw new Error("Access denied"); }
+    verifyAccess(problem, req.user, true);
     await problem.remove();
     return res.RESTEnd();
 }));
 
-privateProblemRouter.post("/new", RESTWarp(async (req, res) => {
+ProblemRouter.post("/new", RESTWarp(async (req, res) => {
+    req.checkQuery("entry", "Invalid query: entry").isString();
+    verifyValidation(req.validationErrors());
+
     const problem = new Problem();
     problem.title = req.body.title;
     problem.content = req.body.content;
@@ -64,14 +59,12 @@ privateProblemRouter.post("/new", RESTWarp(async (req, res) => {
     return res.RESTSend(problem.id);
 }));
 
-privateProblemRouter.post("/submit", RESTWarp(async (req, res) => {
+ProblemRouter.post("/submit", RESTWarp(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
-    const errors = req.validationErrors();
-    if (errors) {
-        throw new Error(normalizeValidatorError(errors));
-    }
+    verifyValidation(req.validationErrors());
+
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    if (!problem) { throw new Error("Not found"); }
+    verifyAccess(problem, req.user, true);
     const solution = new Solution();
     solution.problem = problem.id;
     solution.files = req.body.files;
@@ -83,13 +76,13 @@ privateProblemRouter.post("/submit", RESTWarp(async (req, res) => {
     return res.RESTSend(solution.id);
 }));
 
-privateProblemRouter.get("/count", RESTWarp(async (req, res) => {
+ProblemRouter.get("/count", RESTWarp(async (req, res) => {
     let query = Problem.find().where("owner").equals(req.query.entry);
     query = extendQuery(query, req);
     return res.RESTSend(await query.countDocuments());
 }));
 
-privateProblemRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
+ProblemRouter.get("/list", PaginationGuard, RESTWarp(async (req, res) => {
     let query = Problem.find().where("owner").equals(req.query.entry);
     query = query.select("id title tags created owner creator public");
     query = extendQuery(query, req);

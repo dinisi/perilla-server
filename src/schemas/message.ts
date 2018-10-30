@@ -9,6 +9,7 @@ export interface IMessageModel extends Document {
     created: Date;
     owner: string;
     creator: string;
+    public: boolean;
 }
 
 export const MessageSchema = new Schema(
@@ -31,6 +32,11 @@ export const MessageSchema = new Schema(
             type: String,
             required: true,
             validate: validateUser,
+        },
+        public: {
+            type: String,
+            required: true,
+            default: false,
         },
     },
 );
