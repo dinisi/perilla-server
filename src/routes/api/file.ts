@@ -4,7 +4,7 @@ import { lookup } from "mime-types";
 import * as multer from "multer";
 import * as tmp from "tmp";
 import { File } from "../../schemas/file";
-import { extendQuery, isLoggedin, PaginationGuard, RESTWrap, verifyAccess, verifyValidation } from "./util";
+import { isLoggedin, PaginationWrap, RESTWrap, verifyAccess, verifyValidation } from "./util";
 
 export const FileRouter = Router();
 ensureDirSync("files/uploads/");
@@ -93,16 +93,4 @@ FileRouter.post("/new", isLoggedin, RESTWrap(async (req, res) => {
     return res.RESTSend(file.id);
 }));
 
-FileRouter.get("/count", RESTWrap(async (req, res) => {
-    let query = File.find({ public: true });
-    query = extendQuery(query, req);
-    return res.RESTSend(await query.countDocuments());
-}));
-
-FileRouter.get("/list", PaginationGuard, RESTWrap(async (req, res) => {
-    let query = File.find({ public: true });
-    query = query.select("id filename type description size created owner creator public");
-    query = extendQuery(query, req);
-    const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
-    return res.RESTSend(result);
-}));
+FileRouter.get("/list", PaginationWrap(() => File.find()));

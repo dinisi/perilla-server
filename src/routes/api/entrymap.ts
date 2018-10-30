@@ -2,7 +2,7 @@ import { Router } from "express";
 import { Entry } from "../../schemas/entry";
 import { EntryMap } from "../../schemas/entryMap";
 import { validateOne } from "../../utils";
-import { extendQuery, isEntryAdmin, isLoggedin, normalizeValidatorError, PaginationGuard, RESTWrap, verifyValidation } from "./util";
+import { extendQuery, isEntryAdmin, isLoggedin, PaginationWrap, RESTWrap, verifyValidation } from "./util";
 
 export const EntrymapRouter = Router();
 
@@ -43,17 +43,4 @@ EntrymapRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) =
     return res.RESTEnd();
 }));
 
-// Public to everyone
-
-EntrymapRouter.get("/count", RESTWrap(async (req, res) => {
-    let query = EntryMap.find().where("to").equals(req.query.entry);
-    query = extendQuery(query, req);
-    return res.RESTSend(await query.countDocuments());
-}));
-
-EntrymapRouter.get("/list", PaginationGuard, RESTWrap(async (req, res) => {
-    let query = EntryMap.find().where("to").equals(req.query.entry);
-    query = extendQuery(query, req);
-    const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
-    return res.RESTSend(result);
-}));
+EntrymapRouter.get("/list", PaginationWrap(() => EntryMap.find()));

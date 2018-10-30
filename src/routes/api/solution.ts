@@ -1,22 +1,8 @@
 import { Router } from "express";
 import { Solution } from "../../schemas/solution";
-import { extendQuery, PaginationGuard, RESTWrap, verifyAccess, verifyValidation } from "./util";
+import { extendQuery, PaginationWrap, RESTWrap, verifyAccess, verifyValidation } from "./util";
 
 export const SolutionRouter = Router();
-
-SolutionRouter.get("/count", RESTWrap(async (req, res) => {
-    let query = Solution.find();
-    query = extendQuery(query, req);
-    return res.RESTSend(await query.countDocuments());
-}));
-
-SolutionRouter.get("/list", PaginationGuard, RESTWrap(async (req, res) => {
-    let query = Solution.find();
-    query = query.select("id problem status score created owner creator public");
-    query = extendQuery(query, req);
-    const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
-    return res.RESTSend(result);
-}));
 
 SolutionRouter.get("/", RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
@@ -72,3 +58,5 @@ SolutionRouter.delete("/", RESTWrap(async (req, res) => {
     await solution.remove();
     return res.RESTEnd();
 }));
+
+SolutionRouter.get("/list", PaginationWrap(() => Solution.find()));

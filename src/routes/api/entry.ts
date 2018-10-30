@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { Entry, EntryType } from "../../schemas/entry";
 import { EntryMap } from "../../schemas/entryMap";
-import { extendQuery, isEntryAdmin, isLoggedin, normalizeValidatorError, PaginationGuard, RESTWrap, verifyValidation } from "./util";
+import { extendQuery, isEntryAdmin, isLoggedin, PaginationWrap, RESTWrap, verifyValidation } from "./util";
 
 export const EntryRouter = Router();
 
@@ -43,18 +43,4 @@ EntryRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     return res.RESTEnd();
 }));
 
-// Public to everyone
-
-EntryRouter.get("/count", RESTWrap(async (req, res) => {
-    let query = Entry.find();
-    query = extendQuery(query, req);
-    return res.RESTSend(await query.countDocuments());
-}));
-
-EntryRouter.get("/list", PaginationGuard, RESTWrap(async (req, res) => {
-    let query = Entry.find();
-    query = query.select("_id description email created type");
-    query = extendQuery(query, req);
-    const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
-    return res.RESTSend(result);
-}));
+EntryRouter.get("/list", PaginationWrap(() => Entry.find()));

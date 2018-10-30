@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
-import { extendQuery, PaginationGuard, RESTWrap, verifyAccess, verifyValidation } from "./util";
+import { PaginationWrap, RESTWrap, verifyAccess, verifyValidation } from "./util";
 
 export const ProblemRouter = Router();
 
@@ -76,16 +76,4 @@ ProblemRouter.post("/submit", RESTWrap(async (req, res) => {
     return res.RESTSend(solution.id);
 }));
 
-ProblemRouter.get("/count", RESTWrap(async (req, res) => {
-    let query = Problem.find().where("owner").equals(req.query.entry);
-    query = extendQuery(query, req);
-    return res.RESTSend(await query.countDocuments());
-}));
-
-ProblemRouter.get("/list", PaginationGuard, RESTWrap(async (req, res) => {
-    let query = Problem.find().where("owner").equals(req.query.entry);
-    query = query.select("id title tags created owner creator public");
-    query = extendQuery(query, req);
-    const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
-    return res.RESTSend(result);
-}));
+ProblemRouter.get("/list", PaginationWrap(() => Problem.find()));

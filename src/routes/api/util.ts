@@ -28,20 +28,24 @@ export const normalizeValidatorError = (errors: any[] | Record<string, any>) => 
     }
 };
 
-type IPaginationHandleFunction = <T extends Document>(req: IRESTRequest) => DocumentQuery<T[], T>;
+type IPaginationHandleFunction = (req: IRESTRequest) => DocumentQuery<Document[], Document>;
 
 export const PaginationWrap = (handle: IPaginationHandleFunction) => {
     return RESTWrap((req, res) => {
         let query = handle(req);
         query = extendQuery(query, req);
         if (req.query.noexec) {
-            //
+            query.countDocuments()
+                .then((count) => res.RESTSend(count))
+                .catch((err) => res.RESTFail(err.message));
         } else {
             req.checkQuery("skip", "Invalid skip").isNumeric();
             req.checkQuery("limit", "Invalid limit").isNumeric();
             const errors = req.validationErrors();
             if (errors) { return res.RESTFail(normalizeValidatorError(errors)); }
-            //
+            query.skip(req.query.skip).limit(req.query.limit)
+                .then((result) => res.RESTSend(result))
+                .catch((err) => res.RESTFail(err.message));
         }
     });
 };

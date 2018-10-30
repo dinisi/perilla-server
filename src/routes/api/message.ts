@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Message } from "../../schemas/message";
-import { extendQuery, PaginationGuard, RESTWrap, verifyAccess, verifyValidation } from "./util";
+import { PaginationWrap, RESTWrap, verifyAccess, verifyValidation } from "./util";
 
 export const MessageRouter = Router();
 
@@ -46,15 +46,4 @@ MessageRouter.post("/new", RESTWrap(async (req, res) => {
     return res.RESTSend(message.id);
 }));
 
-MessageRouter.get("/count", RESTWrap(async (req, res) => {
-    let query = Message.find().where("owner").equals(req.query.entry);
-    query = extendQuery(query, req);
-    return res.RESTSend(await query.countDocuments());
-}));
-
-MessageRouter.get("/list", PaginationGuard, RESTWrap(async (req, res) => {
-    let query = Message.find().where("owner").equals(req.query.entry);
-    query = extendQuery(query, req);
-    const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
-    return res.RESTSend(result);
-}));
+MessageRouter.get("/list", PaginationWrap(() => Message.find()));

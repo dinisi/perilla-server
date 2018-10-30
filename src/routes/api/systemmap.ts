@@ -1,21 +1,8 @@
 import { Router } from "express";
 import { SystemMap } from "../../schemas/systemMap";
-import { extendQuery, isLoggedin, isSystemAdmin, PaginationGuard, RESTWrap } from "./util";
+import { isLoggedin, isSystemAdmin, PaginationWrap, RESTWrap } from "./util";
 
 export const SystemMapRouter = Router();
-
-SystemMapRouter.get("/count", RESTWrap(async (req, res) => {
-    let query = SystemMap.find();
-    query = extendQuery(query, req);
-    return res.RESTSend(await query.countDocuments());
-}));
-
-SystemMapRouter.get("/list", PaginationGuard, RESTWrap(async (req, res) => {
-    let query = SystemMap.find();
-    query = extendQuery(query, req);
-    const result = await query.skip(req.pagination.skip).limit(req.pagination.limit);
-    return res.RESTSend(result);
-}));
 
 SystemMapRouter.post("/", isLoggedin, isSystemAdmin, RESTWrap(async (req, res) => {
     req.checkQuery("user").isString();
@@ -34,3 +21,5 @@ SystemMapRouter.delete("/", isLoggedin, isSystemAdmin, RESTWrap(async (req, res)
     await map.remove();
     return res.RESTEnd();
 }));
+
+SystemMapRouter.get("/list", PaginationWrap(() => SystemMap.find()));
