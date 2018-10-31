@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { Entry, EntryType } from "../../schemas/entry";
 import { EntryMap } from "../../schemas/entryMap";
-import { extendQuery, isEntryAdmin, isLoggedin, PaginationWrap, RESTWrap, verifyValidation } from "./util";
+import { isEntryAdmin, isLoggedin, PaginationWrap, RESTWrap, verifyValidation } from "./util";
 
 export const EntryRouter = Router();
 

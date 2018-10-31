@@ -4,27 +4,27 @@ import { lookup } from "mime-types";
 import * as multer from "multer";
 import * as tmp from "tmp";
 import { File } from "../../schemas/file";
-import { isLoggedin, PaginationWrap, RESTWrap, verifyAccess, verifyValidation } from "./util";
+import { isEntryAdmin, isEntryMember, isLoggedin, isSystemAdmin, notNullOrUndefined, PaginationWrap, RESTWrap, verifyValidation } from "./util";
 
 export const FileRouter = Router();
 ensureDirSync("files/uploads/");
 const upload = multer({ dest: "files/uploads/" });
 
-FileRouter.get("/", isLoggedin, RESTWrap(async (req, res) => {
+FileRouter.get("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
-    verifyAccess(file, req.user);
+    notNullOrUndefined(file);
     return res.RESTSend(file);
 }));
 
-FileRouter.post("/", isLoggedin, RESTWrap(async (req, res) => {
+FileRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
-    verifyAccess(file, req.user, true);
+    notNullOrUndefined(file);
     file.filename = req.body.filename;
     file.type = req.body.type;
     file.description = req.body.description;
@@ -33,26 +33,26 @@ FileRouter.post("/", isLoggedin, RESTWrap(async (req, res) => {
     return res.RESTEnd();
 }));
 
-FileRouter.delete("/", isLoggedin, RESTWrap(async (req, res) => {
+FileRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
-    verifyAccess(file, req.user, true);
+    notNullOrUndefined(file);
     await file.remove();
     return res.RESTEnd();
 }));
 
-FileRouter.get("/raw", isLoggedin, RESTWrap(async (req, res) => {
+FileRouter.get("/raw", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
-    verifyAccess(file, req.user);
+    notNullOrUndefined(file);
     return res.sendFile(file.getPath(), { headers: { "Content-Type": file.filename } });
 }));
 
-FileRouter.post("/upload", isLoggedin, upload.single("file"), RESTWrap(async (req, res) => {
+FileRouter.post("/upload", isLoggedin, isEntryAdmin, upload.single("file"), RESTWrap(async (req, res) => {
     req.checkQuery("entry", "Invalid query: entry").isString();
     verifyValidation(req.validationErrors());
 
@@ -67,7 +67,7 @@ FileRouter.post("/upload", isLoggedin, upload.single("file"), RESTWrap(async (re
     return res.RESTSend(file.id);
 }));
 
-FileRouter.post("/new", isLoggedin, RESTWrap(async (req, res) => {
+FileRouter.post("/new", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     req.checkQuery("entry", "Invalid query: entry").isString();
     verifyValidation(req.validationErrors());
 
@@ -93,4 +93,6 @@ FileRouter.post("/new", isLoggedin, RESTWrap(async (req, res) => {
     return res.RESTSend(file.id);
 }));
 
-FileRouter.get("/list", PaginationWrap(() => File.find()));
+FileRouter.get("/list.private", isLoggedin, isEntryMember, PaginationWrap((req) => File.find({ owner: req.query.entry })));
+FileRouter.get("/list.public", PaginationWrap(() => File.find({ public: true })));
+FileRouter.get("/list.all", isLoggedin, isSystemAdmin, PaginationWrap(() => File.find()));

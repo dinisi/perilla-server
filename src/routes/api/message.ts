@@ -1,40 +1,40 @@
 import { Router } from "express";
 import { Message } from "../../schemas/message";
-import { PaginationWrap, RESTWrap, verifyAccess, verifyValidation } from "./util";
+import { isEntryAdmin, isEntryMember, isLoggedin, isSystemAdmin, notNullOrUndefined, PaginationWrap, RESTWrap, verifyValidation } from "./util";
 
 export const MessageRouter = Router();
 
-MessageRouter.get("/", RESTWrap(async (req, res) => {
+MessageRouter.get("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isString();
     verifyValidation(req.validationErrors());
 
     const message = await Message.findOne({ owner: req.query.entry, from: req.query.id });
-    verifyAccess(message, req.user);
+    notNullOrUndefined(message);
     return res.RESTSend(message);
 }));
 
-MessageRouter.post("/", RESTWrap(async (req, res) => {
+MessageRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
     const message = await Message.findOne({ owner: req.query.entry, id: req.query.id });
-    verifyAccess(message, req.user, true);
+    notNullOrUndefined(message);
     message.content = req.body.content;
     await message.save();
     return res.RESTEnd();
 }));
 
-MessageRouter.delete("/", RESTWrap(async (req, res) => {
+MessageRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isString();
     verifyValidation(req.validationErrors());
 
     const message = await Message.findOne({ owner: req.query.entry, from: req.query.id });
-    verifyAccess(message, req.user, true);
+    notNullOrUndefined(message);
     await message.remove();
     return res.RESTEnd();
 }));
 
-MessageRouter.post("/new", RESTWrap(async (req, res) => {
+MessageRouter.post("/new", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
     req.checkQuery("entry", "Invalid query: entry").isString();
     verifyValidation(req.validationErrors());
 
@@ -46,4 +46,6 @@ MessageRouter.post("/new", RESTWrap(async (req, res) => {
     return res.RESTSend(message.id);
 }));
 
-MessageRouter.get("/list", PaginationWrap(() => Message.find()));
+MessageRouter.get("/list.private", isLoggedin, isEntryMember, PaginationWrap((req) => Message.find({ owner: req.query.entry })));
+MessageRouter.get("/list.public", PaginationWrap(() => Message.find({ public: true })));
+MessageRouter.get("/list.all", isLoggedin, isSystemAdmin, PaginationWrap(() => Message.find()));

@@ -1,25 +1,25 @@
 import { Router } from "express";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
-import { PaginationWrap, RESTWrap, verifyAccess, verifyValidation } from "./util";
+import { isEntryAdmin, isEntryMember, isLoggedin, isSystemAdmin, notNullOrUndefined, PaginationWrap, RESTWrap, verifyValidation } from "./util";
 
 export const ProblemRouter = Router();
 
-ProblemRouter.get("/", RESTWrap(async (req, res) => {
+ProblemRouter.get("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    verifyAccess(problem, req.user);
+    notNullOrUndefined(problem);
     return res.RESTSend(problem);
 }));
 
-ProblemRouter.post("/", RESTWrap(async (req, res) => {
+ProblemRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    verifyAccess(problem, req.user, true);
+    notNullOrUndefined(problem);
     problem.title = req.body.title;
     problem.content = req.body.content;
     problem.files = req.body.files;
@@ -31,17 +31,17 @@ ProblemRouter.post("/", RESTWrap(async (req, res) => {
     return res.RESTEnd();
 }));
 
-ProblemRouter.delete("/", RESTWrap(async (req, res) => {
+ProblemRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    verifyAccess(problem, req.user, true);
+    notNullOrUndefined(problem);
     await problem.remove();
     return res.RESTEnd();
 }));
 
-ProblemRouter.post("/new", RESTWrap(async (req, res) => {
+ProblemRouter.post("/new", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     req.checkQuery("entry", "Invalid query: entry").isString();
     verifyValidation(req.validationErrors());
 
@@ -59,12 +59,12 @@ ProblemRouter.post("/new", RESTWrap(async (req, res) => {
     return res.RESTSend(problem.id);
 }));
 
-ProblemRouter.post("/submit", RESTWrap(async (req, res) => {
+ProblemRouter.post("/submit", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
     req.checkQuery("id", "Invalid query: ID").isNumeric();
     verifyValidation(req.validationErrors());
 
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    verifyAccess(problem, req.user, true);
+    notNullOrUndefined(problem);
     const solution = new Solution();
     solution.problem = problem.id;
     solution.files = req.body.files;
@@ -76,4 +76,6 @@ ProblemRouter.post("/submit", RESTWrap(async (req, res) => {
     return res.RESTSend(solution.id);
 }));
 
-ProblemRouter.get("/list", PaginationWrap(() => Problem.find()));
+ProblemRouter.get("/list.private", isLoggedin, isEntryMember, PaginationWrap((req) => Problem.find({ owner: req.query.entry })));
+ProblemRouter.get("/list.public", PaginationWrap(() => Problem.find({ public: true })));
+ProblemRouter.get("/list.all", isLoggedin, isSystemAdmin, PaginationWrap(() => Problem.find()));
