@@ -18,11 +18,13 @@ Content-Type: application/json
 }
 
 ### Get private route access details
-GET http://127.0.0.1:3000/api/private?entry=TheVoiceOfHA
+GET http://127.0.0.1:3000/api/entry?entry=zzs
 
 # Private route - file
 ### Fetch all files
-GET http://127.0.0.1:3000/api/file/list?skip=0&limit=512&entry=zzs
+GET http://127.0.0.1:3000/api/file/list.private?skip=0&limit=512&entry=zzs
+### Fetch all messages
+GET http://127.0.0.1:3000/api/message/list.private?skip=0&limit=512&entry=zzs
 ###
 GET http://127.0.0.1:3000/api/message/list?skip=0&limit=512&entry=zzs
 ###
@@ -91,5 +93,3 @@ GET http://127.0.0.1:3000/api/system/entrymap/list?skip=0&limit=512
 GET http://127.0.0.1:3000/api/system/entry/list?skip=0&limit=512
 ### Logout
 POST http://127.0.0.1:3000/api/logout
-### Try custom http methods
-LIST http://127.0.0.1:3000

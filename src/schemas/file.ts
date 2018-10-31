@@ -1,5 +1,5 @@
 import { ensureDirSync, move, unlink } from "fs-extra";
-import { Document, DocumentQuery, Model, model, Schema } from "mongoose";
+import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
 import { getFileSize, getHash, validateOne, validateUser } from "../utils";
 import { FileCounter } from "./counter";

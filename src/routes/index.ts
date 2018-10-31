@@ -1,6 +1,4 @@
 import { Router } from "express";
-import * as express from "express";
-import { join } from "path";
 import { IRESTResponse } from "../interfaces/route";
 import { APIRouter } from "./api";
 

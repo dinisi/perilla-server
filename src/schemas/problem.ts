@@ -1,8 +1,7 @@
-import { Document, DocumentQuery, Model, model, Schema } from "mongoose";
-import { validateMany, validateOne, validateUser } from "../utils";
+import { Document, Model, model, Schema } from "mongoose";
+import { validateOne, validateUser } from "../utils";
 import { ProblemCounter } from "./counter";
 import { Entry } from "./entry";
-import { File } from "./file";
 import { Solution } from "./solution";
 
 export interface IProblemModel extends Document {
