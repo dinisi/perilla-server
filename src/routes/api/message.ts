@@ -47,5 +47,4 @@ MessageRouter.post("/new", isLoggedin, isEntryMember, RESTWrap(async (req, res) 
 }));
 
 MessageRouter.get("/list.private", isLoggedin, isEntryMember, PaginationWrap((req) => Message.find({ owner: req.query.entry })));
-MessageRouter.get("/list.public", PaginationWrap(() => Message.find({ public: true })));
 MessageRouter.get("/list.all", isLoggedin, isSystemAdmin, PaginationWrap(() => Message.find()));
