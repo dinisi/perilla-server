@@ -5,3 +5,8 @@ declare module "sha3" {
         digest(encoding?: 'hex' | 'binary'): string;
     }
 }
+
+declare module "prompts" {
+    function prompts(options: any): Promise<void>;
+    export = prompts;
+}
