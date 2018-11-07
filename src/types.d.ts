@@ -7,6 +7,6 @@ declare module "sha3" {
 }
 
 declare module "prompts" {
-    function prompts(options: any): Promise<void>;
+    function prompts(options: any): Promise<any>;
     export = prompts;
 }
