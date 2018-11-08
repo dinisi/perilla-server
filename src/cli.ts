@@ -1,3 +1,4 @@
+import chalk = require("chalk");
 import child_process = require("child_process");
 import commander = require("commander");
 import fs = require("fs-extra");
@@ -6,7 +7,11 @@ import path = require("path");
 import prompts = require("prompts");
 import { generate } from "randomstring";
 
+const c = chalk.default;
 const version = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "package.json")).toString()).version;
+
+commander
+    .version(version);
 
 const readbool = async (message: string, initial: boolean = false) => (await prompts({ type: "confirm", name: "v", message, initial })).v;
 const readpass = async () => (await prompts({ type: "password", name: "v", message: "Please input password" })).v;
@@ -122,6 +127,30 @@ const InitializeDatabase = async () => {
     await map.save();
 };
 
+commander
+    .command("init")
+    .description("Initialize the system")
+    .action(async () => {
+        // 0. remove exists installition
+        // 1. Compile typescript code into javascript
+        // 2. Generate configuration file
+        // 3. Initialize database
+
+        console.log("[INFO] Initializing the system...");
+        if (fs.existsSync("config.json")) { await uninstall(); }
+        console.log("[INFO] [STEP 1/4] Compiling typescript code...");
+        compileCode();
+        console.log("[INFO] [STEP 2/4]  Generating config...");
+        await generateConfig();
+        console.log("[INFO] [STEP 3/4] Initializing database...");
+        await InitializeDatabase();
+        console.log("[INFO] ✔️ Done");
+        console.log("[TIP] use `yarn start` to start perilla");
+        console.log("[TIP] Edit config.json to customize perilla.");
+        console.log("[TIP] Please read https://perilla.js.org for more information");
+        process.exit(0);
+    });
+
 const createEntry = async (id: string) => {
     require("./database");
     const questions = [
@@ -150,6 +179,7 @@ const createEntry = async (id: string) => {
         entry.setPassword(await readpass());
     }
     await entry.save();
+    console.log(`[INFO] 😙 Welcome, ${id}.`);
 };
 
 const removeEntry = async (id: string) => {
@@ -158,34 +188,24 @@ const removeEntry = async (id: string) => {
     const entry = await Entry.findById(id);
     if (!entry) { throw new Error("Entry not found"); }
     await entry.remove();
+    console.log(`[INFO] 🗑 ${id} removed.`);
 };
 
-commander
-    .version(version);
+const cp = (obj: any, key: any) => {
+    return c.blueBright(key) + "\t" + c.redBright(obj[key]);
+};
 
-commander
-    .command("init")
-    .description("Initialize the system")
-    .action(async () => {
-        // 0. remove exists installition
-        // 1. Compile typescript code into javascript
-        // 2. Generate configuration file
-        // 3. Initialize database
-
-        console.log("[INFO] Initializing the system...");
-        if (fs.existsSync("config.json")) { await uninstall(); }
-        console.log("[INFO] [STEP 1/4] Compiling typescript code...");
-        compileCode();
-        console.log("[INFO] [STEP 2/4]  Generating config...");
-        await generateConfig();
-        console.log("[INFO] [STEP 3/4] Initializing database...");
-        await InitializeDatabase();
-        console.log("[INFO] ✔️ Done");
-        console.log("[TIP] use `yarn start` to start perilla");
-        console.log("[TIP] Edit config.json to customize perilla.");
-        console.log("[TIP] Please read https://perilla.js.org for more information");
-        process.exit(0);
-    });
+const modifyEntry = async (id: string) => {
+    require("./database");
+    const { Entry, EntryType } = require("./schemas/entry");
+    const entry = await Entry.findById(id);
+    if (!entry) { throw new Error("Entry not found"); }
+    console.log(cp(entry, "_id"));
+    console.log(cp(entry, "description"));
+    console.log(cp(entry, "email"));
+    console.log(cp(entry, "created"));
+    console.log(cp(entry, "type"));
+};
 
 commander
     .command("entry <id>")
@@ -200,6 +220,10 @@ commander
         if (cmd.remove) {
             await removeEntry(id);
         }
+        if (cmd.modify) {
+            await modifyEntry(id);
+        }
+        process.exit(0);
     });
 
 commander.parse(process.argv);
