@@ -8,9 +8,12 @@ import { generate } from "randomstring";
 
 const version = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "package.json")).toString()).version;
 
+const readbool = async (message: string, initial: boolean = false) => (await prompts({ type: "confirm", name: "v", message, initial })).v;
+const readpass = async () => (await prompts({ type: "password", name: "v", message: "Please input password" })).v;
+
 const uninstall = async () => {
     console.log("[INFO] config.json exists.");
-    if ((await prompts({ type: "confirm", name: "value", message: "continue will overwrite exist data. confirm?", initial: false })).value) {
+    if (await readbool("continue will overwrite exist data. confirm?")) {
         console.log("[INFO] removing managed files...");
         const oldConfig = JSON.parse(fs.readFileSync("config.json").toString());
         try {
@@ -19,7 +22,7 @@ const uninstall = async () => {
             fs.unlinkSync("config.json");
         } catch (e) {
             console.log("[ERROR] " + e.message);
-            if (!(await prompts({ type: "confirm", name: "value", message: "continue?", initial: false })).value) { process.exit(0); }
+            if (!await readbool("continue?")) { process.exit(0); }
         }
         console.log("[INFO] Droping database...");
         await mongoose.connect(oldConfig.db.url, oldConfig.db.options);
@@ -111,8 +114,7 @@ const InitializeDatabase = async () => {
     admin.description = "System administrator";
     admin.email = "admin@perilla.js.org";
     admin.type = EntryType.user;
-    const password = (await prompts({ type: "password", name: "value", message: "Administrator password:" })).value;
-    admin.setPassword(password);
+    admin.setPassword(await readpass());
     await admin.save();
     const { SystemMap } = require("./schemas/systemMap");
     const map = new SystemMap();
@@ -120,8 +122,48 @@ const InitializeDatabase = async () => {
     await map.save();
 };
 
+const createEntry = async (id: string) => {
+    require("./database");
+    const questions = [
+        {
+            type: "text",
+            name: "email",
+            message: "Entry email",
+        },
+        {
+            type: "select",
+            name: "type",
+            message: "Entry type",
+            choices: [
+                { title: "User", value: 0 },
+                { title: "Group", value: 1 },
+            ],
+        },
+    ];
+    const answers = await prompts(questions);
+    const { Entry, EntryType } = require("./schemas/entry");
+    const entry = new Entry();
+    entry._id = id;
+    entry.email = answers.email;
+    entry.type = answers.type;
+    if (entry.type === EntryType.user) {
+        entry.setPassword(await readpass());
+    }
+    await entry.save();
+};
+
+const removeEntry = async (id: string) => {
+    require("./database");
+    const { Entry, EntryType } = require("./schemas/entry");
+    const entry = await Entry.findById(id);
+    if (!entry) { throw new Error("Entry not found"); }
+    await entry.remove();
+};
+
 commander
-    .version(version)
+    .version(version);
+
+commander
     .command("init")
     .description("Initialize the system")
     .action(async () => {
@@ -143,6 +185,21 @@ commander
         console.log("[TIP] Edit config.json to customize perilla.");
         console.log("[TIP] Please read https://perilla.js.org for more information");
         process.exit(0);
+    });
+
+commander
+    .command("entry <id>")
+    .description("Entry utils")
+    .option("-c, --create", "Create entry")
+    .option("-r, --remove", "Delete entry")
+    .option("-m, --modify", "Modify entry")
+    .action(async (id, cmd) => {
+        if (cmd.create) {
+            await createEntry(id);
+        }
+        if (cmd.remove) {
+            await removeEntry(id);
+        }
     });
 
 commander.parse(process.argv);
