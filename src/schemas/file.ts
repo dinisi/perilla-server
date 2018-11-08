@@ -23,10 +23,7 @@ export interface IFileModel extends Document {
 
 export const FileSchema = new Schema(
     {
-        id: {
-            type: Number,
-            required: true,
-        },
+        id: Number,
         filename: {
             type: String,
             required: true,

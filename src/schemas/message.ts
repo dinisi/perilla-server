@@ -13,10 +13,7 @@ export interface IMessageModel extends Document {
 
 export const MessageSchema = new Schema(
     {
-        id: {
-            type: Number,
-            required: true,
-        },
+        id: Number,
         content: {
             type: String,
             required: true,

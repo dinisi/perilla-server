@@ -20,10 +20,7 @@ export interface IProblemModel extends Document {
 
 export const ProblemSchema: Schema = new Schema(
     {
-        id: {
-            type: Number,
-            required: true,
-        },
+        id: Number,
         title: {
             type: String,
             required: true,

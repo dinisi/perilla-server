@@ -38,10 +38,7 @@ export interface ISolutionModel extends Document {
 
 export const SolutionSchema: Schema = new Schema(
     {
-        id: {
-            type: Number,
-            required: true,
-        },
+        id: Number,
         problem: {
             type: Number,
             required: true,
