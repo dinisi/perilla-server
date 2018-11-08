@@ -15,7 +15,7 @@ export const MessageSchema = new Schema(
     {
         id: {
             type: Number,
-            index: true,
+            required: true,
         },
         content: {
             type: String,
@@ -34,7 +34,7 @@ export const MessageSchema = new Schema(
         },
     },
 );
-
+MessageSchema.index({ id: 1, owner: 1 }, { unique: true });
 MessageSchema.pre("save", async function(next) {
     const self = this as IMessageModel;
     if (!self.created) {

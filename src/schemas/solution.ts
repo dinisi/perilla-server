@@ -40,7 +40,7 @@ export const SolutionSchema: Schema = new Schema(
     {
         id: {
             type: Number,
-            index: true,
+            required: true,
         },
         problem: {
             type: Number,
@@ -83,7 +83,7 @@ export const SolutionSchema: Schema = new Schema(
         },
     },
 );
-
+SolutionSchema.index({ id: 1, owner: 1 }, { unique: true });
 SolutionSchema.methods.judge = async function() {
     const self = this as ISolutionModel;
     const problem = await Problem.findById(self.problem);

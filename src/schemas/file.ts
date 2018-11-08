@@ -25,7 +25,7 @@ export const FileSchema = new Schema(
     {
         id: {
             type: Number,
-            index: true,
+            required: true,
         },
         filename: {
             type: String,
@@ -60,6 +60,8 @@ export const FileSchema = new Schema(
         },
     },
 );
+
+FileSchema.index({ id: 1, owner: 1 }, { unique: true });
 
 FileSchema.methods.getPath = function() {
     const self = this as IFileModel;

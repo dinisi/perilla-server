@@ -1,14 +1,11 @@
-#!/usr/bin/env node
-
 import child_process = require("child_process");
 import commander = require("commander");
-import crypto = require("crypto");
 import fs = require("fs-extra");
 import mongoose = require("mongoose");
 import path = require("path");
 import prompts = require("prompts");
 import { generate } from "randomstring";
-import { ISystemConfig } from "./interfaces/system";
+
 const version = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "package.json")).toString()).version;
 
 const uninstall = async () => {
@@ -49,7 +46,6 @@ const compileCode = () => {
 };
 
 const generateConfig = async () => {
-    console.log("1");
     const questions = [
         {
             type: "text",
@@ -58,39 +54,33 @@ const generateConfig = async () => {
             initial: "mongodb://localhost:27017/perilla",
         },
         {
-            type: "number",
+            type: "text",
             name: "redis_prefix",
             message: "Redis key prefix",
-            initial: 0,
-            min: 0,
-            max: 15,
+            initial: "perilla_",
         },
         {
             type: "text",
             name: "http_hostname",
+            message: "HTTP Hostname",
             initial: "localhost",
         },
         {
             type: "number",
             name: "http_port",
+            message: "HTTP Port",
             initial: 8680,
             min: 1,
             max: 65535,
         },
         {
             type: "text",
-            name: "sessionSecret",
+            name: "session_secret",
+            message: "session secret",
             initial: generate(25),
         },
     ];
-    console.log("2");
-    const answers = await prompts({
-        type: "text",
-        name: "db_url",
-        message: "Mongodb URL",
-        initial: "mongodb://localhost:27017/perilla",
-    });
-    console.log("3");
+    const answers = await prompts(questions);
     const config = {
         db: {
             url: answers.db_url,
@@ -108,6 +98,7 @@ const generateConfig = async () => {
             hostname: answers.http_hostname,
             https: false,
         },
+        sessionSecret: answers.session_secret,
     };
     fs.writeFileSync("config.json", JSON.stringify(config, null, "\t"));
 };
@@ -129,34 +120,29 @@ const InitializeDatabase = async () => {
     await map.save();
 };
 
-const init = async () => {
-    // Init system
-    // Steps:
-    // 0. remove exists installition
-    // 1. Compile typescript code into javascript
-    // 2. Generate configuration file
-    // 3. Initialize database
-
-    console.log("[INFO] Initializing the system...");
-    // Step 0
-    if (fs.existsSync("config.json")) { await uninstall(); }
-    // Step 1
-    console.log("[INFO] [STEP 1/4] Compiling typescript code...");
-    compileCode();
-    // Step 2
-    console.log("[INFO] [STEP 2/4]  Generating config...");
-    await generateConfig();
-    console.log("[INFO] [STEP 3/4] Initializing database...");
-    // await InitializeDatabase();
-    console.log("[INFO] ✔️ Done");
-    console.log("[TIP] use `yarn start` to start perilla");
-    console.log("[TIP] Edit config.json to customize perilla.");
-    console.log("[TIP] Please read https://perilla.js.org for more information");
-    process.exit(0);
-};
-
 commander
     .version(version)
-    .command("init", "Initialize the system")
-    .action(() => init())
-    .parse(process.argv);
+    .command("init")
+    .description("Initialize the system")
+    .action(async () => {
+        // 0. remove exists installition
+        // 1. Compile typescript code into javascript
+        // 2. Generate configuration file
+        // 3. Initialize database
+
+        console.log("[INFO] Initializing the system...");
+        if (fs.existsSync("config.json")) { await uninstall(); }
+        console.log("[INFO] [STEP 1/4] Compiling typescript code...");
+        compileCode();
+        console.log("[INFO] [STEP 2/4]  Generating config...");
+        await generateConfig();
+        console.log("[INFO] [STEP 3/4] Initializing database...");
+        await InitializeDatabase();
+        console.log("[INFO] ✔️ Done");
+        console.log("[TIP] use `yarn start` to start perilla");
+        console.log("[TIP] Edit config.json to customize perilla.");
+        console.log("[TIP] Please read https://perilla.js.org for more information");
+        process.exit(0);
+    });
+
+commander.parse(process.argv);

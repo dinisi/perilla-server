@@ -22,7 +22,7 @@ export const ProblemSchema: Schema = new Schema(
     {
         id: {
             type: Number,
-            index: true,
+            required: true,
         },
         title: {
             type: String,
@@ -66,7 +66,7 @@ export const ProblemSchema: Schema = new Schema(
         },
     },
 );
-
+ProblemSchema.index({ id: 1, owner: 1 }, { unique: true });
 ProblemSchema.pre("save", async function(next) {
     const self = this as IProblemModel;
     if (!self.created) {
