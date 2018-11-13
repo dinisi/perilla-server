@@ -1,11 +1,11 @@
 import * as crypto from "crypto";
 import { Document, model, Schema } from "mongoose";
 import { FileCounter, MessageCounter, ProblemCounter, SolutionCounter } from "./counter";
-import { EntryMap } from "./entryMap";
+import { EntryMap } from "./entrymap";
 import { File } from "./file";
 import { Problem } from "./problem";
 import { Solution } from "./solution";
-import { SystemMap } from "./systemMap";
+import { SystemMap } from "./systemmap";
 
 export enum EntryType {
     user,

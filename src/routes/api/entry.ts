@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Entry, EntryType } from "../../schemas/entry";
-import { EntryMap } from "../../schemas/entryMap";
+import { EntryMap } from "../../schemas/entrymap";
 import { isEntryAdmin, isLoggedin, PaginationWrap, RESTWrap } from "./util";
 
 export const EntryRouter = Router();

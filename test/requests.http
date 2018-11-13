@@ -23,7 +23,7 @@ POST http://127.0.0.1:8680/api/file?entry=Administrator
 Content-Type: application/json
 
 {
-    "filename": "123"
+    "file": "123"
 }
 
 ### Fetch all files

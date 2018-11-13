@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { SystemMap } from "../../schemas/systemMap";
+import { SystemMap } from "../../schemas/systemmap";
 import { isLoggedin, isSystemAdmin, PaginationWrap, RESTWrap } from "./util";
 
 export const SystemMapRouter = Router();

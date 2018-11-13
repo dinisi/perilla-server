@@ -3,7 +3,7 @@ import "./passport";
 import { Router } from "express";
 import { authenticate } from "passport";
 import { Entry, EntryType } from "../../schemas/entry";
-import { EntryMap } from "../../schemas/entryMap";
+import { EntryMap } from "../../schemas/entrymap";
 import { adminRouter } from "./admin";
 import { EntryRouter } from "./entry";
 import { EntrymapRouter } from "./entrymap";

@@ -1,8 +1,8 @@
 import { NextFunction, Request } from "express";
 import { Document, DocumentQuery } from "mongoose";
 import { IRESTResponse } from "../../interfaces/route";
-import { EntryMap } from "../../schemas/entryMap";
-import { SystemMap } from "../../schemas/systemMap";
+import { EntryMap } from "../../schemas/entrymap";
+import { SystemMap } from "../../schemas/systemmap";
 
 type IHandleFunction = (req: Request, res: IRESTResponse, next?: NextFunction) => Promise<void> | void;
 

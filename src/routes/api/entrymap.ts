@@ -8,7 +8,7 @@
 
 import { Router } from "express";
 import { Entry } from "../../schemas/entry";
-import { EntryMap } from "../../schemas/entryMap";
+import { EntryMap } from "../../schemas/entrymap";
 import { validateOne } from "../../utils";
 import { isEntryAdmin, isLoggedin, PaginationWrap, RESTWrap } from "./util";
 
