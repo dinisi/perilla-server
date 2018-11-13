@@ -4,6 +4,7 @@ import { Router } from "express";
 import { authenticate } from "passport";
 import { Entry, EntryType } from "../../schemas/entry";
 import { EntryMap } from "../../schemas/entryMap";
+import { adminRouter } from "./admin";
 import { EntryRouter } from "./entry";
 import { EntrymapRouter } from "./entrymap";
 import { FileRouter } from "./file";
@@ -11,16 +12,11 @@ import { MessageRouter } from "./message";
 import { ProblemRouter } from "./problem";
 import { SolutionRouter } from "./solution";
 import { SystemMapRouter } from "./systemmap";
-import { RESTWrap, verifyValidation } from "./util";
+import { RESTWrap } from "./util";
 
 export const APIRouter = Router();
 
 APIRouter.post("/register", RESTWrap((req, res) => {
-    req.checkBody("username", "Invalid body: username");
-    req.checkBody("password", "Invalid body: password").isString();
-    req.checkBody("email", "Invalid body: email").isEmail();
-    verifyValidation(req.validationErrors());
-
     const entry = new Entry();
     entry._id = req.body.username;
     entry.email = req.body.email;
@@ -50,6 +46,7 @@ APIRouter.get("/session", RESTWrap(async (req, res) => {
     }
 }));
 
+APIRouter.use("/admin", adminRouter);
 APIRouter.use("/entry", EntryRouter);
 APIRouter.use("/entrymap", EntrymapRouter);
 APIRouter.use("/file", FileRouter);
