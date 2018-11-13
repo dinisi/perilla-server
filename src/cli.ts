@@ -23,7 +23,6 @@ const uninstall = async () => {
         const oldConfig = JSON.parse(fs.readFileSync("config.json").toString());
         try {
             fs.removeSync("files");
-            fs.removeSync("dist");
             fs.unlinkSync("config.json");
         } catch (e) {
             console.log("[ERROR] " + e.message);
@@ -35,21 +34,6 @@ const uninstall = async () => {
         await mongoose.disconnect();
     } else {
         process.exit(0);
-    }
-};
-
-const compileCode = () => {
-    // tslint:disable-next-line:variable-name
-    let tsc_path = null;
-    if (process.platform === "win32") {
-        tsc_path = path.join(__dirname, "..", "node_modules", ".bin", "tsc.cmd");
-    } else {
-        tsc_path = path.join(__dirname, "..", "node_modules", ".bin", "tsc");
-    }
-    if (tsc_path) {
-        child_process.execSync(tsc_path);
-    } else {
-        console.log("Please compile typescript code by you own");
     }
 };
 
@@ -137,9 +121,8 @@ commander
         // 3. Initialize database
 
         console.log("[INFO] Initializing the system...");
+        console.log("[INFO] [STEP 1/4] Checking environment...");
         if (fs.existsSync("config.json")) { await uninstall(); }
-        console.log("[INFO] [STEP 1/4] Compiling typescript code...");
-        compileCode();
         console.log("[INFO] [STEP 2/4]  Generating config...");
         await generateConfig();
         console.log("[INFO] [STEP 3/4] Initializing database...");

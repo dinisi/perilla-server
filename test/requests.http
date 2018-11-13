@@ -1,5 +1,5 @@
 ### Register
-POST http://127.0.0.1:3000/api/register
+POST http://127.0.0.1:8680/api/register
 content-type: application/json
 
 {
@@ -9,28 +9,33 @@ content-type: application/json
 }
 
 ### Login
-POST http://127.0.0.1:3000/api/login
+POST http://127.0.0.1:8680/api/login
 Content-Type: application/json
 
 {
-    "username": "zzs",
+    "username": "Administrator",
     "password": "123456"
 }
 
-### Get private route access details
-GET http://127.0.0.1:3000/api/entry?entry=zzs
-
 # Private route - file
+###
+POST http://127.0.0.1:8680/api/file?entry=Administrator
+Content-Type: application/json
+
+{
+    "filename": "123"
+}
+
 ### Fetch all files
-GET http://127.0.0.1:3000/api/file/list.private?skip=0&limit=512&entry=zzs
+GET http://127.0.0.1:8680/api/file/list.private?skip=0&limit=512&entry=zzs
 ### Fetch all messages
-GET http://127.0.0.1:3000/api/message/list.private?skip=0&limit=512&entry=zzs
+GET http://127.0.0.1:8680/api/message/list.private?skip=0&limit=512&entry=zzs
 ###
-GET http://127.0.0.1:3000/api/message/list?skip=0&limit=512&entry=zzs
+GET http://127.0.0.1:8680/api/message/list?skip=0&limit=512&entry=zzs
 ###
-GET http://127.0.0.1:3000/api/private/file/count?entry=zzs
+GET http://127.0.0.1:8680/api/private/file/count?entry=zzs
 ### Create a new file
-POST http://127.0.0.1:3000/api/private/file/new?entry=zzs
+POST http://127.0.0.1:8680/api/private/file/new?entry=zzs
 Content-Type: application/json
 
 {
@@ -40,9 +45,9 @@ Content-Type: application/json
     "content": "#include<stdio.h>"
 }
 ### Fetch a exists file
-GET http://127.0.0.1:3000/api/private/file?entry=zzs&id=2
+GET http://127.0.0.1:8680/api/private/file?entry=zzs&id=2
 ### Modify a exists file
-POST http://127.0.0.1:3000/api/private/file?entry=zzs&id=2
+POST http://127.0.0.1:8680/api/private/file?entry=zzs&id=2
 Content-Type: application/json
 
 {
@@ -52,9 +57,9 @@ Content-Type: application/json
     "type": "text/x-c"
 }
 ### Fetch a no-exist file
-GET http://127.0.0.1:3000/api/private/file?entry=zzs&id=0
+GET http://127.0.0.1:8680/api/private/file?entry=zzs&id=0
 ### Create message
-POST http://127.0.0.1:3000/api/private/message/new?entry=zzs
+POST http://127.0.0.1:8680/api/private/message/new?entry=zzs
 Content-Type: application/json
 
 {
@@ -62,25 +67,25 @@ Content-Type: application/json
 }
 # Public route
 ### Fetch public files
-GET http://127.0.0.1:3000/api/public/file/count
+GET http://127.0.0.1:8680/api/public/file/count
 ###
-GET http://127.0.0.1:3000/api/public/file/list?skip=0&limit=512
+GET http://127.0.0.1:8680/api/public/file/list?skip=0&limit=512
 # System route
 ### Try to use system route
-GET http://127.0.0.1:3000/api/system/file/count
+GET http://127.0.0.1:8680/api/system/file/count
 ### Fetch file
-GET http://127.0.0.1:3000/api/system/file/list?skip=0&limit=512
+GET http://127.0.0.1:8680/api/system/file/list?skip=0&limit=512
 ###
-GET http://127.0.0.1:3000/api/system/file?id=5bc9420a843ef97822d35001
+GET http://127.0.0.1:8680/api/system/file?id=5bc9420a843ef97822d35001
 ###
-GET http://127.0.0.1:3000/api/system/file/raw?id=5bc9420a843ef97822d35001
+GET http://127.0.0.1:8680/api/system/file/raw?id=5bc9420a843ef97822d35001
 ### Try to fetch entries
-GET http://127.0.0.1:3000/api/system/entry/list?skip=0&limit=512
+GET http://127.0.0.1:8680/api/system/entry/list?skip=0&limit=512
 ###
-GET http://127.0.0.1:3000/api/system/systemmap/list?skip=0&limit=512
+GET http://127.0.0.1:8680/api/system/systemmap/list?skip=0&limit=512
 ### Common routes
 ### Create a new entry
-POST http://127.0.0.1:3000/api/common/entry/create
+POST http://127.0.0.1:8680/api/common/entry/create
 Content-Type: application/json
 
 {
@@ -88,8 +93,8 @@ Content-Type: application/json
     "email": "admin@19260817.net"
 }
 ###
-GET http://127.0.0.1:3000/api/system/entrymap/list?skip=0&limit=512
+GET http://127.0.0.1:8680/api/system/entrymap/list?skip=0&limit=512
 ###
-GET http://127.0.0.1:3000/api/system/entry/list?skip=0&limit=512
+GET http://127.0.0.1:8680/api/system/entry/list?skip=0&limit=512
 ### Logout
-POST http://127.0.0.1:3000/api/logout
+POST http://127.0.0.1:8680/api/logout

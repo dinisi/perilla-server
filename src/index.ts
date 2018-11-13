@@ -4,7 +4,6 @@ import { json, urlencoded } from "body-parser";
 import * as REDISStore from "connect-redis";
 import * as express from "express";
 import * as session from "express-session";
-import * as validator from "express-validator";
 import { appendFileSync, readFileSync } from "fs-extra";
 import * as http from "http";
 import * as https from "https";
@@ -24,7 +23,6 @@ const app: express.Application = express();
 
 app.use(json());
 app.use(urlencoded({ extended: false }));
-app.use(validator());
 const store = REDISStore(session);
 app.use(session({
     store: new store({ client: REDISInstance }),

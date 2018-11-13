@@ -46,6 +46,7 @@ FileRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
 }));
 
 FileRouter.post("/", isLoggedin, isEntryAdmin, upload.single("file"), RESTWrap(async (req, res) => {
+    notNullOrUndefined(req.file);
     const file = new File();
     await file.setFile(req.file.path);
     file.owner = req.query.entry;
