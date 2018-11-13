@@ -15,7 +15,6 @@ export interface IProblemModel extends Document {
     created: Date;
     owner: string;
     creator: string;
-    public: boolean;
 }
 
 export const ProblemSchema: Schema = new Schema(
@@ -55,11 +54,6 @@ export const ProblemSchema: Schema = new Schema(
             type: String,
             required: true,
             validate: validateUser,
-        },
-        public: {
-            type: Boolean,
-            required: true,
-            default: false,
         },
     },
 );

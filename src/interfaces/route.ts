@@ -5,10 +5,3 @@ export interface IRESTResponse extends Response {
     RESTFail(message: any): void;
     RESTEnd(): void;
 }
-
-export interface IRESTRequest extends Request {
-    pagination?: {
-        skip: number;
-        limit: number;
-    };
-}

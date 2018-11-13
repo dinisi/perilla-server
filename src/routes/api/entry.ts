@@ -1,15 +1,11 @@
 import { Router } from "express";
 import { Entry, EntryType } from "../../schemas/entry";
 import { EntryMap } from "../../schemas/entryMap";
-import { isEntryAdmin, isLoggedin, PaginationWrap, RESTWrap, verifyValidation } from "./util";
+import { isEntryAdmin, isLoggedin, PaginationWrap, RESTWrap } from "./util";
 
 export const EntryRouter = Router();
 
-EntryRouter.post("/create", isLoggedin, RESTWrap(async (req, res) => {
-    req.checkBody("name", "Invalid body: name").isString();
-    req.checkBody("email", "Invalid body: email").isEmail();
-    verifyValidation(req.validationErrors());
-
+EntryRouter.post("/", isLoggedin, RESTWrap(async (req, res) => {
     const entry = new Entry();
     entry._id = req.body.name;
     entry.email = req.body.email;
@@ -29,10 +25,7 @@ EntryRouter.get("/", RESTWrap(async (req, res) => {
     return res.RESTSend(entry);
 }));
 
-EntryRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
-    req.checkBody("email", "Invalid body: email").isEmail();
-    verifyValidation(req.validationErrors());
-
+EntryRouter.put("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     const entry = await Entry.findById(req.query.entry);
     entry.description = req.body.description;
     entry.email = req.body.email;
@@ -43,4 +36,4 @@ EntryRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     return res.RESTEnd();
 }));
 
-EntryRouter.get("/list", PaginationWrap(() => Entry.find()));
+EntryRouter.get("/list", PaginationWrap(() => Entry.find().select("-hash -salt")));

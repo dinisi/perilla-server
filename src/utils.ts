@@ -2,11 +2,8 @@ import { createHash } from "crypto";
 import { createReadStream, stat } from "fs-extra";
 import { Document, Model } from "mongoose";
 import { SHA3Hash } from "sha3";
+import tmp = require("tmp");
 import { Entry, EntryType, IEntryModel } from "./schemas/entry";
-import { EntryMap, IEntryMapModel } from "./schemas/entryMap";
-import { IFileModel } from "./schemas/file";
-import { IProblemModel } from "./schemas/problem";
-import { ISolutionModel } from "./schemas/solution";
 
 export const getBaseURL = (hostname: string, port: number) => {
     return "http://" + hostname + (port === 80 ? "" : ":" + port);
@@ -37,6 +34,16 @@ export const getFileSize = (path: string): Promise<number> => {
         });
     });
 };
+
+export const getTmpPath = () => new Promise<string>((resolve, reject) => {
+    tmp.file((err, filepath) => {
+        if (err) {
+            reject(err);
+        } else {
+            resolve(filepath);
+        }
+    });
+});
 
 export const validateOne = async (model: Model<Document>, ID: string) => {
     return !!(await model.findById(ID).countDocuments());

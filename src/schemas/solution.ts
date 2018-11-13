@@ -1,8 +1,9 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { IJudgeTask } from "../interfaces/judgetask";
 import { addJudgeTask } from "../redis";
-import { validateUser } from "../utils";
+import { validateOne, validateUser } from "../utils";
 import { SolutionCounter } from "./counter";
+import { Entry } from "./entry";
 import { File } from "./file";
 import { Problem } from "./problem";
 
@@ -32,7 +33,6 @@ export interface ISolutionModel extends Document {
     created: Date;
     owner: string;
     creator: string;
-    public: boolean;
     judge(): Promise<void>;
 }
 
@@ -66,17 +66,12 @@ export const SolutionSchema: Schema = new Schema(
         owner: {
             type: String,
             required: true,
-            validate: validateUser,
+            validate: (id: string) => validateOne(Entry, id),
         },
         creator: {
             type: String,
             required: true,
             validate: validateUser,
-        },
-        public: {
-            type: Boolean,
-            required: true,
-            default: false,
         },
     },
 );

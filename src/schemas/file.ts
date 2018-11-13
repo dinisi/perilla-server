@@ -16,7 +16,6 @@ export interface IFileModel extends Document {
     created: Date;
     owner: string;
     creator: string;
-    public: boolean;
     getPath(): string;
     setFile(path: string): Promise<void>;
 }
@@ -49,11 +48,6 @@ export const FileSchema = new Schema(
             type: String,
             required: true,
             validate: validateUser,
-        },
-        public: {
-            type: Boolean,
-            required: true,
-            default: false,
         },
     },
 );
