@@ -1,34 +1,19 @@
 import * as mongoose from "mongoose";
 import { config } from "./config";
+import { registerGracefulExitHook } from "./utils";
 
-mongoose.connect(config.db.url, config.db.options as mongoose.ConnectionOptions);
-mongoose.connection.on("connected", () => {
+export const connectDB = async () => {
+    await mongoose.connect(config.db.url, config.db.options as mongoose.ConnectionOptions);
     console.log("Mongoose connected");
-});
-mongoose.connection.on("error", (err) => {
-    console.log("Mongoose connection error: " + err);
-});
-mongoose.connection.on("disconnected", () => {
-    console.log("Mongoose disconnected");
-});
-const gracefulShutdown = (msg: string, callback: any) => {
-    mongoose.connection.close(() => {
-        console.log("Mongoose disconnected through " + msg);
-        callback();
+    mongoose.connection.on("error", (err) => {
+        console.log("Mongoose connection error: " + err);
+    });
+    mongoose.connection.on("disconnected", () => {
+        console.log("Mongoose disconnected");
+    });
+    registerGracefulExitHook(async () => {
+        return new Promise<void>((resolve) => {
+            mongoose.connection.close(() => resolve());
+        });
     });
 };
-process.once("SIGUSR2", () => {
-    gracefulShutdown("nodemon restart", () => {
-        process.kill(process.pid, "SIGUSR2");
-    });
-});
-process.on("SIGINT", () => {
-    gracefulShutdown("app termination", () => {
-        process.exit(0);
-    });
-});
-process.on("SIGTERM", () => {
-    gracefulShutdown("system termination", () => {
-        process.exit(0);
-    });
-});

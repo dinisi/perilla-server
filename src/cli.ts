@@ -1,5 +1,4 @@
 import chalk = require("chalk");
-import child_process = require("child_process");
 import commander = require("commander");
 import fs = require("fs-extra");
 import mongoose = require("mongoose");
@@ -47,9 +46,25 @@ const generateConfig = async () => {
         },
         {
             type: "text",
-            name: "redis_prefix",
-            message: "Redis key prefix",
-            initial: "perilla_",
+            name: "redis_host",
+            message: "Redis host",
+            initial: "127.0.0.1",
+        },
+        {
+            type: "number",
+            name: "redis_port",
+            message: "Redis port",
+            initial: 6379,
+            min: 1,
+            max: 65535,
+        },
+        {
+            type: "number",
+            name: "redis_db",
+            message: "Redis DB index",
+            initial: 0,
+            min: 0,
+            max: 15,
         },
         {
             type: "text",
@@ -76,11 +91,15 @@ const generateConfig = async () => {
     const config = {
         db: {
             url: answers.db_url,
-            options: { useNewUrlParser: true },
+            options: {
+                useNewUrlParser: true,
+                useCreateIndex: true,
+            },
         },
         redis: {
-            prefix: answers.redis_prefix,
-            options: {},
+            host: answers.redis_host,
+            port: answers.redis_port,
+            db: answers.redis_db,
         },
         mail: {
             enabled: false,
@@ -96,7 +115,7 @@ const generateConfig = async () => {
 };
 
 const InitializeDatabase = async () => {
-    require("./database");
+    await require("./database").connectDB();
     const { Entry, EntryType } = require("./schemas/entry");
     const admin = new Entry();
     admin._id = "Administrator";
@@ -105,7 +124,7 @@ const InitializeDatabase = async () => {
     admin.type = EntryType.user;
     admin.setPassword(await readpass());
     await admin.save();
-    const { SystemMap } = require("./schemas/systemMap");
+    const { SystemMap } = require("./schemas/systemmap");
     const map = new SystemMap();
     map.user = admin._id;
     await map.save();
@@ -131,7 +150,8 @@ commander
         console.log("[TIP] use `yarn start` to start perilla");
         console.log("[TIP] Edit config.json to customize perilla.");
         console.log("[TIP] Please read https://perilla.js.org for more information");
-        process.exit(0);
+        const { gracefulExit } = require("./utils");
+        gracefulExit("cli finished");
     });
 
 const createEntry = async (id: string) => {
@@ -206,7 +226,8 @@ commander
         if (cmd.modify) {
             await modifyEntry(id);
         }
-        process.exit(0);
+        const { gracefulExit } = require("./utils");
+        gracefulExit();
     });
 
 commander.parse(process.argv);

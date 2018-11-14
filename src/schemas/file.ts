@@ -1,7 +1,7 @@
 import { ensureDirSync, move, unlink } from "fs-extra";
 import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
-import { getFileSize, getHash, validateOne, validateUser } from "../utils";
+import { getFileSize, getHash } from "../utils";
 import { FileCounter } from "./counter";
 import { Entry } from "./entry";
 ensureDirSync("files/managed");
@@ -48,12 +48,10 @@ export const FileSchema = new Schema(
         owner: {
             type: String,
             required: true,
-            validate: (id: string) => validateOne(Entry, id),
         },
         creator: {
             type: String,
             required: true,
-            validate: validateUser,
         },
     },
 );

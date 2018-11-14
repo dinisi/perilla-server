@@ -1,9 +1,8 @@
 import { createHash } from "crypto";
 import { createReadStream, stat } from "fs-extra";
-import { Document, Model } from "mongoose";
 import { SHA3Hash } from "sha3";
 import tmp = require("tmp");
-import { Entry, EntryType, IEntryModel } from "./schemas/entry";
+import { Entry, EntryType } from "./schemas/entry";
 
 export const getBaseURL = (hostname: string, port: number) => {
     return "http://" + hostname + (port === 80 ? "" : ":" + port);
@@ -45,14 +44,6 @@ export const getTmpPath = () => new Promise<string>((resolve, reject) => {
     });
 });
 
-export const validateOne = async (model: Model<Document>, ID: string) => {
-    return !!(await model.findById(ID).countDocuments());
-};
-
-export const validateMany = async (model: Model<Document>, IDs: string[]) => {
-    return (await model.find().where("_id").in(IDs).countDocuments()) === IDs.length;
-};
-
 export const validateUser = async (ID: string) => {
     const user = await Entry.findById(ID);
     if (!user) { return false; }
@@ -64,3 +55,20 @@ export const validateGroup = async (ID: string) => {
     if (!group) { return false; }
     return group.type === EntryType.group;
 };
+
+type IGracefulExitHook = () => void | Promise<void>;
+const gracefulExitHooks: IGracefulExitHook[] = [];
+
+export const registerGracefulExitHook = (hook: IGracefulExitHook) => {
+    gracefulExitHooks.push(hook);
+};
+
+export const gracefulExit = async (msg: string) => {
+    for (const hook of gracefulExitHooks) { await hook(); }
+    console.log(`Perilla exited: ${msg}`);
+    process.exit(0);
+};
+
+process.once("SIGUSR2", () => { gracefulExit("SIGUSR2(nodemon restart)"); });
+process.on("SIGINT", () => { gracefulExit("SIGINT(app termination)"); });
+process.on("SIGTERM", () => { gracefulExit("SIGTERM(system termination)"); });

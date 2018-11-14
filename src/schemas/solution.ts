@@ -1,6 +1,6 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { publishJudgerCommand } from "../redis";
-import { validateOne, validateUser } from "../utils";
+import { validateUser } from "../utils";
 import { SolutionCounter } from "./counter";
 import { Entry } from "./entry";
 import { Problem } from "./problem";
@@ -67,12 +67,10 @@ export const SolutionSchema: Schema = new Schema(
         owner: {
             type: String,
             required: true,
-            validate: (id: string) => validateOne(Entry, id),
         },
         creator: {
             type: String,
             required: true,
-            validate: validateUser,
         },
     },
 );

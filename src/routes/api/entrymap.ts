@@ -7,10 +7,9 @@
  */
 
 import { Router } from "express";
-import { Entry } from "../../schemas/entry";
+import { Entry, EntryType } from "../../schemas/entry";
 import { EntryMap } from "../../schemas/entrymap";
-import { validateOne } from "../../utils";
-import { isEntryAdmin, isLoggedin, PaginationWrap, RESTWrap } from "./util";
+import { isEntryAdmin, isLoggedin, notNullOrUndefined, PaginationWrap, RESTWrap } from "./util";
 
 export const EntrymapRouter = Router();
 
@@ -23,7 +22,8 @@ EntrymapRouter.get("/", isLoggedin, RESTWrap(async (req, res) => {
 EntrymapRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     let map = await EntryMap.findOne({ to: req.query.entry, from: req.query.from });
     if (!map) {
-        if (!await validateOne(Entry, req.query.from)) { throw new Error("Entry not found"); }
+        const entry = await Entry.findOne({ _id: req.query.from, type: EntryType.user });
+        notNullOrUndefined(entry);
         map = new EntryMap();
         map.from = req.query.from;
         map.to = req.query.entry;

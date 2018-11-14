@@ -1,7 +1,5 @@
 import { Document, model, Schema } from "mongoose";
-import { validateOne, validateUser } from "../utils";
 import { MessageCounter } from "./counter";
-import { Entry } from "./entry";
 
 export interface IMessageModel extends Document {
     id: number;
@@ -22,12 +20,10 @@ export const MessageSchema = new Schema(
         owner: {
             type: String,
             required: true,
-            validate: (id: string) => validateOne(Entry, id),
         },
         creator: {
             type: String,
             required: true,
-            validate: validateUser,
         },
     },
 );

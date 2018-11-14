@@ -1,7 +1,5 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { validateOne, validateUser } from "../utils";
 import { ProblemCounter } from "./counter";
-import { Entry } from "./entry";
 import { Solution } from "./solution";
 
 export interface IProblemModel extends Document {
@@ -43,12 +41,10 @@ export const ProblemSchema: Schema = new Schema(
         owner: {
             type: String,
             required: true,
-            validate: (id: string) => validateOne(Entry, id),
         },
         creator: {
             type: String,
             required: true,
-            validate: validateUser,
         },
     },
 );
