@@ -43,4 +43,19 @@ MessageRouter.post("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => 
     return res.RESTSend(message.id);
 }));
 
-MessageRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => Message.find({ owner: req.query.entry })));
+MessageRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => {
+    let base = Message.find({ owner: req.query.entry });
+    if (req.query.search) {
+        base = base.where("content").regex(new RegExp(req.query.search.replace(/[\^\$\\\.\*\+\?\(\)\[\]\{\}\|]/g, "\\$&"), "g"));
+    }
+    if (req.query.before) {
+        base = base.where("created").lte(req.query.before);
+    }
+    if (req.query.after) {
+        base = base.where("created").gte(req.query.after);
+    }
+    if (req.query.creator) {
+        base = base.where("creator").equals(req.query.creator);
+    }
+    return base;
+}));

@@ -2,7 +2,6 @@
  * solution.ts
  * GET    / : get solution details
  * POST   / : **rejudge solution**
- * PUT    / : update solution
  * DELETE / : delete solution
  * GET    /list
  */
@@ -19,16 +18,6 @@ SolutionRouter.get("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => 
     return res.RESTSend(solution);
 }));
 
-SolutionRouter.put("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
-    const solution = await Solution.findOne({ owner: req.query.entry, id: req.query.id });
-    notNullOrUndefined(solution);
-    solution.status = req.body.status;
-    solution.score = req.body.score;
-    solution.data = req.body.data;
-    solution.details = req.body.details;
-    return res.RESTEnd();
-}));
-
 SolutionRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     const solution = await Solution.findOne({ owner: req.query.entry, id: req.query.id });
     notNullOrUndefined(solution);
@@ -43,4 +32,28 @@ SolutionRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) =
     return res.RESTEnd();
 }));
 
-SolutionRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => Solution.find({ owner: req.query.entry })));
+SolutionRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => {
+    let base = Solution.find({ owner: req.query.entry }).select("id problem status score created creator");
+    if (req.query.problem) {
+        base = base.where("problem").equals(req.query.problem);
+    }
+    if (req.query.status) {
+        base = base.where("status").equals(req.query.status);
+    }
+    if (req.query.max) {
+        base = base.where("score").lte(req.query.max);
+    }
+    if (req.query.min) {
+        base = base.where("score").gte(req.query.min);
+    }
+    if (req.query.before) {
+        base = base.where("created").lte(req.query.before);
+    }
+    if (req.query.after) {
+        base = base.where("created").gte(req.query.after);
+    }
+    if (req.query.creator) {
+        base = base.where("creator").equals(req.query.creator);
+    }
+    return base;
+}));

@@ -80,4 +80,25 @@ FileRouter.get("/raw", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
     return res.sendFile(file.getPath(), { headers: { "Content-Type": file.type } });
 }));
 
-FileRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => File.find({ owner: req.query.entry }).select("id name type tags created creator")));
+FileRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => {
+    let base = File.find({ owner: req.query.entry }).select("id name type tags created creator");
+    if (req.query.tags) {
+        base = base.where("tags").all(req.query.tags);
+    }
+    if (req.query.type) {
+        base = base.where("type").equals(req.query.type);
+    }
+    if (req.query.search) {
+        base = base.where("name").regex(new RegExp(req.query.search.replace(/[\^\$\\\.\*\+\?\(\)\[\]\{\}\|]/g, "\\$&"), "g"));
+    }
+    if (req.query.before) {
+        base = base.where("created").lte(req.query.before);
+    }
+    if (req.query.after) {
+        base = base.where("created").gte(req.query.after);
+    }
+    if (req.query.creator) {
+        base = base.where("creator").equals(req.query.creator);
+    }
+    return base;
+}));
