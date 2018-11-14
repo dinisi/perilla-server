@@ -1,8 +1,6 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { publishJudgerCommand } from "../redis";
-import { validateUser } from "../utils";
 import { SolutionCounter } from "./counter";
-import { Entry } from "./entry";
 import { Problem } from "./problem";
 import { Task } from "./task";
 

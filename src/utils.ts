@@ -2,7 +2,6 @@ import { createHash } from "crypto";
 import { createReadStream, stat } from "fs-extra";
 import { SHA3Hash } from "sha3";
 import tmp = require("tmp");
-import { Entry, EntryType } from "./schemas/entry";
 
 export const getBaseURL = (hostname: string, port: number) => {
     return "http://" + hostname + (port === 80 ? "" : ":" + port);
@@ -43,18 +42,6 @@ export const getTmpPath = () => new Promise<string>((resolve, reject) => {
         }
     });
 });
-
-export const validateUser = async (ID: string) => {
-    const user = await Entry.findById(ID);
-    if (!user) { return false; }
-    return user.type === EntryType.user;
-};
-
-export const validateGroup = async (ID: string) => {
-    const group = await Entry.findById(ID);
-    if (!group) { return false; }
-    return group.type === EntryType.group;
-};
 
 type IGracefulExitHook = () => void | Promise<void>;
 const gracefulExitHooks: IGracefulExitHook[] = [];

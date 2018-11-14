@@ -6,13 +6,16 @@
  */
 
 import { Router } from "express";
+import { Entry, EntryType } from "../../schemas/entry";
 import { SystemMap } from "../../schemas/systemmap";
-import { isLoggedin, isSystemAdmin, PaginationWrap, RESTWrap } from "./util";
+import { isLoggedin, isSystemAdmin, notNullOrUndefined, PaginationWrap, RESTWrap } from "./util";
 
 export const SystemMapRouter = Router();
 
 SystemMapRouter.post("/", isLoggedin, isSystemAdmin, RESTWrap(async (req, res) => {
     if (!await SystemMap.findOne({ user: req.query.user })) {
+        const entry = await Entry.findOne({ _id: req.query.user, type: EntryType.user });
+        notNullOrUndefined(entry);
         const map = new SystemMap();
         map.user = req.query.user;
         await map.save();
