@@ -27,7 +27,6 @@ export interface ISolutionModel extends Document {
     score: number;
     data?: object;
     details?: object;
-    hide: boolean;
     created: Date;
     owner: string;
     creator: string;
@@ -56,11 +55,6 @@ export const SolutionSchema: Schema = new Schema(
         },
         data: Object,
         details: Object,
-        hide: {
-            type: Boolean,
-            required: true,
-            default: false,
-        },
         created: Date,
         owner: {
             type: String,

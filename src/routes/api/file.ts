@@ -31,7 +31,14 @@ FileRouter.put("/", isLoggedin, isEntryAdmin, upload.single("file"), RESTWrap(as
     file.name = req.body.name || req.file.originalname;
     file.type = req.body.type || lookup(file.name) || "text/plain";
     file.description = req.body.description || file.name;
-    file.tags = req.body.tags;
+    if (req.body.tags) {
+        if (req.body.tags instanceof Array) {
+            file.tags = req.body.tags;
+        } else {
+            // FormData
+            file.tags = JSON.parse(req.body.tags);
+        }
+    }
     if (req.file) {
         await file.setFile(req.file.path);
     }
@@ -55,7 +62,14 @@ FileRouter.post("/", isLoggedin, isEntryAdmin, upload.single("file"), RESTWrap(a
     file.name = req.body.name || req.file.originalname;
     file.type = req.body.type || lookup(file.name) || "text/plain";
     file.description = req.body.description || file.name;
-    file.tags = req.body.tags;
+    if (req.body.tags) {
+        if (req.body.tags instanceof Array) {
+            file.tags = req.body.tags;
+        } else {
+            // FormData
+            file.tags = JSON.parse(req.body.tags);
+        }
+    }
     await file.save();
     return res.RESTSend(file.id);
 }));

@@ -60,7 +60,7 @@ ProblemSchema.pre("save", async function(next) {
 });
 
 ProblemSchema.pre("remove", async function(next) {
-    await Solution.remove({ problemID: this.id });
+    await Solution.remove({ problem: this.id });
     next();
 });
 
