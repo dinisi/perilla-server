@@ -1,15 +1,15 @@
 import "./database";
 
 import { json, urlencoded } from "body-parser";
-import * as REDISStore from "connect-redis";
-import * as express from "express";
-import * as session from "express-session";
+import REDISStore = require( "connect-redis");
+import express = require("express");
+import session = require("express-session");
 import { appendFileSync, readFileSync } from "fs-extra";
-import * as http from "http";
-import * as https from "https";
-import * as passport from "passport";
+import http = require("http");
+import https = require("https");
+import passport = require("passport");
 import { config } from "./config";
-import { REDISInstance } from "./redis";
+import { instance } from "./redis";
 import { MainRouter } from "./routes";
 
 const consoleLogger = console.log;
@@ -25,7 +25,7 @@ app.use(json());
 app.use(urlencoded({ extended: false }));
 const store = REDISStore(session);
 app.use(session({
-    store: new store({ client: REDISInstance }),
+    store: new store({ client: instance }),
     secret: config.sessionSecret,
     resave: false,
     saveUninitialized: false,

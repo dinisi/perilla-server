@@ -8,7 +8,6 @@ export interface IProblemModel extends Document {
     id: number;
     title: string;
     content: string;
-    files: number[];
     data?: object;
     channel?: string;
     tags: string[];
@@ -32,10 +31,6 @@ export const ProblemSchema: Schema = new Schema(
             default: "No content",
             minlength: 1,
             maxlength: 40960,
-        },
-        files: {
-            type: [Number],
-            required: true,
         },
         data: Object,
         channel: String,

@@ -1,11 +1,10 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { IJudgeTask } from "../interfaces/judgetask";
-import { addJudgeTask } from "../redis";
+import { publishJudgerCommand } from "../redis";
 import { validateOne, validateUser } from "../utils";
 import { SolutionCounter } from "./counter";
 import { Entry } from "./entry";
-import { File } from "./file";
 import { Problem } from "./problem";
+import { Task } from "./task";
 
 export enum SolutionResult {
     WaitingJudge,            // Wating Judge
@@ -26,10 +25,11 @@ export enum SolutionResult {
 export interface ISolutionModel extends Document {
     id: number;
     problem: number;
-    files: number[];
     status: SolutionResult;
     score: number;
-    log?: string;
+    data?: object;
+    details?: object;
+    hide: boolean;
     created: Date;
     owner: string;
     creator: string;
@@ -43,16 +43,11 @@ export const SolutionSchema: Schema = new Schema(
             type: Number,
             required: true,
         },
-        files: {
-            type: [Number],
-            required: true,
-        },
         status: {
             type: Number,
             required: true,
             default: SolutionResult.WaitingJudge,
-            min: 0,
-            max: 12,
+            validate: (x: number) => !!SolutionResult[x],
         },
         score: {
             type: Number,
@@ -61,7 +56,13 @@ export const SolutionSchema: Schema = new Schema(
             min: 0,
             max: 100,
         },
-        log: String,
+        data: Object,
+        details: Object,
+        hide: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
         created: Date,
         owner: {
             type: String,
@@ -84,21 +85,13 @@ SolutionSchema.methods.judge = async function() {
     if (problem.owner !== self.owner) { throw new Error("Bad solution"); }
     self.status = SolutionResult.WaitingJudge;
     await self.save();
-    const problemFiles = [];
-    for (const id of problem.files) {
-        problemFiles.push((await File.findOne({ owner: problem.owner, id }))._id);
-    }
-    const solutionFiles = [];
-    for (const id of self.files) {
-        solutionFiles.push((await File.findById({ owner: self.owner, id }))._id);
-    }
-    const task: IJudgeTask = {
-        solutionID: "" + self._id,
-        problemFiles,
-        solutionFiles,
-        data: problem.data,
-    };
-    await addJudgeTask(task, problem.channel);
+    const task = new Task();
+    task.channel = problem.channel;
+    task.problem = problem.data;
+    task.solution = self.data;
+    task.objectID = "" + self._id;
+    await task.save();
+    await publishJudgerCommand("newtask");
 };
 
 SolutionSchema.pre("save", async function(next) {

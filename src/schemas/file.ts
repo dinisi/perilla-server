@@ -14,6 +14,7 @@ export interface IFileModel extends Document {
     hash: string;
     size: number;
     created: Date;
+    tags: string[];
     owner: string;
     creator: string;
     getPath(): string;
@@ -38,6 +39,11 @@ export const FileSchema = new Schema(
         },
         hash: String,
         size: String,
+        tags: {
+            type: [String],
+            required: true,
+            default: ["No tags"],
+        },
         created: Date,
         owner: {
             type: String,

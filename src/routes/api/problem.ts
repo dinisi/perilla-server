@@ -1,3 +1,13 @@
+/**
+ * solution.ts
+ * GET    /
+ * POST   /
+ * PUT    /
+ * DELETE /
+ * POST   /submit
+ * GET    /list
+ */
+
 import { Router } from "express";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
@@ -16,7 +26,6 @@ ProblemRouter.put("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     notNullOrUndefined(problem);
     problem.title = req.body.title;
     problem.content = req.body.content;
-    problem.files = req.body.files;
     problem.data = req.body.data;
     problem.channel = req.body.channel;
     problem.tags = req.body.tags;
@@ -35,7 +44,6 @@ ProblemRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     const problem = new Problem();
     problem.title = req.body.title;
     problem.content = req.body.content;
-    problem.files = req.body.files;
     problem.data = req.body.data;
     problem.channel = req.body.channel;
     problem.tags = req.body.tags;
@@ -50,8 +58,8 @@ ProblemRouter.post("/submit", isLoggedin, isEntryMember, RESTWrap(async (req, re
     notNullOrUndefined(problem);
     const solution = new Solution();
     solution.problem = problem.id;
-    solution.files = req.body.files;
     solution.creator = req.user;
+    solution.data = req.body.data;
     solution.owner = req.query.entry;
     await solution.save();
     await solution.judge();

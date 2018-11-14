@@ -1,3 +1,10 @@
+/**
+ * systemmap.ts
+ * POST   /
+ * DELETE /
+ * LIST   /
+ */
+
 import { Router } from "express";
 import { SystemMap } from "../../schemas/systemmap";
 import { isLoggedin, isSystemAdmin, PaginationWrap, RESTWrap } from "./util";

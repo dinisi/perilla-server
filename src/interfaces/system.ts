@@ -1,14 +1,11 @@
-import { Always, Array, Boolean, Number, Partial, Record, Static, String } from "runtypes";
+import { Always, Boolean, InstanceOf, Number, Partial, Record, Static, String } from "runtypes";
 
 export const ISystemConfig = Record({
     db: Record({
         url: String,
         options: Always,
     }),
-    redis: Record({
-        prefix: String,
-        options: Always,
-    }),
+    redis: Always,
     mail: Record({
         enabled: Boolean,
     }).And(Partial({
@@ -26,6 +23,4 @@ export const ISystemConfig = Record({
     sessionSecret: String,
 });
 
-export interface ISystemConfig extends Static<typeof ISystemConfig> {
-    [key: string]: any;
-}
+export type ISystemConfig = Static<typeof ISystemConfig>;

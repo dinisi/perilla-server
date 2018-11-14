@@ -4,6 +4,7 @@
  * POST   / : **rejudge solution**
  * PUT    / : update solution
  * DELETE / : delete solution
+ * GET    /list
  */
 
 import { Router } from "express";
@@ -21,10 +22,10 @@ SolutionRouter.get("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => 
 SolutionRouter.put("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     const solution = await Solution.findById(req.query.id);
     notNullOrUndefined(solution);
-    solution.files = req.body.files;
     solution.status = req.body.status;
     solution.score = req.body.score;
-    solution.log = req.body.log;
+    solution.data = req.body.data;
+    solution.details = req.body.details;
     return res.RESTEnd();
 }));
 

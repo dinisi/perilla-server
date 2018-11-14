@@ -40,4 +40,9 @@ EntrymapRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) =
     return res.RESTEnd();
 }));
 
-EntrymapRouter.get("/list", PaginationWrap(() => EntryMap.find()));
+EntrymapRouter.get("/list", PaginationWrap((req) => {
+    let query = EntryMap.find();
+    if (req.query.from) { query = query.where("from").equals(req.query.from); }
+    if (req.query.to) { query = query.where("to").equals(req.query.to); }
+    return query;
+}));

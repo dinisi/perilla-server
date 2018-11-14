@@ -23,3 +23,4 @@ export const FileCounter = model<ICounterModel>("filecounter", CounterSchema);
 export const SolutionCounter = model<ICounterModel>("solutioncounter", CounterSchema);
 export const ProblemCounter = model<ICounterModel>("problemcounter", CounterSchema);
 export const MessageCounter = model<ICounterModel>("messagecounter", CounterSchema);
+export const ArticleCounter = model<ICounterModel>("articlecounter", CounterSchema);

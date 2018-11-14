@@ -5,6 +5,7 @@ import { authenticate } from "passport";
 import { Entry, EntryType } from "../../schemas/entry";
 import { EntryMap } from "../../schemas/entrymap";
 import { adminRouter } from "./admin";
+import { ArticleRouter } from "./article";
 import { EntryRouter } from "./entry";
 import { EntrymapRouter } from "./entrymap";
 import { FileRouter } from "./file";
@@ -47,6 +48,7 @@ APIRouter.get("/session", RESTWrap(async (req, res) => {
 }));
 
 APIRouter.use("/admin", adminRouter);
+APIRouter.use("/article", ArticleRouter);
 APIRouter.use("/entry", EntryRouter);
 APIRouter.use("/entrymap", EntrymapRouter);
 APIRouter.use("/file", FileRouter);

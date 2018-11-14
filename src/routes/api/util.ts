@@ -20,8 +20,7 @@ type IPaginationHandleFunction = (req: Request) => DocumentQuery<Document[], Doc
 
 export const PaginationWrap = (handle: IPaginationHandleFunction) => {
     return RESTWrap((req, res) => {
-        let query = handle(req);
-        query = extendQuery(query, req);
+        const query = handle(req);
         if (req.query.noexec) {
             query.countDocuments()
                 .then((count) => res.RESTSend(count))
@@ -34,16 +33,6 @@ export const PaginationWrap = (handle: IPaginationHandleFunction) => {
                 .catch((err) => res.RESTFail(err.message));
         }
     });
-};
-
-export const extendQuery = <T extends Document>(origin: DocumentQuery<T[], T>, req: Request) => {
-    if (req.query.control) {
-        origin = origin.where(JSON.parse(req.query.control));
-    }
-    if (req.query.sort) {
-        origin = origin.sort(JSON.parse(req.query.sort));
-    }
-    return origin;
 };
 
 export const isLoggedin = async (req: Request, res: IRESTResponse, next: NextFunction) => {

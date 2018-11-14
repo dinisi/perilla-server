@@ -1,3 +1,12 @@
+/**
+ * message.ts
+ * GET    /
+ * PUT    /
+ * POST   /
+ * DELETE /
+ * GET    /list
+ */
+
 import { Router } from "express";
 import { Message } from "../../schemas/message";
 import { isEntryAdmin, isEntryMember, isLoggedin, notNullOrUndefined, PaginationWrap, RESTWrap } from "./util";

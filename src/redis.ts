@@ -1,15 +1,12 @@
-import { promisifyAll } from "bluebird";
-import { generate } from "randomstring";
 import * as redis from "redis";
 import { config } from "./config";
-import { IJudgeTask } from "./interfaces/judgetask";
-promisifyAll(redis);
-export const REDISInstance: any = redis.createClient(config.redis.options as any);
+export const instance = redis.createClient(config.redis as any);
 
-const getKey = (prefix: string, key: string) => {
-    return config.redis.prefix + "_" + prefix + "_" + key;
-};
-
-export const addJudgeTask = async (task: IJudgeTask, channel: string) => {
-    await REDISInstance.lpushAsync(getKey("JQ", channel), JSON.stringify(task));
+export const publishJudgerCommand = (cmd: string) => {
+    return new Promise((resolve, reject) => {
+        instance.publish("perillajudger", cmd, (err, reply) => {
+            if (err) { return reject(err); }
+            return resolve(reply);
+        });
+    });
 };
