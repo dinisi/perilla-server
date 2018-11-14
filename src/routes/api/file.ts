@@ -28,9 +28,10 @@ FileRouter.get("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
 FileRouter.put("/", isLoggedin, isEntryAdmin, upload.single("file"), RESTWrap(async (req, res) => {
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
     notNullOrUndefined(file);
-    file.filename = req.body.filename;
-    file.type = req.body.type || lookup(req.file.originalname) || "text/plain";
-    file.description = req.body.description || req.file.originalname;
+    file.name = req.body.name || req.file.originalname;
+    file.type = req.body.type || lookup(file.name) || "text/plain";
+    file.description = req.body.description || file.name;
+    file.tags = req.body.tags;
     if (req.file) {
         await file.setFile(req.file.path);
     }
@@ -51,9 +52,10 @@ FileRouter.post("/", isLoggedin, isEntryAdmin, upload.single("file"), RESTWrap(a
     await file.setFile(req.file.path);
     file.owner = req.query.entry;
     file.creator = req.user;
-    file.filename = req.file.originalname;
-    file.type = lookup(req.file.originalname) || "text/plain";
-    file.description = req.file.originalname;
+    file.name = req.body.name || req.file.originalname;
+    file.type = req.body.type || lookup(file.name) || "text/plain";
+    file.description = req.body.description || file.name;
+    file.tags = req.body.tags;
     await file.save();
     return res.RESTSend(file.id);
 }));
@@ -61,7 +63,7 @@ FileRouter.post("/", isLoggedin, isEntryAdmin, upload.single("file"), RESTWrap(a
 FileRouter.get("/raw", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
     notNullOrUndefined(file);
-    return res.sendFile(file.getPath(), { headers: { "Content-Type": file.filename } });
+    return res.sendFile(file.getPath(), { headers: { "Content-Type": file.type } });
 }));
 
-FileRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => File.find({ owner: req.query.entry })));
+FileRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => File.find({ owner: req.query.entry }).select("id name type tags created creator")));

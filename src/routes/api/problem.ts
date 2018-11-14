@@ -66,4 +66,4 @@ ProblemRouter.post("/submit", isLoggedin, isEntryMember, RESTWrap(async (req, re
     return res.RESTSend(solution.id);
 }));
 
-ProblemRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => Problem.find({ owner: req.query.entry })));
+ProblemRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => Problem.find({ owner: req.query.entry }).select("id title tags created creator")));

@@ -3,12 +3,11 @@ import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
 import { getFileSize, getHash } from "../utils";
 import { FileCounter } from "./counter";
-import { Entry } from "./entry";
 ensureDirSync("files/managed");
 
 export interface IFileModel extends Document {
     id: number;
-    filename: string;
+    name: string;
     type: string;
     description: string;
     hash: string;
@@ -24,7 +23,7 @@ export interface IFileModel extends Document {
 export const FileSchema = new Schema(
     {
         id: Number,
-        filename: {
+        name: {
             type: String,
             required: true,
         },

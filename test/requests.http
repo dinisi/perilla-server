@@ -39,7 +39,7 @@ POST http://127.0.0.1:8680/api/private/file/new?entry=zzs
 Content-Type: application/json
 
 {
-    "filename": "test.c",
+    "name": "test.c",
     "description": "test - for system test",
     "public": true,
     "content": "#include<stdio.h>"
@@ -53,7 +53,7 @@ Content-Type: application/json
 {
     "description": "DDD",
     "public": false,
-    "filename": "test.c",
+    "name": "test.c",
     "type": "text/x-c"
 }
 ### Fetch a no-exist file
