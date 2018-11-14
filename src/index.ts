@@ -1,16 +1,16 @@
 import "./database";
 
 import { json, urlencoded } from "body-parser";
-import REDISStore = require("connect-redis");
+import MongoStore = require("connect-mongo");
 import express = require("express");
 import session = require("express-session");
 import { appendFileSync, readFileSync } from "fs-extra";
 import http = require("http");
 import https = require("https");
+import mongoose = require("mongoose");
 import passport = require("passport");
 import { config } from "./config";
 import { connectDB } from "./database";
-import { instance } from "./redis";
 import { MainRouter } from "./routes";
 
 const consoleLogger = console.log;
@@ -27,9 +27,9 @@ console.log("Perilla started");
 
     app.use(json());
     app.use(urlencoded({ extended: false }));
-    const store = REDISStore(session);
+    const store = MongoStore(session);
     app.use(session({
-        store: new store({ client: instance }),
+        store: new store({ mongooseConnection: mongoose.connection }),
         secret: config.sessionSecret,
         resave: false,
         saveUninitialized: false,

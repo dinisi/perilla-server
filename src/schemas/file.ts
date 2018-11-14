@@ -3,7 +3,9 @@ import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
 import { getFileSize, getHash } from "../utils";
 import { FileCounter } from "./counter";
-ensureDirSync("files/managed");
+
+export const managedFilePath = join("files", "managed");
+ensureDirSync(managedFilePath);
 
 export interface IFileModel extends Document {
     id: number;
@@ -59,7 +61,7 @@ FileSchema.index({ id: 1, owner: 1 }, { unique: true });
 
 FileSchema.methods.getPath = function() {
     const self = this as IFileModel;
-    return resolve(join("files/managed", self.hash));
+    return resolve(join(managedFilePath, self.hash));
 };
 
 FileSchema.methods.setFile = async function(path: string) {

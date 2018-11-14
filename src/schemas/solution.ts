@@ -1,5 +1,4 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { publishJudgerCommand } from "../redis";
 import { SolutionCounter } from "./counter";
 import { Problem } from "./problem";
 import { Task } from "./task";
@@ -81,7 +80,6 @@ SolutionSchema.methods.judge = async function() {
     task.solution = self.data;
     task.objectID = "" + self._id;
     await task.save();
-    await publishJudgerCommand("newtask");
 };
 
 SolutionSchema.pre("save", async function(next) {

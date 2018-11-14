@@ -1,7 +1,6 @@
 import { createHash } from "crypto";
 import { createReadStream, stat } from "fs-extra";
 import { SHA3Hash } from "sha3";
-import tmp = require("tmp");
 
 export const getBaseURL = (hostname: string, port: number) => {
     return "http://" + hostname + (port === 80 ? "" : ":" + port);
@@ -32,16 +31,6 @@ export const getFileSize = (path: string): Promise<number> => {
         });
     });
 };
-
-export const getTmpPath = () => new Promise<string>((resolve, reject) => {
-    tmp.file((err, filepath) => {
-        if (err) {
-            reject(err);
-        } else {
-            resolve(filepath);
-        }
-    });
-});
 
 type IGracefulExitHook = () => void | Promise<void>;
 const gracefulExitHooks: IGracefulExitHook[] = [];
