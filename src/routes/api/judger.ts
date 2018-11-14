@@ -9,11 +9,21 @@ import { Solution } from "../../schemas/solution";
 import { Task } from "../../schemas/task";
 import { isLoggedin, isSystemAdmin, notNullOrUndefined, RESTWrap } from "./util";
 
-const JudgerRouter = Router();
+export const JudgerRouter = Router();
+let queueLength = 0;
+
+export const pushQueue = () => { queueLength++; };
 
 JudgerRouter.get("/", isLoggedin, isSystemAdmin, RESTWrap(async (req, res) => {
+    if (!queueLength) {
+        return res.RESTFail("Empty queue");
+    }
     const task = await Task.findOneAndRemove().where("channel").in(req.query.channel);
     notNullOrUndefined(task);
+    if (!task) {
+        return res.RESTFail("Empty queue");
+    }
+    queueLength--;
     res.RESTSend(task);
 }));
 

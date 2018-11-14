@@ -1,11 +1,10 @@
-import { Always, Boolean, InstanceOf, Number, Partial, Record, Static, String } from "runtypes";
+import { Always, Boolean, Number, Partial, Record, Static, String } from "runtypes";
 
 export const ISystemConfig = Record({
     db: Record({
         url: String,
         options: Always,
     }),
-    redis: Always,
     mail: Record({
         enabled: Boolean,
     }).And(Partial({

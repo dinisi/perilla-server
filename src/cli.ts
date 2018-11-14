@@ -46,28 +46,6 @@ const generateConfig = async () => {
         },
         {
             type: "text",
-            name: "redis_host",
-            message: "Redis host",
-            initial: "127.0.0.1",
-        },
-        {
-            type: "number",
-            name: "redis_port",
-            message: "Redis port",
-            initial: 6379,
-            min: 1,
-            max: 65535,
-        },
-        {
-            type: "number",
-            name: "redis_db",
-            message: "Redis DB index",
-            initial: 0,
-            min: 0,
-            max: 15,
-        },
-        {
-            type: "text",
             name: "http_hostname",
             message: "HTTP Hostname",
             initial: "localhost",
@@ -95,11 +73,6 @@ const generateConfig = async () => {
                 useNewUrlParser: true,
                 useCreateIndex: true,
             },
-        },
-        redis: {
-            host: answers.redis_host,
-            port: answers.redis_port,
-            db: answers.redis_db,
         },
         mail: {
             enabled: false,

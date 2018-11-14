@@ -1,4 +1,5 @@
 import { Document, Model, model, Schema } from "mongoose";
+import { pushQueue } from "../routes/api/judger";
 import { SolutionCounter } from "./counter";
 import { Problem } from "./problem";
 import { Task } from "./task";
@@ -74,6 +75,7 @@ SolutionSchema.methods.judge = async function() {
     if (problem.owner !== self.owner) { throw new Error("Bad solution"); }
     self.status = SolutionResult.WaitingJudge;
     await self.save();
+    pushQueue();
     const task = new Task();
     task.channel = problem.channel;
     task.problem = problem.data;
