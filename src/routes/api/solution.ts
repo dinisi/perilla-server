@@ -14,13 +14,13 @@ import { isEntryAdmin, isEntryMember, isLoggedin, notNullOrUndefined, Pagination
 export const SolutionRouter = Router();
 
 SolutionRouter.get("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
-    const solution = await Solution.findById(req.query.id);
+    const solution = await Solution.findOne({ owner: req.query.entry, id: req.query.id });
     notNullOrUndefined(solution);
     return res.RESTSend(solution);
 }));
 
 SolutionRouter.put("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
-    const solution = await Solution.findById(req.query.id);
+    const solution = await Solution.findOne({ owner: req.query.entry, id: req.query.id });
     notNullOrUndefined(solution);
     solution.status = req.body.status;
     solution.score = req.body.score;
@@ -30,14 +30,14 @@ SolutionRouter.put("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
 }));
 
 SolutionRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
-    const solution = await Solution.findById(req.query.id);
+    const solution = await Solution.findOne({ owner: req.query.entry, id: req.query.id });
     notNullOrUndefined(solution);
     await solution.judge();
     return res.RESTEnd();
 }));
 
 SolutionRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
-    const solution = await Solution.findById(req.query.id);
+    const solution = await Solution.findOne({ owner: req.query.entry, id: req.query.id });
     notNullOrUndefined(solution);
     await solution.remove();
     return res.RESTEnd();
