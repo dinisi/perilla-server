@@ -3,7 +3,7 @@
  */
 
 import { Router } from "express";
-import { join } from "path";
+import { join, resolve } from "path";
 import { File, managedFilePath } from "../../schemas/file";
 import { Solution } from "../../schemas/solution";
 import { Task } from "../../schemas/task";
@@ -44,6 +44,6 @@ JudgerRouter.get("/resolve", isLoggedin, isSystemAdmin, RESTWrap(async (req, res
 }));
 
 JudgerRouter.get("/download", isLoggedin, isSystemAdmin, RESTWrap(async (req, res) => {
-    const path = join(managedFilePath, req.query.hash);
+    const path = resolve(join(managedFilePath, req.query.hash));
     res.sendFile(path);
 }));
