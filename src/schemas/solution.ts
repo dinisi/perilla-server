@@ -69,7 +69,7 @@ export const SolutionSchema: Schema = new Schema(
 SolutionSchema.index({ id: 1, owner: 1 }, { unique: true });
 SolutionSchema.methods.judge = async function() {
     const self = this as ISolutionModel;
-    const problem = await Problem.findById(self.problem);
+    const problem = await Problem.findOne({ id: self.problem, owner: self.owner });
     if (!problem) { throw new Error("Invalid solution"); }
     if (!problem.channel) { throw new Error("Problem do not have a valid data config"); }
     if (problem.owner !== self.owner) { throw new Error("Bad solution"); }
