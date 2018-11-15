@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node dist/index.js",
     "cli": "node dist/cli.js",
-    "build": "tsc"
+    "build": "tsc",
+    "dev": "concurrently \"tsc --watch\" \"nodemon .\""
   },
   "dependencies": {
     "body-parser": "^1.18.3",
@@ -47,6 +48,8 @@
     "@types/passport": "^0.4.7",
     "@types/passport-local": "^1.0.33",
     "@types/randomstring": "^1.1.6",
+    "concurrently": "^4.0.1",
+    "nodemon": "^1.18.6",
     "tslint": "^5.11.0"
   }
 }
