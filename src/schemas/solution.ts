@@ -81,6 +81,7 @@ SolutionSchema.methods.judge = async function() {
     task.problem = problem.data;
     task.solution = self.data;
     task.objectID = "" + self._id;
+    task.owner = self.owner;
     await task.save();
 };
 
