@@ -47,4 +47,22 @@ ArticleRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     return res.RESTSend(problem.id);
 }));
 
-ArticleRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => Article.find({ owner: req.query.entry })));
+ArticleRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => {
+    let base = Article.find({ owner: req.query.entry }).select("id title tags created creator");
+    if (req.query.tags) {
+        base = base.where("tags").all(req.query.tags);
+    }
+    if (req.query.search) {
+        base = base.where("title").regex(new RegExp(req.query.search.replace(/[\^\$\\\.\*\+\?\(\)\[\]\{\}\|]/g, "\\$&"), "g"));
+    }
+    if (req.query.before) {
+        base = base.where("created").lte(req.query.before);
+    }
+    if (req.query.after) {
+        base = base.where("created").gte(req.query.after);
+    }
+    if (req.query.creator) {
+        base = base.where("creator").equals(req.query.creator);
+    }
+    return base;
+}));
