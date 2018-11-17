@@ -14,6 +14,10 @@ let queueLength = 0;
 
 export const pushQueue = () => { queueLength++; };
 
+JudgerRouter.get("/queue", RESTWrap(async (req, res) => {
+    res.RESTSend(queueLength);
+}));
+
 JudgerRouter.get("/", isLoggedin, isSystemAdmin, RESTWrap(async (req, res) => {
     if (!queueLength) {
         return res.RESTFail("Empty queue");
