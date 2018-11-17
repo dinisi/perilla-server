@@ -82,22 +82,22 @@ FileRouter.get("/raw", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
 
 FileRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => {
     let base = File.find({ owner: req.query.entry }).select("id name type tags created creator");
-    if (req.query.tags) {
+    if (req.query.tags !== undefined) {
         base = base.where("tags").all(req.query.tags);
     }
-    if (req.query.type) {
+    if (req.query.type !== undefined) {
         base = base.where("type").equals(req.query.type);
     }
-    if (req.query.search) {
+    if (req.query.search !== undefined) {
         base = base.where("name").regex(new RegExp(req.query.search.replace(/[\^\$\\\.\*\+\?\(\)\[\]\{\}\|]/g, "\\$&"), "g"));
     }
-    if (req.query.before) {
+    if (req.query.before !== undefined) {
         base = base.where("created").lte(req.query.before);
     }
-    if (req.query.after) {
+    if (req.query.after !== undefined) {
         base = base.where("created").gte(req.query.after);
     }
-    if (req.query.creator) {
+    if (req.query.creator !== undefined) {
         base = base.where("creator").equals(req.query.creator);
     }
     return base;

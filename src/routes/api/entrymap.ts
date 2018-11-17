@@ -42,7 +42,7 @@ EntrymapRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) =
 
 EntrymapRouter.get("/list", PaginationWrap((req) => {
     let query = EntryMap.find({ to: req.query.entry });
-    if (req.query.search) {
+    if (req.query.search !== undefined) {
         query = query.where("from").regex(new RegExp(req.query.search.replace(/[\^\$\\\.\*\+\?\(\)\[\]\{\}\|]/g, "\\$&"), "g"));
     }
     return query;

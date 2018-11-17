@@ -68,19 +68,19 @@ ProblemRouter.post("/submit", isLoggedin, isEntryMember, RESTWrap(async (req, re
 
 ProblemRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => {
     let base = Problem.find({ owner: req.query.entry }).select("id title tags created creator");
-    if (req.query.tags) {
+    if (req.query.tags !== undefined) {
         base = base.where("tags").all(req.query.tags);
     }
-    if (req.query.search) {
+    if (req.query.search !== undefined) {
         base = base.where("title").regex(new RegExp(req.query.search.replace(/[\^\$\\\.\*\+\?\(\)\[\]\{\}\|]/g, "\\$&"), "g"));
     }
-    if (req.query.before) {
+    if (req.query.before !== undefined) {
         base = base.where("created").lte(req.query.before);
     }
-    if (req.query.after) {
+    if (req.query.after !== undefined) {
         base = base.where("created").gte(req.query.after);
     }
-    if (req.query.creator) {
+    if (req.query.creator !== undefined) {
         base = base.where("creator").equals(req.query.creator);
     }
     return base;

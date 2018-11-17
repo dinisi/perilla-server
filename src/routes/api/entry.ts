@@ -39,16 +39,16 @@ EntryRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
 
 EntryRouter.get("/list", PaginationWrap((req) => {
     let base = Entry.find().select("-hash -salt");
-    if (req.query.search) {
+    if (req.query.search !== undefined) {
         base = base.where("_id").regex(new RegExp(req.query.search.replace(/[\^\$\\\.\*\+\?\(\)\[\]\{\}\|]/g, "\\$&"), "g"));
     }
-    if (req.query.before) {
+    if (req.query.before !== undefined) {
         base = base.where("created").lte(req.query.before);
     }
-    if (req.query.after) {
+    if (req.query.after !== undefined) {
         base = base.where("created").gte(req.query.after);
     }
-    if (req.query.type) {
+    if (req.query.type !== undefined) {
         base = base.where("type").gte(req.query.type);
     }
     return base;

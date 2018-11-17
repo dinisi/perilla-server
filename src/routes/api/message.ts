@@ -45,16 +45,16 @@ MessageRouter.post("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => 
 
 MessageRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => {
     let base = Message.find({ owner: req.query.entry });
-    if (req.query.search) {
+    if (req.query.search !== undefined) {
         base = base.where("content").regex(new RegExp(req.query.search.replace(/[\^\$\\\.\*\+\?\(\)\[\]\{\}\|]/g, "\\$&"), "g"));
     }
-    if (req.query.before) {
+    if (req.query.before !== undefined) {
         base = base.where("created").lte(req.query.before);
     }
-    if (req.query.after) {
+    if (req.query.after !== undefined) {
         base = base.where("created").gte(req.query.after);
     }
-    if (req.query.creator) {
+    if (req.query.creator !== undefined) {
         base = base.where("creator").equals(req.query.creator);
     }
     return base;
