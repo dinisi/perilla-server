@@ -49,7 +49,7 @@ EntryRouter.get("/list", PaginationWrap((req) => {
         base = base.where("created").gte(req.query.after);
     }
     if (req.query.type !== undefined) {
-        base = base.where("type").gte(req.query.type);
+        base = base.where("type").equals(req.query.type);
     }
     return base;
 }));
