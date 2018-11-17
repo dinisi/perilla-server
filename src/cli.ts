@@ -128,7 +128,7 @@ commander
     });
 
 const createEntry = async (id: string) => {
-    require("./database");
+    await require("./database").connectDB();
     const questions = [
         {
             type: "text",
@@ -159,7 +159,7 @@ const createEntry = async (id: string) => {
 };
 
 const removeEntry = async (id: string) => {
-    require("./database");
+    await require("./database").connectDB();
     const { Entry, EntryType } = require("./schemas/entry");
     const entry = await Entry.findById(id);
     if (!entry) { throw new Error("Entry not found"); }
@@ -172,7 +172,7 @@ const cp = (obj: any, key: any) => {
 };
 
 const modifyEntry = async (id: string) => {
-    require("./database");
+    await require("./database").connectDB();
     const { Entry, EntryType } = require("./schemas/entry");
     const entry = await Entry.findById(id);
     if (!entry) { throw new Error("Entry not found"); }
@@ -181,6 +181,12 @@ const modifyEntry = async (id: string) => {
     console.log(cp(entry, "email"));
     console.log(cp(entry, "created"));
     console.log(cp(entry, "type"));
+    if (entry.type === EntryType.user) {
+        if (await readbool("Change password")) {
+            entry.setPassword(await readpass());
+        }
+    }
+    await entry.save();
 };
 
 commander
@@ -190,17 +196,21 @@ commander
     .option("-r, --remove", "Delete entry")
     .option("-m, --modify", "Modify entry")
     .action(async (id, cmd) => {
-        if (cmd.create) {
-            await createEntry(id);
-        }
-        if (cmd.remove) {
-            await removeEntry(id);
-        }
-        if (cmd.modify) {
-            await modifyEntry(id);
+        try {
+            if (cmd.create) {
+                await createEntry(id);
+            }
+            if (cmd.remove) {
+                await removeEntry(id);
+            }
+            if (cmd.modify) {
+                await modifyEntry(id);
+            }
+        } catch (e) {
+            console.log(e.message);
         }
         const { gracefulExit } = require("./utils");
-        gracefulExit();
+        gracefulExit("cli finished");
     });
 
 commander.parse(process.argv);

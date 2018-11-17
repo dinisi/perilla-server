@@ -24,4 +24,5 @@ export const EntryMapSchema = new Schema(
     },
 );
 
+EntryMapSchema.index({ from: 1, to: 1 }, { unique: true });
 export const EntryMap = model<IEntryMapModel>("EntryMap", EntryMapSchema);
