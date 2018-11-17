@@ -69,20 +69,29 @@ export const SolutionSchema: Schema = new Schema(
 SolutionSchema.index({ id: 1, owner: 1 }, { unique: true });
 SolutionSchema.methods.judge = async function() {
     const self = this as ISolutionModel;
-    const problem = await Problem.findOne({ id: self.problem, owner: self.owner });
-    if (!problem) { throw new Error("Invalid solution"); }
-    if (!problem.channel) { throw new Error("Problem do not have a valid data config"); }
-    if (problem.owner !== self.owner) { throw new Error("Bad solution"); }
-    self.status = SolutionResult.WaitingJudge;
-    await self.save();
-    pushQueue();
-    const task = new Task();
-    task.channel = problem.channel;
-    task.problem = problem.data;
-    task.solution = self.data;
-    task.objectID = "" + self._id;
-    task.owner = self.owner;
-    await task.save();
+    try {
+        const problem = await Problem.findOne({ id: self.problem, owner: self.owner });
+        if (!problem) { throw new Error("Invalid solution"); }
+        if (!problem.channel) { throw new Error("Problem do not have a valid data config"); }
+        if (problem.owner !== self.owner) { throw new Error("Bad solution"); }
+        self.status = SolutionResult.WaitingJudge;
+        await self.save();
+        pushQueue();
+        const task = new Task();
+        task.channel = problem.channel;
+        task.problem = problem.data;
+        task.solution = self.data;
+        task.objectID = "" + self._id;
+        task.owner = self.owner;
+        await task.save();
+    } catch (e) {
+        self.status = SolutionResult.JudgementFailed;
+        self.score = 0;
+        self.details = {
+            error: e.message,
+        };
+        await self.save();
+    }
 };
 
 SolutionSchema.pre("save", async function(next) {
