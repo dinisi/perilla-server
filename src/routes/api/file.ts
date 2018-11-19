@@ -12,12 +12,14 @@ import { Router } from "express";
 import { ensureDirSync } from "fs-extra";
 import { lookup } from "mime-types";
 import * as multer from "multer";
+import { join } from "path";
 import { File } from "../../schemas/file";
 import { isEntryAdmin, isEntryMember, isLoggedin, notNullOrUndefined, PaginationWrap, RESTWrap } from "./util";
 
 export const FileRouter = Router();
-ensureDirSync("files/uploads/");
-const upload = multer({ dest: "files/uploads/" });
+const uploadFilePath = join(__dirname, "..", "..", "..", "files", "uploads");
+ensureDirSync(uploadFilePath);
+const upload = multer({ dest: uploadFilePath });
 
 FileRouter.get("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });

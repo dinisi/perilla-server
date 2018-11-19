@@ -9,6 +9,7 @@ import http = require("http");
 import https = require("https");
 import mongoose = require("mongoose");
 import passport = require("passport");
+import { join } from "path";
 import { config } from "./config";
 import { connectDB } from "./database";
 import { MainRouter } from "./routes";
@@ -16,7 +17,7 @@ import { MainRouter } from "./routes";
 const consoleLogger = console.log;
 console.log = (message: string) => {
     consoleLogger(message);
-    appendFileSync("app.log", `[${(new Date()).toLocaleString()}] ${message}\n`);
+    appendFileSync(join(__dirname, "..", "app.log"), `[${(new Date()).toLocaleString()}] ${message}\n`);
 };
 console.log("Perilla started");
 

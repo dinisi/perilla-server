@@ -72,12 +72,8 @@ typings/
 # Serverless directories
 .serverless
 
-dist
-
-files
-
+# Perilla files
+dist/
+files/
 config.json
-
-test/config.js
-
-certificate
+frontend/

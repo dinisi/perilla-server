@@ -1,6 +1,9 @@
 import { Router } from "express";
+import { join } from "path";
 import { IRESTResponse } from "../interfaces/route";
 import { APIRouter } from "./api";
+import { RESTWrap } from "./api/util";
+import { FrontEndRouter } from "./frontend";
 
 export let MainRouter = Router();
 
@@ -17,4 +20,10 @@ MainRouter.use((req, res: IRESTResponse, next) => {
     next();
 });
 
+MainRouter.get("/", RESTWrap(async (req, res) => {
+    const { version } = require(join("..", "..", "package.json"));
+    res.RESTSend({ version });
+}));
+
 MainRouter.use("/api", APIRouter);
+MainRouter.use("/frontend", FrontEndRouter);
