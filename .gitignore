@@ -73,7 +73,7 @@ typings/
 .serverless
 
 # Perilla files
-dist/
-files/
+/dist/
+/files/
 config.json
-frontend/
+/frontend/
