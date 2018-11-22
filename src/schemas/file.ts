@@ -1,4 +1,4 @@
-import { ensureDirSync, move, unlink } from "fs-extra";
+import { ensureDirSync, existsSync, move, unlink } from "fs-extra";
 import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
 import { getFileSize, getHash } from "../utils";
@@ -66,22 +66,9 @@ FileSchema.methods.getPath = function() {
 
 FileSchema.methods.setFile = async function(path: string) {
     const self = this as IFileModel;
-    if (self.hash) {
-        const count = await File.find().where("hash").equals(self.hash).countDocuments();
-        if (count === 1) {
-            await unlink(self.getPath());
-        }
-        self.hash = null;
-        self.size = null;
-    }
-    if (path) {
-        self.hash = await getHash(path);
-        self.size = await getFileSize(path);
-        const count = await File.find().where("hash").equals(self.hash).countDocuments();
-        if (count === 0) {
-            await move(path, self.getPath());
-        }
-    }
+    self.hash = await getHash(path);
+    self.size = await getFileSize(path);
+    if (!existsSync(self.getPath())) { await move(path, self.getPath()); }
 };
 
 FileSchema.pre("save", async function(next) {
@@ -91,12 +78,6 @@ FileSchema.pre("save", async function(next) {
         const counter = await FileCounter.findByIdAndUpdate(self.owner, { $inc: { count: 1 } }, { upsert: true, new: true });
         self.id = counter.count;
     }
-    next();
-});
-
-FileSchema.pre("remove", async function(next) {
-    const self = this as IFileModel;
-    await self.setFile(null);
     next();
 });
 
