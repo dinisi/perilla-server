@@ -1,14 +1,15 @@
-import chalk = require("chalk");
+import { default as c } from "chalk";
 import commander = require("commander");
-import fs = require("fs-extra");
+import { createWriteStream, existsSync, readFileSync, removeSync, unlinkSync, writeFileSync } from "fs-extra";
 import mongoose = require("mongoose");
-import path = require("path");
 import prompts = require("prompts");
 import { generate } from "randomstring";
+import { get } from "request";
+import { Extract } from "unzipper";
+import { FRONTEND_PATH, PACKAGE_PATH } from "./constant";
 import { ISystemConfig } from "./interfaces/system";
 
-const c = chalk.default;
-const version = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "package.json")).toString()).version;
+const version = JSON.parse(readFileSync(PACKAGE_PATH).toString()).version;
 
 commander
     .version(version);
@@ -20,11 +21,11 @@ const uninstall = async () => {
     console.log("[INFO] config.json exists.");
     if (await readbool("continue will overwrite exist data. confirm?")) {
         console.log("[INFO] removing managed files...");
-        const oldConfig = JSON.parse(fs.readFileSync("config.json").toString());
+        const oldConfig = JSON.parse(readFileSync("config.json").toString());
         try {
-            fs.removeSync("files");
-            fs.unlinkSync("config.json");
-            fs.unlinkSync("app.log");
+            removeSync("files");
+            unlinkSync("config.json");
+            unlinkSync("app.log");
         } catch (e) {
             console.log("[ERROR] " + e.message);
             if (!await readbool("continue?")) { process.exit(0); }
@@ -123,7 +124,7 @@ const generateConfig = async () => {
         },
         sessionSecret: answers.session_secret,
     };
-    fs.writeFileSync("config.json", JSON.stringify(config, null, "\t"));
+    writeFileSync("config.json", JSON.stringify(config, null, "\t"));
 };
 
 const InitializeDatabase = async () => {
@@ -153,7 +154,7 @@ commander
 
         console.log("[INFO] Initializing the system...");
         console.log("[INFO] [STEP 1/4] Checking environment...");
-        if (fs.existsSync("config.json")) { await uninstall(); }
+        if (existsSync("config.json")) { await uninstall(); }
         console.log("[INFO] [STEP 2/4]  Generating config...");
         await generateConfig();
         console.log("[INFO] [STEP 3/4] Initializing database...");
@@ -244,6 +245,46 @@ commander
             }
             if (cmd.modify) {
                 await modifyEntry(id);
+            }
+        } catch (e) {
+            console.log(e.message);
+        }
+        const { gracefulExit } = require("./utils");
+        gracefulExit("cli finished");
+    });
+
+const fetchLatestFrontendTag = async () => {
+    const url = "https://github.com/ZhangZisu/perilla-frontend/releases/latest";
+    return new Promise<string>((resolve, reject) => {
+        get("https://github.com/ZhangZisu/perilla-frontend/releases/latest", (err, res) => {
+            if (err) { return reject(err); }
+            const span = /<span class="css-truncate-target" style="max-width: 125px">[a-zA-Z0-9.]+<\/span>/.exec(res.body)[0];
+            if (!span) { return reject("Fetch latest frontend version failed"); }
+            const latest = span.substr(-12, span.length - 66);
+            console.log(`Version ${latest} found.`);
+            resolve(latest);
+        });
+    });
+};
+
+const downloadFrontendRelease = async (tag: string) => {
+    const url = `https://github.com/ZhangZisu/perilla-frontend/releases/download/${tag}/dist.zip`;
+    removeSync(FRONTEND_PATH);
+    console.log("Downloading...");
+    return new Promise<void>((resolve, reject) => {
+        get(url).pipe(Extract({ path: FRONTEND_PATH })).on("close", resolve).on("error", reject);
+    });
+};
+
+commander
+    .command("frontend")
+    .description("Frontend utils")
+    .option("-d, --download", "Download frontend file")
+    .action(async (cmd) => {
+        try {
+            if (cmd.download) {
+                const latest = await fetchLatestFrontendTag();
+                await downloadFrontendRelease(latest);
             }
         } catch (e) {
             console.log(e.message);
