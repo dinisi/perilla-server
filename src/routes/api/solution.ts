@@ -8,31 +8,33 @@
 
 import { Router } from "express";
 import { Solution } from "../../schemas/solution";
-import { isEntryAdmin, isEntryMember, isLoggedin, notNullOrUndefined, PaginationWrap, RESTWrap } from "./util";
+import { ensure, isLoggedin, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
 
 export const SolutionRouter = Router();
 
-SolutionRouter.get("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
+SolutionRouter.get("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const solution = await Solution.findOne({ owner: req.query.entry, id: req.query.id });
-    notNullOrUndefined(solution);
+    ensure(solution, "Not found");
     return res.RESTSend(solution);
 }));
 
-SolutionRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
+SolutionRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const solution = await Solution.findOne({ owner: req.query.entry, id: req.query.id });
-    notNullOrUndefined(solution);
+    ensure(solution, "Not found");
+    ensure(req.admin || solution.owner === req.user, "Access denied");
     await solution.judge();
     return res.RESTEnd();
 }));
 
-SolutionRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
+SolutionRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const solution = await Solution.findOne({ owner: req.query.entry, id: req.query.id });
-    notNullOrUndefined(solution);
+    ensure(solution, "Not found");
+    ensure(req.admin || solution.owner === req.user, "Access denied");
     await solution.remove();
     return res.RESTEnd();
 }));
 
-SolutionRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => {
+SolutionRouter.get("/list", verifyEntryAccess, PaginationWrap((req) => {
     let base = Solution.find({ owner: req.query.entry }).select("id problem status score created creator");
     if (req.query.problem !== undefined) {
         base = base.where("problem").equals(req.query.problem);

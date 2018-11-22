@@ -4,36 +4,27 @@
 
 import { Router } from "express";
 import { join, resolve } from "path";
-import { File, managedFilePath } from "../../schemas/file";
+import { JUDGE_PREFIX, MANAGED_FILE_PATH } from "../../constant";
+import { llen, rpop } from "../../redis";
+import { File } from "../../schemas/file";
 import { Solution } from "../../schemas/solution";
-import { Task } from "../../schemas/task";
-import { isLoggedin, isSystemAdmin, notNullOrUndefined, RESTWrap } from "./util";
+import { ensure, isLoggedin, isSystemAdmin, RESTWrap } from "./util";
 
 export const JudgerRouter = Router();
-let queueLength = 0;
 
-export const pushQueue = () => { queueLength++; };
-
-JudgerRouter.get("/queue", RESTWrap(async (req, res) => {
-    res.RESTSend(queueLength);
+JudgerRouter.get("/len", RESTWrap(async (req, res) => {
+    res.RESTSend(llen(req.query.channel, JUDGE_PREFIX));
 }));
 
-JudgerRouter.get("/", isLoggedin, isSystemAdmin, RESTWrap(async (req, res) => {
-    if (!queueLength) {
-        return res.RESTFail("Empty queue");
-    }
-    const task = await Task.findOneAndRemove().where("channel").in(req.query.channel);
-    notNullOrUndefined(task);
-    if (!task) {
-        return res.RESTFail("Empty queue");
-    }
-    queueLength--;
-    res.RESTSend(task);
+JudgerRouter.get("/pop", isLoggedin, isSystemAdmin, RESTWrap(async (req, res) => {
+    const task = await rpop(req.query.channel, JUDGE_PREFIX);
+    if (!task) { return res.RESTFail("Empty queue"); }
+    res.RESTSend(JSON.stringify(task));
 }));
 
 JudgerRouter.post("/", isLoggedin, isSystemAdmin, RESTWrap(async (req, res) => {
     const solution = await Solution.findById(req.query.objectID);
-    notNullOrUndefined(solution);
+    ensure(solution, "Not found");
     solution.status = req.body.status;
     solution.score = req.body.score;
     solution.details = req.body.details;
@@ -43,11 +34,11 @@ JudgerRouter.post("/", isLoggedin, isSystemAdmin, RESTWrap(async (req, res) => {
 
 JudgerRouter.get("/resolve", isLoggedin, isSystemAdmin, RESTWrap(async (req, res) => {
     const file = await File.findOne({ owner: req.query.owner, id: req.query.id });
-    notNullOrUndefined(file);
+    ensure(file, "Not found");
     res.RESTSend(file);
 }));
 
 JudgerRouter.get("/download", isLoggedin, isSystemAdmin, RESTWrap(async (req, res) => {
-    const path = resolve(join(managedFilePath, req.query.hash));
+    const path = resolve(join(MANAGED_FILE_PATH, req.query.hash));
     res.sendFile(path);
 }));

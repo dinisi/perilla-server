@@ -5,12 +5,7 @@ export const ISystemConfig = Record({
         url: String,
         options: Always,
     }),
-    mail: Record({
-        enabled: Boolean,
-    }).And(Partial({
-        options: Always,
-        from: String,
-    })),
+    redis: Always,
     http: Record({
         port: Number,
         hostname: String,

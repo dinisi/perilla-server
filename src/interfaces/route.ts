@@ -5,3 +5,7 @@ export interface IRESTResponse extends Response {
     RESTFail(message: any): void;
     RESTEnd(): void;
 }
+
+export interface IRESTRequest extends Request {
+    admin?: boolean;
+}

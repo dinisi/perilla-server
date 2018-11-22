@@ -8,21 +8,22 @@
 
 import { Router } from "express";
 import { Entry, EntryType } from "../../schemas/entry";
-import { isEntryAdmin, isLoggedin, notNullOrUndefined, PaginationWrap, RESTWrap } from "./util";
+import { ensure, isLoggedin, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
 
 export const EntryRouter = Router();
 
 EntryRouter.get("/", RESTWrap(async (req, res) => {
     const entry = await Entry.findById(req.query.entry).select("-hash -salt");
-    notNullOrUndefined(entry);
+    ensure(entry, "Not found");
     return res.RESTSend(entry);
 }));
 
-EntryRouter.put("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
+EntryRouter.put("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
     const entry = await Entry.findById(req.query.entry);
-    notNullOrUndefined(entry);
-    entry.description = req.body.description;
-    entry.email = req.body.email;
+    ensure(entry, "Not found");
+    ensure(req.admin, "Access denied");
+    entry.description = req.body.description || entry.description;
+    entry.email = req.body.email || entry.email;
     if (req.body.password && entry.type === EntryType.user) {
         entry.setPassword(req.body.password);
     }
@@ -30,9 +31,10 @@ EntryRouter.put("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     return res.RESTEnd();
 }));
 
-EntryRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
+EntryRouter.delete("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
     const entry = await Entry.findById(req.query.entry);
-    notNullOrUndefined(entry);
+    ensure(entry, "Not found");
+    ensure(req.admin, "Access denied");
     await entry.remove();
     return res.RESTEnd();
 }));

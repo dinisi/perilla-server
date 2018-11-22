@@ -1,11 +1,9 @@
 import { ensureDirSync, existsSync, move, unlink } from "fs-extra";
 import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
+import { MANAGED_FILE_PATH } from "../constant";
 import { getFileSize, getHash } from "../utils";
 import { FileCounter } from "./counter";
-
-export const managedFilePath = join("files", "managed");
-ensureDirSync(managedFilePath);
 
 export interface IFileModel extends Document {
     id: number;
@@ -61,14 +59,13 @@ FileSchema.index({ id: 1, owner: 1 }, { unique: true });
 
 FileSchema.methods.getPath = function() {
     const self = this as IFileModel;
-    return resolve(join(managedFilePath, self.hash));
+    return resolve(join(MANAGED_FILE_PATH, self.hash));
 };
 
-FileSchema.methods.setFile = async function(path: string) {
+FileSchema.methods.setFile = async function(hash: string) {
     const self = this as IFileModel;
-    self.hash = await getHash(path);
-    self.size = await getFileSize(path);
-    if (!existsSync(self.getPath())) { await move(path, self.getPath()); }
+    self.hash = hash;
+    self.size = await getFileSize(self.getPath());
 };
 
 FileSchema.pre("save", async function(next) {

@@ -75,5 +75,5 @@ typings/
 # Perilla files
 /dist/
 /files/
-config.json
 /frontend/
+/config.json

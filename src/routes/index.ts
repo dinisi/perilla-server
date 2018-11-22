@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { join } from "path";
+import { PACKAGE_PATH } from "../constant";
 import { IRESTResponse } from "../interfaces/route";
 import { APIRouter } from "./api";
 import { RESTWrap } from "./api/util";
@@ -21,7 +22,7 @@ MainRouter.use((req, res: IRESTResponse, next) => {
 });
 
 MainRouter.get("/", RESTWrap(async (req, res) => {
-    const { version } = require(join("..", "..", "package.json"));
+    const { version } = require(PACKAGE_PATH);
     res.RESTSend({ version });
 }));
 

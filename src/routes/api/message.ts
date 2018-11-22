@@ -9,32 +9,34 @@
 
 import { Router } from "express";
 import { Message } from "../../schemas/message";
-import { isEntryAdmin, isEntryMember, isLoggedin, notNullOrUndefined, PaginationWrap, RESTWrap } from "./util";
+import { ensure, isLoggedin, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
 
 export const MessageRouter = Router();
 
-MessageRouter.get("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
+MessageRouter.get("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const message = await Message.findOne({ owner: req.query.entry, from: req.query.id });
-    notNullOrUndefined(message);
+    ensure(message, "Not found");
     return res.RESTSend(message);
 }));
 
-MessageRouter.put("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
+MessageRouter.put("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const message = await Message.findOne({ owner: req.query.entry, id: req.query.id });
-    notNullOrUndefined(message);
-    message.content = req.body.content;
+    ensure(message, "Not found");
+    ensure(req.admin || message.owner === req.user, "Access denied");
+    message.content = req.body.content || message.content;
     await message.save();
     return res.RESTEnd();
 }));
 
-MessageRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
+MessageRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const message = await Message.findOne({ owner: req.query.entry, from: req.query.id });
-    notNullOrUndefined(message);
+    ensure(message, "Not found");
+    ensure(req.admin || message.owner === req.user, "Access denied");
     await message.remove();
     return res.RESTEnd();
 }));
 
-MessageRouter.post("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
+MessageRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const message = new Message();
     message.content = req.body.content;
     message.owner = req.query.entry;
@@ -43,7 +45,7 @@ MessageRouter.post("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => 
     return res.RESTSend(message.id);
 }));
 
-MessageRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => {
+MessageRouter.get("/list", verifyEntryAccess, PaginationWrap((req) => {
     let base = Message.find({ owner: req.query.entry });
     if (req.query.search !== undefined) {
         base = base.where("content").regex(new RegExp(req.query.search.replace(/[\^\$\\\.\*\+\?\(\)\[\]\{\}\|]/g, "\\$&"), "g"));

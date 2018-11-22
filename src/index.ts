@@ -1,36 +1,38 @@
 import "./database";
 
 import { json, urlencoded } from "body-parser";
-import MongoStore = require("connect-mongo");
+import redisStore = require("connect-redis");
 import express = require("express");
 import session = require("express-session");
 import { appendFileSync, readFileSync } from "fs-extra";
 import http = require("http");
 import https = require("https");
-import mongoose = require("mongoose");
 import passport = require("passport");
 import { join } from "path";
 import { config } from "./config";
+import { APPLOG_PATH } from "./constant";
 import { connectDB } from "./database";
+import { connectRedis, redisClient } from "./redis";
 import { MainRouter } from "./routes";
 
 const consoleLogger = console.log;
 console.log = (message: string) => {
     consoleLogger(message);
-    appendFileSync(join(__dirname, "..", "app.log"), `[${(new Date()).toLocaleString()}] ${message}\n`);
+    appendFileSync(APPLOG_PATH, `[${(new Date()).toLocaleString()}] ${message}\n`);
 };
 console.log("Perilla started");
 
 (async () => {
     await connectDB();
+    await connectRedis();
 
     const app = express();
 
     app.use(json());
     app.use(urlencoded({ extended: false }));
-    const store = MongoStore(session);
+    const store = redisStore(session);
     app.use(session({
-        store: new store({ mongooseConnection: mongoose.connection }),
+        store: new store({ client: redisClient }),
         secret: config.sessionSecret,
         resave: false,
         saveUninitialized: false,

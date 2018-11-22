@@ -5,6 +5,7 @@ import mongoose = require("mongoose");
 import path = require("path");
 import prompts = require("prompts");
 import { generate } from "randomstring";
+import { ISystemConfig } from "./interfaces/system";
 
 const c = chalk.default;
 const version = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "package.json")).toString()).version;
@@ -23,6 +24,7 @@ const uninstall = async () => {
         try {
             fs.removeSync("files");
             fs.unlinkSync("config.json");
+            fs.unlinkSync("app.log");
         } catch (e) {
             console.log("[ERROR] " + e.message);
             if (!await readbool("continue?")) { process.exit(0); }
@@ -38,6 +40,40 @@ const uninstall = async () => {
 
 const generateConfig = async () => {
     const questions = [
+        {
+            type: "text",
+            name: "db_url",
+            message: "Mongodb URL",
+            initial: "mongodb://localhost:27017/perilla",
+        },
+        {
+            type: "text",
+            name: "redis_host",
+            message: "REDIS database hostname/IP address",
+            initial: "127.0.0.1",
+        },
+        {
+            type: "number",
+            name: "redis_port",
+            message: "REDIS database port",
+            initial: 6379,
+            min: 1,
+            max: 65535,
+        },
+        {
+            type: "number",
+            name: "redis_index",
+            message: "REDIS database index",
+            initial: 0,
+            min: 0,
+            max: 15,
+        },
+        {
+            type: "text",
+            name: "redis_prefix",
+            message: "REDIS database prefix",
+            initial: "perilla",
+        },
         {
             type: "text",
             name: "db_url",
@@ -66,7 +102,7 @@ const generateConfig = async () => {
         },
     ];
     const answers = await prompts(questions);
-    const config = {
+    const config: ISystemConfig = {
         db: {
             url: answers.db_url,
             options: {
@@ -74,8 +110,11 @@ const generateConfig = async () => {
                 useCreateIndex: true,
             },
         },
-        mail: {
-            enabled: false,
+        redis: {
+            host: answers.redis_host,
+            port: answers.redis_port,
+            db: answers.redis_index,
+            prefix: answers.redis_prefix,
         },
         http: {
             port: answers.http_port,

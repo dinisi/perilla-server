@@ -9,45 +9,47 @@
 
 import { Router } from "express";
 import { Article } from "../../schemas/article";
-import { isEntryAdmin, isEntryMember, isLoggedin, notNullOrUndefined, PaginationWrap, RESTWrap } from "./util";
+import { ensure, isLoggedin, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
 
 export const ArticleRouter = Router();
 
-ArticleRouter.get("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
-    const problem = await Article.findOne({ owner: req.query.entry, id: req.query.id });
-    notNullOrUndefined(problem);
-    return res.RESTSend(problem);
+ArticleRouter.get("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
+    const article = await Article.findOne({ owner: req.query.entry, id: req.query.id });
+    ensure(article, "Not found");
+    return res.RESTSend(article);
 }));
 
-ArticleRouter.put("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
-    const problem = await Article.findOne({ owner: req.query.entry, id: req.query.id });
-    notNullOrUndefined(problem);
-    problem.title = req.body.title;
-    problem.content = req.body.content;
-    problem.tags = req.body.tags;
-    await problem.save();
+ArticleRouter.put("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
+    const article = await Article.findOne({ owner: req.query.entry, id: req.query.id });
+    ensure(article, "Not found");
+    ensure(req.admin || article.owner === req.user, "Access denied");
+    article.title = req.body.title || article.title;
+    article.content = req.body.content || article.content;
+    article.tags = req.body.tags || article.tags;
+    await article.save();
     return res.RESTEnd();
 }));
 
-ArticleRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
-    const problem = await Article.findOne({ owner: req.query.entry, id: req.query.id });
-    notNullOrUndefined(problem);
-    await problem.remove();
+ArticleRouter.delete("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
+    const article = await Article.findOne({ owner: req.query.entry, id: req.query.id });
+    ensure(article, "Not found");
+    ensure(req.admin || article.owner === req.user, "Access denied");
+    await article.remove();
     return res.RESTEnd();
 }));
 
-ArticleRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
-    const problem = new Article();
-    problem.title = req.body.title;
-    problem.content = req.body.content;
-    problem.tags = req.body.tags;
-    problem.owner = req.query.entry;
-    problem.creator = req.user;
-    await problem.save();
-    return res.RESTSend(problem.id);
+ArticleRouter.post("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
+    const article = new Article();
+    article.title = req.body.title;
+    article.content = req.body.content;
+    article.tags = req.body.tags;
+    article.owner = req.query.entry;
+    article.creator = req.user;
+    await article.save();
+    return res.RESTSend(article.id);
 }));
 
-ArticleRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => {
+ArticleRouter.get("/list", isLoggedin, verifyEntryAccess, PaginationWrap((req) => {
     let base = Article.find({ owner: req.query.entry }).select("id title tags created creator");
     if (req.query.tags !== undefined) {
         base = base.where("tags").all(req.query.tags);

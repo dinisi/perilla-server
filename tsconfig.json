@@ -7,7 +7,6 @@
         "preserveConstEnums": true,
         "outDir": "dist/",
         "sourceMap": true,
-        "allowJs": true
     },
     "include": [
         "src/**/*"

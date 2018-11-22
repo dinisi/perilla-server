@@ -9,21 +9,22 @@
 import { Router } from "express";
 import { Entry, EntryType } from "../../schemas/entry";
 import { EntryMap } from "../../schemas/entrymap";
-import { isEntryAdmin, isLoggedin, notNullOrUndefined, PaginationWrap, RESTWrap } from "./util";
+import { ensure, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
 
 export const EntrymapRouter = Router();
 
-EntrymapRouter.get("/", isLoggedin, RESTWrap(async (req, res) => {
+EntrymapRouter.get("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const map = await EntryMap.findOne({ to: req.query.entry, from: req.query.from });
     if (!map) { throw new Error("Not found"); }
     return res.RESTSend(map);
 }));
 
-EntrymapRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
+EntrymapRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
+    ensure(req.admin, "Access denied");
     let map = await EntryMap.findOne({ to: req.query.entry, from: req.query.from });
     if (!map) {
         const entry = await Entry.findOne({ _id: req.query.from, type: EntryType.user });
-        notNullOrUndefined(entry);
+        ensure(entry, "Not found");
         map = new EntryMap();
         map.from = req.query.from;
         map.to = req.query.entry;
@@ -33,14 +34,15 @@ EntrymapRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => 
     return res.RESTEnd();
 }));
 
-EntrymapRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
+EntrymapRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
+    ensure(req.admin, "Access denied");
     const map = await EntryMap.findOne({ to: req.query.entry, from: req.query.from });
     if (!map) { throw new Error("Not found"); }
     await map.remove();
     return res.RESTEnd();
 }));
 
-EntrymapRouter.get("/list", PaginationWrap((req) => {
+EntrymapRouter.get("/list", verifyEntryAccess, PaginationWrap((req) => {
     let query = EntryMap.find({ to: req.query.entry });
     if (req.query.search !== undefined) {
         query = query.where("from").regex(new RegExp(req.query.search.replace(/[\^\$\\\.\*\+\?\(\)\[\]\{\}\|]/g, "\\$&"), "g"));

@@ -13,7 +13,7 @@ export const connectDB = async () => {
     });
     registerGracefulExitHook(async () => {
         return new Promise<void>((resolve) => {
-            mongoose.connection.close(() => resolve());
+            mongoose.connection.close(resolve);
         });
     });
 };

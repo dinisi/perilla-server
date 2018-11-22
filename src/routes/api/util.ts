@@ -1,13 +1,18 @@
-import { NextFunction, Request } from "express";
+import { NextFunction } from "express";
 import { Document, DocumentQuery } from "mongoose";
-import { IRESTResponse } from "../../interfaces/route";
+import { IRESTRequest, IRESTResponse } from "../../interfaces/route";
+import { IArticleModel } from "../../schemas/article";
 import { EntryMap } from "../../schemas/entrymap";
+import { IFileModel } from "../../schemas/file";
+import { IMessageModel } from "../../schemas/message";
+import { IProblemModel } from "../../schemas/problem";
+import { ISolutionModel } from "../../schemas/solution";
 import { SystemMap } from "../../schemas/systemmap";
 
-type IHandleFunction = (req: Request, res: IRESTResponse, next?: NextFunction) => Promise<void> | void;
+type IHandleFunction = (req: IRESTRequest, res: IRESTResponse, next?: NextFunction) => Promise<void> | void;
 
 export const RESTWrap = (handle: IHandleFunction) => {
-    return async (req: Request, res: IRESTResponse, next: NextFunction) => {
+    return async (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
         try {
             await handle(req, res, next);
         } catch (e) {
@@ -16,7 +21,7 @@ export const RESTWrap = (handle: IHandleFunction) => {
     };
 };
 
-type IPaginationHandleFunction = (req: Request) => DocumentQuery<Document[], Document>;
+type IPaginationHandleFunction = (req: IRESTRequest) => DocumentQuery<Document[], Document>;
 
 export const PaginationWrap = (handle: IPaginationHandleFunction) => {
     return RESTWrap((req, res) => {
@@ -35,34 +40,34 @@ export const PaginationWrap = (handle: IPaginationHandleFunction) => {
     });
 };
 
-export const isLoggedin = async (req: Request, res: IRESTResponse, next: NextFunction) => {
+export const verifyEntryAccess = RESTWrap(async (req, res, next) => {
+    if (!req.isAuthenticated()) { throw new Error("Access denied"); }
+    if (!req.query.entry) { throw new Error("Invalid request"); }
+    if (req.query.forced) {
+        // Match system admin table
+        const map = await SystemMap.findOne({ user: req.user });
+        if (!map) { throw new Error("Access denied"); }
+        req.admin = true;
+        return next();
+    } else {
+        const map = await EntryMap.findOne({ from: req.user, to: req.query.entry });
+        if (!map) { throw new Error("Access denied"); }
+        if (map.admin) {req.admin = true; }
+        return next();
+    }
+});
+
+export const ensure = (value: any, message: string) => {
+    if (!value) {throw new Error(message); }
+};
+
+export const isLoggedin = async (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
     if (!req.isAuthenticated()) { return res.RESTFail("Access denied"); }
     return next();
 };
 
-export const isSystemAdmin = async (req: Request, res: IRESTResponse, next: NextFunction) => {
+export const isSystemAdmin = async (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
     const map = await SystemMap.findOne({ user: req.user });
     if (!map) { return res.RESTFail("Access denied"); }
     return next();
-};
-
-export const isEntryAdmin = async (req: Request, res: IRESTResponse, next: NextFunction) => {
-    const entryMap = await EntryMap.findOne({ from: req.user, to: req.query.entry });
-    if (entryMap.admin) { return next(); }
-    const systemMap = await SystemMap.findOne({ user: req.user });
-    if (systemMap) { return next(); }
-    return res.RESTFail("Access denied");
-};
-
-export const isEntryMember = async (req: Request, res: IRESTResponse, next: NextFunction) => {
-    const entryMap = await EntryMap.findOne({ from: req.user, to: req.query.entry });
-    if (entryMap) { return next(); }
-    const systemMap = await SystemMap.findOne({ user: req.user });
-    if (systemMap) { return next(); }
-    return res.RESTFail("Access denied");
-};
-
-export const notNullOrUndefined = (obj: any) => {
-    if (obj === null || obj === undefined) { throw new Error("Not found"); }
-    return;
 };

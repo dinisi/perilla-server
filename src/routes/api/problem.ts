@@ -11,36 +11,38 @@
 import { Router } from "express";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
-import { isEntryAdmin, isEntryMember, isLoggedin, notNullOrUndefined, PaginationWrap, RESTWrap } from "./util";
+import { ensure, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
 
 export const ProblemRouter = Router();
 
-ProblemRouter.get("/", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
+ProblemRouter.get("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    notNullOrUndefined(problem);
+    ensure(problem, "Not found");
     return res.RESTSend(problem);
 }));
 
-ProblemRouter.put("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
+ProblemRouter.put("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    notNullOrUndefined(problem);
-    problem.title = req.body.title;
-    problem.content = req.body.content;
-    problem.data = req.body.data;
-    problem.channel = req.body.channel;
-    problem.tags = req.body.tags;
+    ensure(problem, "Not found");
+    ensure(req.admin || problem.owner === req.user, "Access denied");
+    problem.title = req.body.title || problem.title;
+    problem.content = req.body.content || problem.content;
+    problem.data = req.body.data || problem.data;
+    problem.channel = req.body.channel || problem.channel;
+    problem.tags = req.body.tags || problem.tags;
     await problem.save();
     return res.RESTEnd();
 }));
 
-ProblemRouter.delete("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
+ProblemRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    notNullOrUndefined(problem);
+    ensure(problem, "Not found");
+    ensure(req.admin || problem.owner === req.user, "Access denied");
     await problem.remove();
     return res.RESTEnd();
 }));
 
-ProblemRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
+ProblemRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const problem = new Problem();
     problem.title = req.body.title;
     problem.content = req.body.content;
@@ -53,9 +55,9 @@ ProblemRouter.post("/", isLoggedin, isEntryAdmin, RESTWrap(async (req, res) => {
     return res.RESTSend(problem.id);
 }));
 
-ProblemRouter.post("/submit", isLoggedin, isEntryMember, RESTWrap(async (req, res) => {
+ProblemRouter.post("/submit", verifyEntryAccess, RESTWrap(async (req, res) => {
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    notNullOrUndefined(problem);
+    ensure(problem, "Not found");
     const solution = new Solution();
     solution.problem = problem.id;
     solution.creator = req.user;
@@ -66,7 +68,7 @@ ProblemRouter.post("/submit", isLoggedin, isEntryMember, RESTWrap(async (req, re
     return res.RESTSend(solution.id);
 }));
 
-ProblemRouter.get("/list", isLoggedin, isEntryMember, PaginationWrap((req) => {
+ProblemRouter.get("/list", verifyEntryAccess, PaginationWrap((req) => {
     let base = Problem.find({ owner: req.query.entry }).select("id title tags created creator");
     if (req.query.tags !== undefined) {
         base = base.where("tags").all(req.query.tags);

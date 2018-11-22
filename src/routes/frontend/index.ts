@@ -1,15 +1,14 @@
 import express = require("express");
 import { existsSync } from "fs";
 import { join } from "path";
+import { FRONTEND_PATH } from "../../constant";
 
 export const FrontEndRouter = express.Router();
 
-const FrontEndPath = join(__dirname, "..", "..", "..", "frontend");
-
-if (existsSync(FrontEndPath)) {
-    FrontEndRouter.use(express.static(FrontEndPath));
+if (existsSync(FRONTEND_PATH)) {
+    FrontEndRouter.use(express.static(FRONTEND_PATH));
     FrontEndRouter.get("/*", (req, res) => {
-        res.sendFile(join(FrontEndPath, "index.html"));
+        res.sendFile(join(FRONTEND_PATH, "index.html"));
     });
 } else {
     FrontEndRouter.get("/*", (req, res) => {

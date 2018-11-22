@@ -1,8 +1,8 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { pushQueue } from "../routes/api/judger";
+import { JUDGE_PREFIX } from "../constant";
+import { lpush } from "../redis";
 import { SolutionCounter } from "./counter";
 import { Problem } from "./problem";
-import { Task } from "./task";
 
 export enum SolutionResult {
     WaitingJudge,            // Wating Judge
@@ -76,14 +76,13 @@ SolutionSchema.methods.judge = async function() {
         if (problem.owner !== self.owner) { throw new Error("Bad solution"); }
         self.status = SolutionResult.WaitingJudge;
         await self.save();
-        pushQueue();
-        const task = new Task();
-        task.channel = problem.channel;
-        task.problem = problem.data;
-        task.solution = self.data;
-        task.objectID = "" + self._id;
-        task.owner = self.owner;
-        await task.save();
+        const task = {
+            problem: problem.data,
+            solution: self.data,
+            owner: self.owner,
+            objectID: self.id,
+        };
+        await lpush(problem.channel, JUDGE_PREFIX,  JSON.stringify(task));
     } catch (e) {
         self.status = SolutionResult.JudgementFailed;
         self.score = 0;
