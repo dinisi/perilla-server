@@ -9,7 +9,7 @@ import { fileGC } from "./filegc";
 const consoleLogger = console.log;
 console.log = (message: string) => {
     consoleLogger(message);
-    appendFileSync(APPLOG_PATH, `[GC ${(new Date()).toLocaleString()}] ${message}\n`);
+    appendFileSync(APPLOG_PATH, `CRON [${(new Date()).toLocaleString()}] ${message}\n`);
 };
 console.log("Perilla Cron started");
 
