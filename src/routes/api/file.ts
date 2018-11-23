@@ -32,7 +32,7 @@ FileRouter.post("/provide", isLoggedin, (req, res) => {
         const busboy = new Busboy({ headers: req.headers });
         busboy.on("file", (fieldname, stream) => {
             createTmpFile((err, path) => {
-                if (err) {throw err; }
+                if (err) { throw err; }
                 const sha3 = new SHA3Hash();
                 const ws = createWriteStream(path);
                 stream.on("data", (chunk) => {
@@ -72,7 +72,7 @@ FileRouter.put("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     file.type = req.body.type || lookup(file.name) || file.type || "text/plain";
     file.description = req.body.description || file.name;
     file.tags = req.body.tags || file.tags;
-    req.body.hash && file.setFile(req.body.hash);
+    if (req.body.hash) { await file.setFile(req.body.hash); }
     await file.save();
     return res.RESTEnd();
 }));
