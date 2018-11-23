@@ -72,7 +72,7 @@ FileRouter.put("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     file.type = req.body.type || lookup(file.name) || file.type || "text/plain";
     file.description = req.body.description || file.name;
     file.tags = req.body.tags || file.tags;
-    file.setFile(req.body.hash);
+    req.body.hash && file.setFile(req.body.hash);
     await file.save();
     return res.RESTEnd();
 }));
