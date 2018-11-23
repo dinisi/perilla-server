@@ -4,7 +4,7 @@ module.exports = {
 	apps: [{
 		name: "Perilla",
 		script: "dist/index.js",
-		instances: Math.max(1, os.cpus().length - 1),
+		instances: process.env.INSTANCES || Math.max(1, os.cpus().length - 1),
 		autorestart: true,
 		watch: false,
 		max_memory_restart: "1G",
