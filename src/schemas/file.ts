@@ -2,7 +2,7 @@ import { ensureDirSync, existsSync, move, unlink } from "fs-extra";
 import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
 import { MANAGED_FILE_PATH } from "../constant";
-import { getFileSize, getHash } from "../utils";
+import { getFileSize } from "../utils";
 import { FileCounter } from "./counter";
 
 export interface IFileModel extends Document {

@@ -44,11 +44,11 @@ ProblemRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 
 ProblemRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const problem = new Problem();
-    problem.title = req.body.title;
-    problem.content = req.body.content;
-    problem.data = req.body.data;
-    problem.channel = req.body.channel;
-    problem.tags = req.body.tags;
+    problem.title = req.body.title || problem.title;
+    problem.content = req.body.content || problem.content;
+    problem.data = req.body.data || problem.data;
+    problem.channel = req.body.channel || problem.channel;
+    problem.tags = req.body.tags || problem.tags;
     problem.owner = req.query.entry;
     problem.creator = req.user;
     await problem.save();

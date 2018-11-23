@@ -40,9 +40,9 @@ ArticleRouter.delete("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, re
 
 ArticleRouter.post("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
     const article = new Article();
-    article.title = req.body.title;
-    article.content = req.body.content;
-    article.tags = req.body.tags;
+    article.title = req.body.title || article.title;
+    article.content = req.body.content || article.content;
+    article.tags = req.body.tags || article.tags;
     article.owner = req.query.entry;
     article.creator = req.user;
     await article.save();
