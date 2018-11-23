@@ -1,12 +1,7 @@
 import { NextFunction } from "express";
 import { Document, DocumentQuery } from "mongoose";
 import { IRESTRequest, IRESTResponse } from "../../interfaces/route";
-import { IArticleModel } from "../../schemas/article";
 import { EntryMap } from "../../schemas/entrymap";
-import { IFileModel } from "../../schemas/file";
-import { IMessageModel } from "../../schemas/message";
-import { IProblemModel } from "../../schemas/problem";
-import { ISolutionModel } from "../../schemas/solution";
 import { SystemMap } from "../../schemas/systemmap";
 
 type IHandleFunction = (req: IRESTRequest, res: IRESTResponse, next?: NextFunction) => Promise<void> | void;
