@@ -1,4 +1,5 @@
 import { Document, Model, model, Schema } from "mongoose";
+import { PROBLEM } from "../constant";
 import { ProblemCounter } from "./counter";
 import { Solution } from "./solution";
 
@@ -20,22 +21,22 @@ export const ProblemSchema: Schema = new Schema(
         title: {
             type: String,
             required: true,
-            minlength: 1,
-            maxlength: 50,
+            minlength: PROBLEM.title.minlength,
+            maxlength: PROBLEM.title.maxlength,
         },
         content: {
             type: String,
             required: true,
-            default: "No content",
-            minlength: 1,
-            maxlength: 40960,
+            default: PROBLEM.content.default,
+            minlength: PROBLEM.content.minlength,
+            maxlength: PROBLEM.content.maxlength,
         },
         data: Object,
         channel: String,
         tags: {
             type: [String],
             required: true,
-            default: ["No tags"],
+            default: PROBLEM.tags.default,
         },
         created: Date,
         owner: {

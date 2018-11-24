@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "passport";
+import { ERR_NOT_LOGGED_IN } from "../../constant";
 import { Entry, EntryType } from "../../schemas/entry";
 import { EntryMap } from "../../schemas/entrymap";
 import { isLoggedin, PaginationWrap, RESTWrap } from "./util";
@@ -22,7 +23,7 @@ MiscRouter.post("/login", authenticate("local"), RESTWrap((req, res) => {
 }));
 
 MiscRouter.post("/logout", RESTWrap((req, res) => {
-    if (!req.isAuthenticated()) { throw new Error("Not logged in"); }
+    if (!req.isAuthenticated()) { throw new Error(ERR_NOT_LOGGED_IN); }
     req.logout();
     res.RESTEnd();
 }));
@@ -52,7 +53,7 @@ MiscRouter.post("/creategroup", isLoggedin, RESTWrap(async (req, res) => {
 MiscRouter.get("/accessible", isLoggedin, PaginationWrap((req) => {
     let query = EntryMap.find({ from: req.user });
     if (req.query.search !== undefined) {
-        query = query.where("from").regex(new RegExp(req.query.search.replace(/[\^\$\\\.\*\+\?\(\)\[\]\{\}\|]/g, "\\$&"), "g"));
+        query = query.where("to").regex(new RegExp(req.query.search.replace(/[\^\$\\\.\*\+\?\(\)\[\]\{\}\|]/g, "\\$&"), "g"));
     }
     return query;
 }));

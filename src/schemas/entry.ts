@@ -1,5 +1,6 @@
 import * as crypto from "crypto";
 import { Document, model, Schema } from "mongoose";
+import { ENTRY } from "../constant";
 import { Article } from "./article";
 import { ArticleCounter, FileCounter, ProblemCounter, SolutionCounter } from "./counter";
 import { EntryMap } from "./entrymap";
@@ -30,15 +31,18 @@ export const EntrySchema: Schema = new Schema(
         _id: {
             type: String,
             required: true,
-            minlength: 1,
-            validate: (v: string) => /^[A-Za-z0-9]*$/.test(v),
+            minlength: ENTRY._id.minlength,
+            maxlength: ENTRY._id.maxlength,
+            validate: ENTRY._id.validate,
         },
         description: String,
         email: {
             type: String,
             required: true,
-            minlength: 1,
             unique: true,
+            minlength: ENTRY.email.minlength,
+            maxlength: ENTRY.email.maxlength,
+            validate: ENTRY.email.validate,
         },
         hash: String,
         salt: String,
@@ -46,8 +50,7 @@ export const EntrySchema: Schema = new Schema(
         type: {
             type: Number,
             required: true,
-            min: 0,
-            max: 1,
+            validate: (v: number) => !!EntryType[v],
         },
     },
 );

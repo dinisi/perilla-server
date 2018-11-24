@@ -15,7 +15,7 @@ import { lookup } from "mime-types";
 import { join } from "path";
 import { SHA3Hash } from "sha3";
 import { file as createTmpFile } from "tmp";
-import { MANAGED_FILE_PATH } from "../../constant";
+import { ERR_ACCESS_DENIED, ERR_ALREADY_EXISTS, ERR_NOT_FOUND, MANAGED_FILE_PATH } from "../../constant";
 import { File } from "../../schemas/file";
 import { ensure, isLoggedin, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
 
@@ -23,7 +23,7 @@ export const FileRouter = Router();
 
 FileRouter.get("/provide", isLoggedin, RESTWrap(async (req, res) => {
     const dist = join(MANAGED_FILE_PATH, req.query.hash);
-    if (existsSync(dist)) { throw new Error("File exists"); }
+    if (existsSync(dist)) { throw new Error(ERR_ALREADY_EXISTS); }
     res.RESTEnd();
 }));
 
@@ -60,14 +60,14 @@ FileRouter.post("/provide", isLoggedin, (req, res) => {
 
 FileRouter.get("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
-    ensure(file, "Not found");
+    ensure(file, ERR_NOT_FOUND);
     return res.RESTSend(file);
 }));
 
 FileRouter.put("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
-    ensure(file, "Not found");
-    ensure(req.admin || file.owner === req.user, "Access denied");
+    ensure(file, ERR_NOT_FOUND);
+    ensure(req.admin || file.owner === req.user, ERR_ACCESS_DENIED);
     file.name = req.body.name || file.name;
     file.type = req.body.type || lookup(file.name) || file.type || "text/plain";
     file.description = req.body.description || file.name;
@@ -79,8 +79,8 @@ FileRouter.put("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 
 FileRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
-    ensure(file, "Not found");
-    ensure(req.admin || file.owner === req.user, "Access denied");
+    ensure(file, ERR_NOT_FOUND);
+    ensure(req.admin || file.owner === req.user, ERR_ACCESS_DENIED);
     await file.remove();
     return res.RESTEnd();
 }));
@@ -100,7 +100,7 @@ FileRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 
 FileRouter.get("/raw", verifyEntryAccess, RESTWrap(async (req, res) => {
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
-    ensure(file, "Not found");
+    ensure(file, ERR_NOT_FOUND);
     return res.sendFile(file.getPath(), { headers: { "Content-Type": file.type } });
 }));
 

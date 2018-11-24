@@ -8,6 +8,7 @@
  */
 
 import { Router } from "express";
+import { ERR_ACCESS_DENIED, ERR_NOT_FOUND } from "../../constant";
 import { Article } from "../../schemas/article";
 import { ensure, isLoggedin, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
 
@@ -15,14 +16,14 @@ export const ArticleRouter = Router();
 
 ArticleRouter.get("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
     const article = await Article.findOne({ owner: req.query.entry, id: req.query.id });
-    ensure(article, "Not found");
+    ensure(article, ERR_NOT_FOUND);
     return res.RESTSend(article);
 }));
 
 ArticleRouter.put("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
     const article = await Article.findOne({ owner: req.query.entry, id: req.query.id });
-    ensure(article, "Not found");
-    ensure(req.admin || article.owner === req.user, "Access denied");
+    ensure(article, ERR_NOT_FOUND);
+    ensure(req.admin || article.owner === req.user, ERR_ACCESS_DENIED);
     article.title = req.body.title || article.title;
     article.content = req.body.content || article.content;
     article.tags = req.body.tags || article.tags;
@@ -32,8 +33,8 @@ ArticleRouter.put("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) 
 
 ArticleRouter.delete("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
     const article = await Article.findOne({ owner: req.query.entry, id: req.query.id });
-    ensure(article, "Not found");
-    ensure(req.admin || article.owner === req.user, "Access denied");
+    ensure(article, ERR_NOT_FOUND);
+    ensure(req.admin || article.owner === req.user, ERR_ACCESS_DENIED);
     await article.remove();
     return res.RESTEnd();
 }));

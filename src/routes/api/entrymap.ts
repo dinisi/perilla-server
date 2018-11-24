@@ -7,6 +7,7 @@
  */
 
 import { Router } from "express";
+import { ERR_ACCESS_DENIED, ERR_NOT_FOUND } from "../../constant";
 import { Entry, EntryType } from "../../schemas/entry";
 import { EntryMap } from "../../schemas/entrymap";
 import { ensure, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
@@ -15,16 +16,16 @@ export const EntrymapRouter = Router();
 
 EntrymapRouter.get("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const map = await EntryMap.findOne({ to: req.query.entry, from: req.query.from });
-    if (!map) { throw new Error("Not found"); }
+    if (!map) { throw new Error(ERR_NOT_FOUND); }
     return res.RESTSend(map);
 }));
 
 EntrymapRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
-    ensure(req.admin, "Access denied");
+    ensure(req.admin, ERR_ACCESS_DENIED);
     let map = await EntryMap.findOne({ to: req.query.entry, from: req.query.from });
     if (!map) {
         const entry = await Entry.findOne({ _id: req.query.from, type: EntryType.user });
-        ensure(entry, "Not found");
+        ensure(entry, ERR_NOT_FOUND);
         map = new EntryMap();
         map.from = req.query.from;
         map.to = req.query.entry;
@@ -35,9 +36,9 @@ EntrymapRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 }));
 
 EntrymapRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
-    ensure(req.admin, "Access denied");
+    ensure(req.admin, ERR_ACCESS_DENIED);
     const map = await EntryMap.findOne({ to: req.query.entry, from: req.query.from });
-    if (!map) { throw new Error("Not found"); }
+    if (!map) { throw new Error(ERR_NOT_FOUND); }
     await map.remove();
     return res.RESTEnd();
 }));

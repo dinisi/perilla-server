@@ -1,4 +1,5 @@
 import { Document, Model, model, Schema } from "mongoose";
+import { ARTICLE } from "../constant";
 import { ArticleCounter } from "./counter";
 
 export interface IArticleModel extends Document {
@@ -17,20 +18,20 @@ export const ArticleSchema: Schema = new Schema(
         title: {
             type: String,
             required: true,
-            minlength: 1,
-            maxlength: 50,
+            minlength: ARTICLE.title.minlength,
+            maxlength: ARTICLE.title.maxlength,
         },
         content: {
             type: String,
             required: true,
-            default: "No content",
-            minlength: 1,
-            maxlength: 40960,
+            default: ARTICLE.content.default,
+            minlength: ARTICLE.content.minlength,
+            maxlength: ARTICLE.content.maxlength,
         },
         tags: {
             type: [String],
             required: true,
-            default: ["No tags"],
+            default: ARTICLE.tags.default,
         },
         created: Date,
         owner: {

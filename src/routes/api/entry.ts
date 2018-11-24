@@ -7,6 +7,7 @@
  */
 
 import { Router } from "express";
+import { ERR_ACCESS_DENIED, ERR_NOT_FOUND } from "../../constant";
 import { Entry, EntryType } from "../../schemas/entry";
 import { ensure, isLoggedin, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
 
@@ -14,14 +15,14 @@ export const EntryRouter = Router();
 
 EntryRouter.get("/", RESTWrap(async (req, res) => {
     const entry = await Entry.findById(req.query.entry).select("-hash -salt");
-    ensure(entry, "Not found");
+    ensure(entry, ERR_NOT_FOUND);
     return res.RESTSend(entry);
 }));
 
 EntryRouter.put("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
     const entry = await Entry.findById(req.query.entry);
-    ensure(entry, "Not found");
-    ensure(req.admin, "Access denied");
+    ensure(entry, ERR_NOT_FOUND);
+    ensure(req.admin, ERR_ACCESS_DENIED);
     entry.description = req.body.description || entry.description;
     entry.email = req.body.email || entry.email;
     if (req.body.password && entry.type === EntryType.user) {
@@ -33,8 +34,8 @@ EntryRouter.put("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) =>
 
 EntryRouter.delete("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
     const entry = await Entry.findById(req.query.entry);
-    ensure(entry, "Not found");
-    ensure(req.admin, "Access denied");
+    ensure(entry, ERR_NOT_FOUND);
+    ensure(req.admin, ERR_ACCESS_DENIED);
     await entry.remove();
     return res.RESTEnd();
 }));

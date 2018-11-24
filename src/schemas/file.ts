@@ -1,7 +1,7 @@
 import { ensureDirSync, existsSync, move, unlink } from "fs-extra";
 import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
-import { MANAGED_FILE_PATH } from "../constant";
+import { FILE, MANAGED_FILE_PATH } from "../constant";
 import { getFileSize } from "../utils";
 import { FileCounter } from "./counter";
 
@@ -26,6 +26,8 @@ export const FileSchema = new Schema(
         name: {
             type: String,
             required: true,
+            minlength: FILE.title.minlength,
+            maxlength: FILE.title.maxlength,
         },
         type: {
             type: String,
@@ -34,14 +36,16 @@ export const FileSchema = new Schema(
         description: {
             type: String,
             required: true,
-            default: "No description",
+            default: FILE.description.default,
+            minlength: FILE.description.minlength,
+            maxlength: FILE.description.maxlength,
         },
         hash: String,
         size: String,
         tags: {
             type: [String],
             required: true,
-            default: ["No tags"],
+            default: FILE.tags.default,
         },
         created: Date,
         owner: {

@@ -12,6 +12,7 @@ if (existsSync(FRONTEND_PATH)) {
     });
 } else {
     FrontEndRouter.get("/*", (req, res) => {
+        res.status(404);
         res.send("Error: Frontend File not exists");
     });
 }

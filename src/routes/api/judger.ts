@@ -4,7 +4,7 @@
 
 import { Router } from "express";
 import { join, resolve } from "path";
-import { JUDGE_PREFIX, MANAGED_FILE_PATH } from "../../constant";
+import { ERR_NOT_FOUND, JUDGE_PREFIX, MANAGED_FILE_PATH } from "../../constant";
 import { llen, rpop } from "../../redis";
 import { File } from "../../schemas/file";
 import { Solution } from "../../schemas/solution";
@@ -24,7 +24,7 @@ JudgerRouter.get("/pop", isLoggedin, isSystemAdmin, RESTWrap(async (req, res) =>
 
 JudgerRouter.post("/", isLoggedin, isSystemAdmin, RESTWrap(async (req, res) => {
     const solution = await Solution.findById(req.query.objectID);
-    ensure(solution, "Not found");
+    ensure(solution, ERR_NOT_FOUND);
     solution.status = req.body.status;
     solution.score = req.body.score;
     solution.details = req.body.details;
@@ -34,7 +34,7 @@ JudgerRouter.post("/", isLoggedin, isSystemAdmin, RESTWrap(async (req, res) => {
 
 JudgerRouter.get("/resolve", isLoggedin, isSystemAdmin, RESTWrap(async (req, res) => {
     const file = await File.findOne({ owner: req.query.owner, id: req.query.id });
-    ensure(file, "Not found");
+    ensure(file, ERR_NOT_FOUND);
     res.RESTSend(file);
 }));
 

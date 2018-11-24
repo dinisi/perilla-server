@@ -9,6 +9,7 @@
  */
 
 import { Router } from "express";
+import { ERR_ACCESS_DENIED, ERR_NOT_FOUND } from "../../constant";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
 import { ensure, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
@@ -17,14 +18,14 @@ export const ProblemRouter = Router();
 
 ProblemRouter.get("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    ensure(problem, "Not found");
+    ensure(problem, ERR_NOT_FOUND);
     return res.RESTSend(problem);
 }));
 
 ProblemRouter.put("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    ensure(problem, "Not found");
-    ensure(req.admin || problem.owner === req.user, "Access denied");
+    ensure(problem, ERR_NOT_FOUND);
+    ensure(req.admin || problem.owner === req.user, ERR_ACCESS_DENIED);
     problem.title = req.body.title || problem.title;
     problem.content = req.body.content || problem.content;
     problem.data = req.body.data || problem.data;
@@ -36,8 +37,8 @@ ProblemRouter.put("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 
 ProblemRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    ensure(problem, "Not found");
-    ensure(req.admin || problem.owner === req.user, "Access denied");
+    ensure(problem, ERR_NOT_FOUND);
+    ensure(req.admin || problem.owner === req.user, ERR_ACCESS_DENIED);
     await problem.remove();
     return res.RESTEnd();
 }));
@@ -57,7 +58,7 @@ ProblemRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 
 ProblemRouter.post("/submit", verifyEntryAccess, RESTWrap(async (req, res) => {
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
-    ensure(problem, "Not found");
+    ensure(problem, ERR_NOT_FOUND);
     const solution = new Solution();
     solution.problem = problem.id;
     solution.creator = req.user;

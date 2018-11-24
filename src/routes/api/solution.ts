@@ -7,6 +7,7 @@
  */
 
 import { Router } from "express";
+import { ERR_ACCESS_DENIED, ERR_NOT_FOUND } from "../../constant";
 import { Solution } from "../../schemas/solution";
 import { ensure, isLoggedin, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
 
@@ -14,22 +15,22 @@ export const SolutionRouter = Router();
 
 SolutionRouter.get("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const solution = await Solution.findOne({ owner: req.query.entry, id: req.query.id });
-    ensure(solution, "Not found");
+    ensure(solution, ERR_NOT_FOUND);
     return res.RESTSend(solution);
 }));
 
 SolutionRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const solution = await Solution.findOne({ owner: req.query.entry, id: req.query.id });
-    ensure(solution, "Not found");
-    ensure(req.admin || solution.owner === req.user, "Access denied");
+    ensure(solution, ERR_NOT_FOUND);
+    ensure(req.admin || solution.owner === req.user, ERR_ACCESS_DENIED);
     await solution.judge();
     return res.RESTEnd();
 }));
 
 SolutionRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const solution = await Solution.findOne({ owner: req.query.entry, id: req.query.id });
-    ensure(solution, "Not found");
-    ensure(req.admin || solution.owner === req.user, "Access denied");
+    ensure(solution, ERR_NOT_FOUND);
+    ensure(req.admin || solution.owner === req.user, ERR_ACCESS_DENIED);
     await solution.remove();
     return res.RESTEnd();
 }));
