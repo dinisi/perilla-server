@@ -7,9 +7,9 @@
  */
 
 import { Router } from "express";
-import { ERR_ACCESS_DENIED, ERR_NOT_FOUND } from "../../constant";
+import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST, ERR_NOT_FOUND } from "../../constant";
 import { Entry, EntryType } from "../../schemas/entry";
-import { ensure, isLoggedin, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
+import { ensure, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
 
 export const EntryRouter = Router();
 
@@ -19,7 +19,7 @@ EntryRouter.get("/", RESTWrap(async (req, res) => {
     return res.RESTSend(entry);
 }));
 
-EntryRouter.put("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
+EntryRouter.put("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const entry = await Entry.findById(req.query.entry);
     ensure(entry, ERR_NOT_FOUND);
     ensure(req.admin, ERR_ACCESS_DENIED);
@@ -32,7 +32,7 @@ EntryRouter.put("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) =>
     return res.RESTEnd();
 }));
 
-EntryRouter.delete("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
+EntryRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const entry = await Entry.findById(req.query.entry);
     ensure(entry, ERR_NOT_FOUND);
     ensure(req.admin, ERR_ACCESS_DENIED);
@@ -53,6 +53,11 @@ EntryRouter.get("/list", PaginationWrap((req) => {
     }
     if (req.query.type !== undefined) {
         base = base.where("type").equals(req.query.type);
+    }
+    if (req.query.sortBy !== undefined) {
+        ensure(["_id", "created"].includes(req.query.sortBy), ERR_INVALID_REQUEST);
+        if (req.query.descending) { req.query.sortBy = "-" + req.query.sortBy; }
+        base = base.sort(req.query.sortBy);
     }
     return base;
 }));

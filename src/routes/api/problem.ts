@@ -9,7 +9,7 @@
  */
 
 import { Router } from "express";
-import { ERR_ACCESS_DENIED, ERR_NOT_FOUND } from "../../constant";
+import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST, ERR_NOT_FOUND } from "../../constant";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
 import { ensure, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
@@ -85,6 +85,11 @@ ProblemRouter.get("/list", verifyEntryAccess, PaginationWrap((req) => {
     }
     if (req.query.creator !== undefined) {
         base = base.where("creator").equals(req.query.creator);
+    }
+    if (req.query.sortBy !== undefined) {
+        ensure(["id", "created", "title"].includes(req.query.sortBy), ERR_INVALID_REQUEST);
+        if (req.query.descending) { req.query.sortBy = "-" + req.query.sortBy; }
+        base = base.sort(req.query.sortBy);
     }
     return base;
 }));
