@@ -7,7 +7,7 @@ export const getBaseURL = (hostname: string, port: number) => {
 export const getFileSize = (path: string): Promise<number> => {
     return new Promise((resolve, reject) => {
         stat(path, (err, stats) => {
-            if (err) { reject(err); }
+            if (err) { return reject(err); }
             resolve(stats.size);
         });
     });

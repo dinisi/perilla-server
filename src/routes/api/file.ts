@@ -18,6 +18,9 @@ import { ERR_ACCESS_DENIED, ERR_ALREADY_EXISTS, ERR_INVALID_REQUEST, ERR_NOT_FOU
 import { File } from "../../schemas/file";
 import { ensure, isLoggedin, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
 
+// tslint:disable-next-line:no-var-requires
+const createKeccakHash = require("keccak");
+
 export const FileRouter = Router();
 
 FileRouter.get("/provide", isLoggedin, RESTWrap(async (req, res) => {
@@ -26,13 +29,13 @@ FileRouter.get("/provide", isLoggedin, RESTWrap(async (req, res) => {
     res.RESTEnd();
 }));
 
-FileRouter.post("/provide", isLoggedin, (req, res) => {
-    try {
-        const busboy = new Busboy({ headers: req.headers });
-        busboy.on("file", (fieldname, stream) => {
+FileRouter.post("/provide", isLoggedin, RESTWrap((req, res) => {
+    const busboy = new Busboy({ headers: req.headers });
+    const promises: Array<Promise<string>> = [];
+    busboy.on("file", (fieldname, stream) => {
+        promises.push(new Promise<string>((resolve, reject) => {
             createTmpFile((err, path) => {
-                if (err) { throw err; }
-                const createKeccakHash = require("keccak");
+                if (err) { return reject(err); }
                 const keccak256 = createKeccakHash("keccak256");
                 const ws = createWriteStream(path);
                 stream.on("data", (chunk) => {
@@ -45,18 +48,25 @@ FileRouter.post("/provide", isLoggedin, (req, res) => {
                         if (!existsSync(join(MANAGED_FILE_PATH, sha3))) {
                             moveSync(path, join(MANAGED_FILE_PATH, sha3));
                         }
+                        return resolve(sha3);
                     });
                 });
+                stream.on("error", () => {
+                    return reject();
+                });
             });
-        });
-        busboy.on("finish", () => {
-            res.json({ status: "success" });
-        });
-        return req.pipe(busboy);
-    } catch (e) {
-        res.json({ status: "failed", payload: e.message });
-    }
-});
+        }));
+    });
+    busboy.on("finish", async () => {
+        try {
+            const result = await Promise.all(promises);
+            res.RESTSend(result);
+        } catch (e) {
+            res.RESTFail(e.message);
+        }
+    });
+    req.pipe(busboy);
+}));
 
 FileRouter.get("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
