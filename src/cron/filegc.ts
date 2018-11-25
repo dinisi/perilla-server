@@ -3,8 +3,6 @@ import { join } from "path";
 import { MANAGED_FILE_PATH } from "../constant";
 import { File } from "../schemas/file";
 
-const gcInterval = 7 * 24 * 60 * 60 * 60 * 1000;
-
 export const fileGC = async () => {
     try {
         const files = await readdir(MANAGED_FILE_PATH);
@@ -17,8 +15,7 @@ export const fileGC = async () => {
             }
         }
         const end = +new Date();
-        console.log(`GC used ${(end - start) / 1000} seconds and removed ${delta} files.`);
-        setTimeout(fileGC, gcInterval);
+        console.log(`FILEGC used ${(end - start) / 1000} seconds and removed ${delta} files.`);
     } catch (e) {
         console.log(e.message);
     }
