@@ -260,7 +260,7 @@ const fetchLatestFrontendTag = async () => {
             if (err) { return reject(err); }
             const span = /<span class="css-truncate-target" style="max-width: 125px">[a-zA-Z0-9.]+<\/span>/.exec(res.body)[0];
             if (!span) { return reject("Fetch latest frontend version failed"); }
-            const latest = span.substr(-12, span.length - 66);
+            const latest = span.substr(59, span.length - 66);
             console.log(`Version ${latest} found.`);
             resolve(latest);
         });
