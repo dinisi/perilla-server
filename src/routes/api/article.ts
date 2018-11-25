@@ -23,7 +23,7 @@ ArticleRouter.get("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 ArticleRouter.put("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const article = await Article.findOne({ owner: req.query.entry, id: req.query.id });
     ensure(article, ERR_NOT_FOUND);
-    ensure(req.admin || article.owner === req.user, ERR_ACCESS_DENIED);
+    ensure(req.admin || article.creator === req.user, ERR_ACCESS_DENIED);
     article.title = req.body.title || article.title;
     article.content = req.body.content || article.content;
     article.tags = req.body.tags || article.tags;
@@ -34,7 +34,7 @@ ArticleRouter.put("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 ArticleRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const article = await Article.findOne({ owner: req.query.entry, id: req.query.id });
     ensure(article, ERR_NOT_FOUND);
-    ensure(req.admin || article.owner === req.user, ERR_ACCESS_DENIED);
+    ensure(req.admin || article.creator === req.user, ERR_ACCESS_DENIED);
     await article.remove();
     return res.RESTEnd();
 }));

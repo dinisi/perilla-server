@@ -22,7 +22,7 @@ SolutionRouter.get("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 SolutionRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const solution = await Solution.findOne({ owner: req.query.entry, id: req.query.id });
     ensure(solution, ERR_NOT_FOUND);
-    ensure(req.admin || solution.owner === req.user, ERR_ACCESS_DENIED);
+    ensure(req.admin || solution.creator === req.user, ERR_ACCESS_DENIED);
     await solution.judge();
     return res.RESTEnd();
 }));
@@ -30,7 +30,7 @@ SolutionRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 SolutionRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const solution = await Solution.findOne({ owner: req.query.entry, id: req.query.id });
     ensure(solution, ERR_NOT_FOUND);
-    ensure(req.admin || solution.owner === req.user, ERR_ACCESS_DENIED);
+    ensure(req.admin || solution.creator === req.user, ERR_ACCESS_DENIED);
     await solution.remove();
     return res.RESTEnd();
 }));

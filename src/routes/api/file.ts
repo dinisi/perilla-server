@@ -13,7 +13,6 @@ import { Router } from "express";
 import { createWriteStream, existsSync, moveSync } from "fs-extra";
 import { lookup } from "mime-types";
 import { join } from "path";
-import { SHA3Hash } from "sha3";
 import { file as createTmpFile } from "tmp";
 import { ERR_ACCESS_DENIED, ERR_ALREADY_EXISTS, ERR_INVALID_REQUEST, ERR_NOT_FOUND, MANAGED_FILE_PATH } from "../../constant";
 import { File } from "../../schemas/file";
@@ -33,17 +32,18 @@ FileRouter.post("/provide", isLoggedin, (req, res) => {
         busboy.on("file", (fieldname, stream) => {
             createTmpFile((err, path) => {
                 if (err) { throw err; }
-                const sha3 = new SHA3Hash();
+                const createKeccakHash = require("keccak");
+                const keccak256 = createKeccakHash("keccak256");
                 const ws = createWriteStream(path);
                 stream.on("data", (chunk) => {
-                    sha3.update(chunk);
+                    keccak256.update(chunk);
                     ws.write(chunk);
                 });
                 stream.on("end", () => {
-                    const sha3Value = sha3.digest("hex");
+                    const sha3 = keccak256.digest("hex");
                     ws.end(() => {
-                        if (!existsSync(join(MANAGED_FILE_PATH, sha3Value))) {
-                            moveSync(path, join(MANAGED_FILE_PATH, sha3Value));
+                        if (!existsSync(join(MANAGED_FILE_PATH, sha3))) {
+                            moveSync(path, join(MANAGED_FILE_PATH, sha3));
                         }
                     });
                 });
@@ -67,7 +67,7 @@ FileRouter.get("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 FileRouter.put("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
     ensure(file, ERR_NOT_FOUND);
-    ensure(req.admin || file.owner === req.user, ERR_ACCESS_DENIED);
+    ensure(req.admin || file.creator === req.user, ERR_ACCESS_DENIED);
     file.name = req.body.name || file.name;
     file.type = req.body.type || lookup(file.name) || file.type || "text/plain";
     file.description = req.body.description || file.name;
@@ -80,7 +80,7 @@ FileRouter.put("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 FileRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
     ensure(file, ERR_NOT_FOUND);
-    ensure(req.admin || file.owner === req.user, ERR_ACCESS_DENIED);
+    ensure(req.admin || file.creator === req.user, ERR_ACCESS_DENIED);
     await file.remove();
     return res.RESTEnd();
 }));
