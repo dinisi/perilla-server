@@ -8,19 +8,19 @@
  */
 
 import { Router } from "express";
-import { ERR_ACCESS_DENIED, ERR_NOT_FOUND } from "../../constant";
+import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST, ERR_NOT_FOUND } from "../../constant";
 import { Article } from "../../schemas/article";
-import { ensure, isLoggedin, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
+import { ensure, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
 
 export const ArticleRouter = Router();
 
-ArticleRouter.get("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
+ArticleRouter.get("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const article = await Article.findOne({ owner: req.query.entry, id: req.query.id });
     ensure(article, ERR_NOT_FOUND);
     return res.RESTSend(article);
 }));
 
-ArticleRouter.put("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
+ArticleRouter.put("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const article = await Article.findOne({ owner: req.query.entry, id: req.query.id });
     ensure(article, ERR_NOT_FOUND);
     ensure(req.admin || article.owner === req.user, ERR_ACCESS_DENIED);
@@ -31,7 +31,7 @@ ArticleRouter.put("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) 
     return res.RESTEnd();
 }));
 
-ArticleRouter.delete("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
+ArticleRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const article = await Article.findOne({ owner: req.query.entry, id: req.query.id });
     ensure(article, ERR_NOT_FOUND);
     ensure(req.admin || article.owner === req.user, ERR_ACCESS_DENIED);
@@ -39,7 +39,7 @@ ArticleRouter.delete("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, re
     return res.RESTEnd();
 }));
 
-ArticleRouter.post("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res) => {
+ArticleRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const article = new Article();
     article.title = req.body.title || article.title;
     article.content = req.body.content || article.content;
@@ -50,7 +50,7 @@ ArticleRouter.post("/", isLoggedin, verifyEntryAccess, RESTWrap(async (req, res)
     return res.RESTSend(article.id);
 }));
 
-ArticleRouter.get("/list", isLoggedin, verifyEntryAccess, PaginationWrap((req) => {
+ArticleRouter.get("/list", verifyEntryAccess, PaginationWrap((req) => {
     let base = Article.find({ owner: req.query.entry }).select("id title tags created creator");
     if (req.query.tags !== undefined) {
         base = base.where("tags").all(req.query.tags);
@@ -66,6 +66,11 @@ ArticleRouter.get("/list", isLoggedin, verifyEntryAccess, PaginationWrap((req) =
     }
     if (req.query.creator !== undefined) {
         base = base.where("creator").equals(req.query.creator);
+    }
+    if (req.query.sortBy !== undefined) {
+        ensure(["id", "created", "title"].includes(req.query.sortBy), ERR_INVALID_REQUEST);
+        if (req.query.descending) { req.query.sortBy = "-" + req.query.sortBy; }
+        base = base.sort(req.query.sortBy);
     }
     return base;
 }));

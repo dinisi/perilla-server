@@ -48,22 +48,23 @@ export const verifyEntryAccess = RESTWrap(async (req, res, next) => {
     } else {
         const map = await EntryMap.findOne({ from: req.user, to: req.query.entry });
         if (!map) { throw new Error(ERR_ACCESS_DENIED); }
-        if (map.admin) {req.admin = true; }
+        if (map.admin) { req.admin = true; }
         return next();
     }
 });
 
+export const isSystemAdmin = async (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
+    if (!req.isAuthenticated()) { throw new Error(ERR_ACCESS_DENIED); }
+    const map = await SystemMap.findOne({ user: req.user });
+    if (!map) { return res.RESTFail(ERR_ACCESS_DENIED); }
+    return next();
+};
+
 export const ensure = (value: any, message: string) => {
-    if (!value) {throw new Error(message); }
+    if (!value) { throw new Error(message); }
 };
 
 export const isLoggedin = async (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
     if (!req.isAuthenticated()) { return res.RESTFail(ERR_ACCESS_DENIED); }
-    return next();
-};
-
-export const isSystemAdmin = async (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
-    const map = await SystemMap.findOne({ user: req.user });
-    if (!map) { return res.RESTFail(ERR_ACCESS_DENIED); }
     return next();
 };

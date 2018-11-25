@@ -15,7 +15,7 @@ import { lookup } from "mime-types";
 import { join } from "path";
 import { SHA3Hash } from "sha3";
 import { file as createTmpFile } from "tmp";
-import { ERR_ACCESS_DENIED, ERR_ALREADY_EXISTS, ERR_NOT_FOUND, MANAGED_FILE_PATH } from "../../constant";
+import { ERR_ACCESS_DENIED, ERR_ALREADY_EXISTS, ERR_INVALID_REQUEST, ERR_NOT_FOUND, MANAGED_FILE_PATH } from "../../constant";
 import { File } from "../../schemas/file";
 import { ensure, isLoggedin, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
 
@@ -123,6 +123,11 @@ FileRouter.get("/list", verifyEntryAccess, PaginationWrap((req) => {
     }
     if (req.query.creator !== undefined) {
         base = base.where("creator").equals(req.query.creator);
+    }
+    if (req.query.sortBy !== undefined) {
+        ensure(["id", "created", "name"].includes(req.query.sortBy), ERR_INVALID_REQUEST);
+        if (req.query.descending) { req.query.sortBy = "-" + req.query.sortBy; }
+        base = base.sort(req.query.sortBy);
     }
     return base;
 }));
