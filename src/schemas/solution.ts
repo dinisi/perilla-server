@@ -80,7 +80,7 @@ SolutionSchema.methods.judge = async function() {
             problem: problem.data,
             solution: self.data,
             owner: self.owner,
-            objectID: self.id,
+            objectID: self._id,
         };
         await lpush(problem.channel, JUDGE_PREFIX,  JSON.stringify(task));
     } catch (e) {
