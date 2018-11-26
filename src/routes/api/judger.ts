@@ -13,7 +13,7 @@ import { ensure, isSystemAdmin, RESTWrap } from "./util";
 export const JudgerRouter = Router();
 
 JudgerRouter.get("/len", RESTWrap(async (req, res) => {
-    res.RESTSend(llen(req.query.channel, JUDGE_PREFIX));
+    res.RESTSend(await llen(req.query.channel, JUDGE_PREFIX));
 }));
 
 JudgerRouter.get("/pop", isSystemAdmin, RESTWrap(async (req, res) => {
