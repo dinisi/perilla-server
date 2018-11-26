@@ -19,7 +19,7 @@ JudgerRouter.get("/len", RESTWrap(async (req, res) => {
 JudgerRouter.get("/pop", isSystemAdmin, RESTWrap(async (req, res) => {
     const task = await rpop(req.query.channel, JUDGE_PREFIX);
     if (!task) { return res.RESTFail("Empty queue"); }
-    res.RESTSend(JSON.stringify(task));
+    res.RESTSend(JSON.parse(task));
 }));
 
 JudgerRouter.post("/", isSystemAdmin, RESTWrap(async (req, res) => {
