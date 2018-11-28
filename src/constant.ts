@@ -76,3 +76,6 @@ export const ERR_NOT_FOUND = "Not found";
 export const ERR_ALREADY_EXISTS = "Already exists";
 export const ERR_NOT_LOGGED_IN = "Not logged in";
 export const ERR_INVALID_REQUEST = "Invalid request";
+
+// System Limits
+export const MAX_PAGINATION_LIMIT = 128;
