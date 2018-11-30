@@ -4,7 +4,7 @@ import { ensureDirSync } from "fs-extra";
 
 // REDIS prefixes
 export const JUDGE_PREFIX = "judge";
-export const CHRON_PREFIX = "chron";
+export const CRON_PREFIX = "cron";
 
 // File paths
 export const MANAGED_FILE_PATH = join(__dirname, "..", "files", "managed");
@@ -26,7 +26,7 @@ export const ARTICLE = {
         maxlength: 40960,
     },
     tags: {
-        default: ["tagless"],
+        default: ["Untagged"],
     },
 };
 export const ENTRY = {
@@ -52,7 +52,7 @@ export const FILE = {
         maxlength: 40960,
     },
     tags: {
-        default: ["tagless"],
+        default: ["Untagged"],
     },
 };
 export const PROBLEM = {
@@ -66,7 +66,7 @@ export const PROBLEM = {
         maxlength: 40960,
     },
     tags: {
-        default: ["tagless"],
+        default: ["Untagged"],
     },
 };
 
@@ -76,3 +76,6 @@ export const ERR_NOT_FOUND = "Not found";
 export const ERR_ALREADY_EXISTS = "Already exists";
 export const ERR_NOT_LOGGED_IN = "Not logged in";
 export const ERR_INVALID_REQUEST = "Invalid request";
+
+// System Limits
+export const MAX_PAGINATION_LIMIT = 128;

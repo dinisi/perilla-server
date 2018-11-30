@@ -1,6 +1,6 @@
 import { NextFunction } from "express";
 import { Document, DocumentQuery } from "mongoose";
-import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST } from "../../constant";
+import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST, MAX_PAGINATION_LIMIT } from "../../constant";
 import { IRESTRequest, IRESTResponse } from "../../interfaces/route";
 import { EntryMap } from "../../schemas/entrymap";
 import { SystemMap } from "../../schemas/systemmap";
@@ -20,18 +20,17 @@ export const RESTWrap = (handle: IHandleFunction) => {
 type IPaginationHandleFunction = (req: IRESTRequest) => DocumentQuery<Document[], Document>;
 
 export const PaginationWrap = (handle: IPaginationHandleFunction) => {
-    return RESTWrap((req, res) => {
+    return RESTWrap(async (req, res) => {
         const query = handle(req);
         if (req.query.noexec) {
-            query.countDocuments()
-                .then((count) => res.RESTSend(count))
-                .catch((err) => res.RESTFail(err.message));
+            const count = await query.countDocuments();
+            res.RESTSend(count);
         } else {
             const skip = parseInt(req.query.skip, 10);
             const limit = parseInt(req.query.limit, 10);
-            query.skip(skip).limit(limit)
-                .then((result) => res.RESTSend(result))
-                .catch((err) => res.RESTFail(err.message));
+            ensure(limit <= MAX_PAGINATION_LIMIT, ERR_INVALID_REQUEST);
+            const result = await query.skip(skip).limit(limit);
+            res.RESTSend(result);
         }
     });
 };
