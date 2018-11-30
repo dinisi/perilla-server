@@ -115,7 +115,7 @@ FileRouter.get("/raw", verifyEntryAccess, RESTWrap(async (req, res) => {
 }));
 
 FileRouter.get("/list", verifyEntryAccess, PaginationWrap((req) => {
-    let base = File.find({ owner: req.query.entry }).select("id name type tags created creator");
+    let base = File.find({ owner: req.query.entry }).select("id name type tags updated creator");
     if (req.query.tags !== undefined) {
         base = base.where("tags").all(req.query.tags);
     }
@@ -126,16 +126,16 @@ FileRouter.get("/list", verifyEntryAccess, PaginationWrap((req) => {
         base = base.where("name").regex(new RegExp(req.query.search.replace(/[\^\$\\\.\*\+\?\(\)\[\]\{\}\|]/g, "\\$&"), "g"));
     }
     if (req.query.before !== undefined) {
-        base = base.where("created").lte(req.query.before);
+        base = base.where("updated").lte(req.query.before);
     }
     if (req.query.after !== undefined) {
-        base = base.where("created").gte(req.query.after);
+        base = base.where("updated").gte(req.query.after);
     }
     if (req.query.creator !== undefined) {
         base = base.where("creator").equals(req.query.creator);
     }
     if (req.query.sortBy !== undefined) {
-        ensure(["id", "created", "name"].includes(req.query.sortBy), ERR_INVALID_REQUEST);
+        ensure(["id", "updated", "name"].includes(req.query.sortBy), ERR_INVALID_REQUEST);
         if (req.query.descending) { req.query.sortBy = "-" + req.query.sortBy; }
         base = base.sort(req.query.sortBy);
     }

@@ -10,7 +10,7 @@ export interface IProblemModel extends Document {
     data?: object;
     channel?: string;
     tags: string[];
-    created: Date;
+    updated: Date;
     owner: string;
     creator: string;
 }
@@ -38,7 +38,7 @@ export const ProblemSchema: Schema = new Schema(
             required: true,
             default: PROBLEM.tags.default,
         },
-        created: Date,
+        updated: Date,
         owner: {
             type: String,
             required: true,
@@ -52,11 +52,11 @@ export const ProblemSchema: Schema = new Schema(
 ProblemSchema.index({ id: 1, owner: 1 }, { unique: true });
 ProblemSchema.pre("save", async function(next) {
     const self = this as IProblemModel;
-    if (!self.created) {
-        self.created = new Date();
+    if (!self.id) {
         const counter = await ProblemCounter.findByIdAndUpdate(self.owner, { $inc: { count: 1 } }, { upsert: true, new: true });
         self.id = counter.count;
     }
+    self.updated = new Date();
     next();
 });
 

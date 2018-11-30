@@ -12,7 +12,7 @@ export interface IFileModel extends Document {
     description: string;
     hash: string;
     size: number;
-    created: Date;
+    updated: Date;
     tags: string[];
     owner: string;
     creator: string;
@@ -47,7 +47,7 @@ export const FileSchema = new Schema(
             required: true,
             default: FILE.tags.default,
         },
-        created: Date,
+        updated: Date,
         owner: {
             type: String,
             required: true,
@@ -74,11 +74,11 @@ FileSchema.methods.setFile = async function(hash: string) {
 
 FileSchema.pre("save", async function(next) {
     const self = this as IFileModel;
-    if (!self.created) {
-        self.created = new Date();
+    if (!self.id) {
         const counter = await FileCounter.findByIdAndUpdate(self.owner, { $inc: { count: 1 } }, { upsert: true, new: true });
         self.id = counter.count;
     }
+    self.updated = new Date();
     next();
 });
 

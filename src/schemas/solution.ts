@@ -27,7 +27,7 @@ export interface ISolutionModel extends Document {
     score: number;
     data?: object;
     details?: object;
-    created: Date;
+    updated: Date;
     owner: string;
     creator: string;
     judge(): Promise<void>;
@@ -55,7 +55,7 @@ export const SolutionSchema: Schema = new Schema(
         },
         data: Object,
         details: Object,
-        created: Date,
+        updated: Date,
         owner: {
             type: String,
             required: true,
@@ -82,7 +82,7 @@ SolutionSchema.methods.judge = async function() {
             owner: self.owner,
             objectID: self._id,
         };
-        await lpush(problem.channel, JUDGE_PREFIX,  JSON.stringify(task));
+        await lpush(problem.channel, JUDGE_PREFIX, JSON.stringify(task));
     } catch (e) {
         self.status = SolutionResult.JudgementFailed;
         self.score = 0;
@@ -95,12 +95,12 @@ SolutionSchema.methods.judge = async function() {
 
 SolutionSchema.pre("save", async function(next) {
     const self = this as ISolutionModel;
-    if (!self.created) {
-        self.created = new Date();
+    if (!self.id) {
         const counter = await SolutionCounter.findByIdAndUpdate(self.owner, { $inc: { count: 1 } }, { upsert: true, new: true });
         self.id = counter.count;
         self.status = SolutionResult.WaitingJudge;
     }
+    self.updated = new Date();
     next();
 });
 

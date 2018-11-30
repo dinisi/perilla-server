@@ -7,7 +7,7 @@ export interface IArticleModel extends Document {
     title: string;
     content: string;
     tags: string[];
-    created: Date;
+    updated: Date;
     owner: string;
     creator: string;
 }
@@ -33,7 +33,7 @@ export const ArticleSchema: Schema = new Schema(
             required: true,
             default: ARTICLE.tags.default,
         },
-        created: Date,
+        updated: Date,
         owner: {
             type: String,
             required: true,
@@ -47,11 +47,11 @@ export const ArticleSchema: Schema = new Schema(
 ArticleSchema.index({ id: 1, owner: 1 }, { unique: true });
 ArticleSchema.pre("save", async function(next) {
     const self = this as IArticleModel;
-    if (!self.created) {
-        self.created = new Date();
+    if (!self.id) {
         const counter = await ArticleCounter.findByIdAndUpdate(self.owner, { $inc: { count: 1 } }, { upsert: true, new: true });
         self.id = counter.count;
     }
+    self.updated = new Date();
     next();
 });
 

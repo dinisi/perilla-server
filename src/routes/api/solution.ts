@@ -36,7 +36,7 @@ SolutionRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 }));
 
 SolutionRouter.get("/list", verifyEntryAccess, PaginationWrap((req) => {
-    let base = Solution.find({ owner: req.query.entry }).select("id problem status score created creator");
+    let base = Solution.find({ owner: req.query.entry }).select("id problem status score updated creator");
     if (req.query.problem !== undefined) {
         base = base.where("problem").equals(req.query.problem);
     }
@@ -50,16 +50,16 @@ SolutionRouter.get("/list", verifyEntryAccess, PaginationWrap((req) => {
         base = base.where("score").gte(req.query.min);
     }
     if (req.query.before !== undefined) {
-        base = base.where("created").lte(req.query.before);
+        base = base.where("updated").lte(req.query.before);
     }
     if (req.query.after !== undefined) {
-        base = base.where("created").gte(req.query.after);
+        base = base.where("updated").gte(req.query.after);
     }
     if (req.query.creator !== undefined) {
         base = base.where("creator").equals(req.query.creator);
     }
     if (req.query.sortBy !== undefined) {
-        ensure(["id", "created", "score"].includes(req.query.sortBy), ERR_INVALID_REQUEST);
+        ensure(["id", "updated", "score"].includes(req.query.sortBy), ERR_INVALID_REQUEST);
         if (req.query.descending) { req.query.sortBy = "-" + req.query.sortBy; }
         base = base.sort(req.query.sortBy);
     }

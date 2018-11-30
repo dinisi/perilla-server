@@ -51,7 +51,7 @@ ArticleRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 }));
 
 ArticleRouter.get("/list", verifyEntryAccess, PaginationWrap((req) => {
-    let base = Article.find({ owner: req.query.entry }).select("id title tags created creator");
+    let base = Article.find({ owner: req.query.entry }).select("id title tags updated creator");
     if (req.query.tags !== undefined) {
         base = base.where("tags").all(req.query.tags);
     }
@@ -59,16 +59,16 @@ ArticleRouter.get("/list", verifyEntryAccess, PaginationWrap((req) => {
         base = base.where("title").regex(new RegExp(req.query.search.replace(/[\^\$\\\.\*\+\?\(\)\[\]\{\}\|]/g, "\\$&"), "g"));
     }
     if (req.query.before !== undefined) {
-        base = base.where("created").lte(req.query.before);
+        base = base.where("updated").lte(req.query.before);
     }
     if (req.query.after !== undefined) {
-        base = base.where("created").gte(req.query.after);
+        base = base.where("updated").gte(req.query.after);
     }
     if (req.query.creator !== undefined) {
         base = base.where("creator").equals(req.query.creator);
     }
     if (req.query.sortBy !== undefined) {
-        ensure(["id", "created", "title"].includes(req.query.sortBy), ERR_INVALID_REQUEST);
+        ensure(["id", "updated", "title"].includes(req.query.sortBy), ERR_INVALID_REQUEST);
         if (req.query.descending) { req.query.sortBy = "-" + req.query.sortBy; }
         base = base.sort(req.query.sortBy);
     }
