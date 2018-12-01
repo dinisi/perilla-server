@@ -11,11 +11,12 @@
 1. 执行`git clone https://github.com/ZhangZisu/perilla.git`
 2. 执行`cd perilla`
 3. 执行`yarn`
-4. 执行`node cli init`，按照提示输入信息
+4. 执行`yarn cli init`，按照提示输入信息
 5. 系统会自动初始化服务器
 6. 部署成功。运行`yarn start`启动，安装`pm2`后可以使用`pm2 start`以守护形式运行
 
 ## 安装UI(可选)
-1. 执行`git submodule init`
-2. 执行`git submodule update`
-3. 执行`cd ui && yarn && yarn build`编译UI
+1. 执行`yarn cli frontend -d`
+系统将从GitHub Release上下载最新的前端发布文件
+
+如果Github Release使用的AWS被墙，也可以从[Last Release](https://github.com/ZhangZisu/perilla-frontend/releases/latest)上下载后解压存放在项目根下的frontend文件夹中
