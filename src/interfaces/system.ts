@@ -1,11 +1,11 @@
-import { Always, Boolean, Number, Partial, Record, Static, String } from "runtypes";
+import { Boolean, Number, Partial, Record, Static, String, Unknown } from "runtypes";
 
 export const ISystemConfig = Record({
     db: Record({
         url: String,
-        options: Always,
+        options: Unknown,
     }),
-    redis: Always,
+    redis: Unknown,
     http: Record({
         port: Number,
         hostname: String,
