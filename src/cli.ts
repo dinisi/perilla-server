@@ -43,12 +43,6 @@ const generateConfig = async () => {
     const questions = [
         {
             type: "text",
-            name: "db_url",
-            message: "Mongodb URL",
-            initial: "mongodb://localhost:27017/perilla",
-        },
-        {
-            type: "text",
             name: "redis_host",
             message: "REDIS database hostname/IP address",
             initial: "127.0.0.1",
