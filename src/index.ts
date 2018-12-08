@@ -7,8 +7,6 @@ import session = require("express-session");
 import { appendFileSync, readFileSync } from "fs-extra";
 import http = require("http");
 import https = require("https");
-import passport = require("passport");
-import { join } from "path";
 import { config } from "./config";
 import { APPLOG_PATH } from "./constant";
 import { connectDB } from "./database";
@@ -31,14 +29,6 @@ console.log("Perilla started");
     app.use(json());
     app.use(urlencoded({ extended: false }));
     const store = redisStore(session);
-    app.use(session({
-        store: new store({ client: redisClient }),
-        secret: config.sessionSecret,
-        resave: false,
-        saveUninitialized: false,
-    }));
-    app.use(passport.initialize());
-    app.use(passport.session());
 
     app.use(MainRouter);
 

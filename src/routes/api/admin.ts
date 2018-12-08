@@ -3,7 +3,7 @@ import { Article } from "../../schemas/article";
 import { File } from "../../schemas/file";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
-import { isSystemAdmin, PaginationWrap } from "./util";
+import { isSystemAdmin, PaginationWrap } from "../util";
 
 export const adminRouter = Router();
 

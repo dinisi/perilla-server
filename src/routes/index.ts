@@ -3,8 +3,8 @@ import { join } from "path";
 import { PACKAGE_PATH } from "../constant";
 import { IRESTResponse } from "../interfaces/route";
 import { APIRouter } from "./api";
-import { RESTWrap } from "./api/util";
 import { FrontEndRouter } from "./frontend";
+import { RESTWrap } from "./util";
 
 export let MainRouter = Router();
 

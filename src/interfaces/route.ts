@@ -7,5 +7,6 @@ export interface IRESTResponse extends Response {
 }
 
 export interface IRESTRequest extends Request {
+    user?: string;
     admin?: boolean;
 }

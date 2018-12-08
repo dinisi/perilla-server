@@ -14,7 +14,7 @@ export const ISystemConfig = Record({
         certificate: String,
         privatekey: String,
     })),
-    sessionSecret: String,
+    secret: String,
 });
 
 export type ISystemConfig = Static<typeof ISystemConfig>;

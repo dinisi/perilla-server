@@ -1,9 +1,9 @@
 import { NextFunction } from "express";
 import { Document, DocumentQuery } from "mongoose";
-import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST, MAX_PAGINATION_LIMIT } from "../../constant";
-import { IRESTRequest, IRESTResponse } from "../../interfaces/route";
-import { EntryMap } from "../../schemas/entrymap";
-import { SystemMap } from "../../schemas/systemmap";
+import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST, MAX_PAGINATION_LIMIT } from "../constant";
+import { IRESTRequest, IRESTResponse } from "../interfaces/route";
+import { EntryMap } from "../schemas/entrymap";
+import { SystemMap } from "../schemas/systemmap";
 
 type IHandleFunction = (req: IRESTRequest, res: IRESTResponse, next?: NextFunction) => Promise<void> | void;
 
@@ -36,7 +36,7 @@ export const PaginationWrap = (handle: IPaginationHandleFunction) => {
 };
 
 export const verifyEntryAccess = RESTWrap(async (req, res, next) => {
-    if (!req.isAuthenticated()) { throw new Error(ERR_ACCESS_DENIED); }
+    if (!req.user) { throw new Error(ERR_ACCESS_DENIED); }
     if (!req.query.entry) { throw new Error(ERR_INVALID_REQUEST); }
     if (req.query.forced) {
         // Match system admin table
@@ -53,7 +53,7 @@ export const verifyEntryAccess = RESTWrap(async (req, res, next) => {
 });
 
 export const isSystemAdmin = async (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
-    if (!req.isAuthenticated()) { throw new Error(ERR_ACCESS_DENIED); }
+    if (!req.user) { throw new Error(ERR_ACCESS_DENIED); }
     const map = await SystemMap.findOne({ user: req.user });
     if (!map) { return res.RESTFail(ERR_ACCESS_DENIED); }
     return next();
@@ -64,6 +64,6 @@ export const ensure = (value: any, message: string) => {
 };
 
 export const isLoggedin = async (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
-    if (!req.isAuthenticated()) { return res.RESTFail(ERR_ACCESS_DENIED); }
+    if (!req.user) { return res.RESTFail(ERR_ACCESS_DENIED); }
     return next();
 };

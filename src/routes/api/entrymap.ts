@@ -10,7 +10,7 @@ import { Router } from "express";
 import { ERR_ACCESS_DENIED, ERR_NOT_FOUND } from "../../constant";
 import { Entry, EntryType } from "../../schemas/entry";
 import { EntryMap } from "../../schemas/entrymap";
-import { ensure, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
+import { ensure, PaginationWrap, RESTWrap, verifyEntryAccess } from "../util";
 
 export const EntrymapRouter = Router();
 

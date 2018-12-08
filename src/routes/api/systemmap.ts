@@ -9,7 +9,7 @@ import { Router } from "express";
 import { ERR_NOT_FOUND } from "../../constant";
 import { Entry, EntryType } from "../../schemas/entry";
 import { SystemMap } from "../../schemas/systemmap";
-import { ensure, isSystemAdmin, PaginationWrap, RESTWrap } from "./util";
+import { ensure, isSystemAdmin, PaginationWrap, RESTWrap } from "../util";
 
 export const SystemMapRouter = Router();
 

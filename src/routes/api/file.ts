@@ -16,7 +16,7 @@ import { join } from "path";
 import { file as createTmpFile } from "tmp";
 import { ERR_ACCESS_DENIED, ERR_ALREADY_EXISTS, ERR_INVALID_REQUEST, ERR_NOT_FOUND, MANAGED_FILE_PATH } from "../../constant";
 import { File } from "../../schemas/file";
-import { ensure, isLoggedin, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
+import { ensure, isLoggedin, PaginationWrap, RESTWrap, verifyEntryAccess } from "../util";
 
 // tslint:disable-next-line:no-var-requires
 const createKeccakHash = require("keccak");

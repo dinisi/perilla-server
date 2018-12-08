@@ -12,7 +12,7 @@ import { Router } from "express";
 import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST, ERR_NOT_FOUND } from "../../constant";
 import { Problem } from "../../schemas/problem";
 import { Solution } from "../../schemas/solution";
-import { ensure, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
+import { ensure, PaginationWrap, RESTWrap, verifyEntryAccess } from "../util";
 
 export const ProblemRouter = Router();
 

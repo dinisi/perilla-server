@@ -8,7 +8,7 @@ import { ERR_NOT_FOUND, JUDGE_PREFIX, MANAGED_FILE_PATH } from "../../constant";
 import { llen, rpop } from "../../redis";
 import { File } from "../../schemas/file";
 import { Solution } from "../../schemas/solution";
-import { ensure, isSystemAdmin, RESTWrap } from "./util";
+import { ensure, isSystemAdmin, RESTWrap } from "../util";
 
 export const JudgerRouter = Router();
 

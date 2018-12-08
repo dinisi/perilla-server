@@ -10,7 +10,7 @@
 import { Router } from "express";
 import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST, ERR_NOT_FOUND } from "../../constant";
 import { Article } from "../../schemas/article";
-import { ensure, PaginationWrap, RESTWrap, verifyEntryAccess } from "./util";
+import { ensure, PaginationWrap, RESTWrap, verifyEntryAccess } from "../util";
 
 export const ArticleRouter = Router();
 
