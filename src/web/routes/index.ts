@@ -3,6 +3,7 @@ import { join } from "path";
 import { PACKAGE_PATH } from "../../constant";
 import { IRESTResponse } from "../../interfaces/route";
 import { APIRouter } from "./api";
+import { AuthRouter } from "./auth";
 import { FrontEndRouter } from "./frontend";
 import { RESTWrap } from "./util";
 
@@ -27,4 +28,5 @@ MainRouter.get("/", RESTWrap(async (req, res) => {
 }));
 
 MainRouter.use("/api", APIRouter);
+MainRouter.use("/auth", AuthRouter);
 MainRouter.use("/frontend", FrontEndRouter);

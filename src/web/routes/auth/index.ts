@@ -23,6 +23,6 @@ AuthRouter.post("/login", RESTWrap(async (req, res) => {
     if (!entry) { throw new Error(ERR_NOT_FOUND); }
     if (entry.type !== EntryType.user) { throw new Error(ERR_INVALID_REQUEST); }
     if (!entry.validPassword(req.body.password)) { throw new Error(ERR_ACCESS_DENIED); }
-    const token = sign(entry._id, config.secret, { expiresIn: "1d" });
+    const token = sign({ _id: entry._id }, config.secret, { expiresIn: "1d" });
     return res.RESTSend(token);
 }));

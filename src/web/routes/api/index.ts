@@ -18,8 +18,8 @@ export const APIRouter = Router();
 APIRouter.use(RESTWrap(async (req, res, next) => {
     const token = req.headers["x-access-token"];
     if (typeof token === "string" && token) {
-        const decoded = verify(token, config.secret);
-        req.user = decoded as string;
+        const decoded = verify(token, config.secret) as any;
+        req.user = decoded._id as string;
     }
     return next();
 }));
