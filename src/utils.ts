@@ -1,4 +1,7 @@
+import { isMaster, workers } from "cluster";
 import { stat } from "fs-extra";
+import { IPCMessage } from "./interfaces/message";
+import { log } from "./log";
 
 export const getBaseURL = (hostname: string, port: number) => {
     return "http://" + hostname + (port === 80 ? "" : ":" + port);
@@ -13,6 +16,10 @@ export const getFileSize = (path: string): Promise<number> => {
     });
 };
 
+export const sendMessage = isMaster ? undefined : (message: IPCMessage) => {
+    process.send(message);
+};
+
 type IGracefulExitHook = () => void | Promise<void>;
 const gracefulExitHooks: IGracefulExitHook[] = [];
 
@@ -22,7 +29,7 @@ export const registerGracefulExitHook = (hook: IGracefulExitHook) => {
 
 export const gracefulExit = async (msg: string) => {
     for (const hook of gracefulExitHooks) { await hook(); }
-    console.log(`Perilla exited: ${msg}`);
+    log(`Exited: ${msg}`);
     process.exit(0);
 };
 

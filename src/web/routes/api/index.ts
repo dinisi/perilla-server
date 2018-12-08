@@ -1,8 +1,6 @@
-import "./passport";
-
 import { Router } from "express";
 import { verify } from "jsonwebtoken";
-import { config } from "../../config";
+import { config } from "../../../config";
 import { RESTWrap } from "../util";
 import { adminRouter } from "./admin";
 import { ArticleRouter } from "./article";

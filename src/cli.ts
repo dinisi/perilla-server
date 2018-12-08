@@ -43,34 +43,6 @@ const generateConfig = async () => {
     const questions = [
         {
             type: "text",
-            name: "redis_host",
-            message: "REDIS database hostname/IP address",
-            initial: "127.0.0.1",
-        },
-        {
-            type: "number",
-            name: "redis_port",
-            message: "REDIS database port",
-            initial: 6379,
-            min: 1,
-            max: 65535,
-        },
-        {
-            type: "number",
-            name: "redis_index",
-            message: "REDIS database index",
-            initial: 0,
-            min: 0,
-            max: 15,
-        },
-        {
-            type: "text",
-            name: "redis_prefix",
-            message: "REDIS database prefix",
-            initial: "perilla",
-        },
-        {
-            type: "text",
             name: "db_url",
             message: "Mongodb URL",
             initial: "mongodb://localhost:27017/perilla",
@@ -91,8 +63,8 @@ const generateConfig = async () => {
         },
         {
             type: "text",
-            name: "session_secret",
-            message: "session secret",
+            name: "secret",
+            message: "secret",
             initial: generate(25),
         },
     ];
@@ -105,18 +77,12 @@ const generateConfig = async () => {
                 useCreateIndex: true,
             },
         },
-        redis: {
-            host: answers.redis_host,
-            port: answers.redis_port,
-            db: answers.redis_index,
-            prefix: answers.redis_prefix,
-        },
         http: {
             port: answers.http_port,
             hostname: answers.http_hostname,
             https: false,
         },
-        sessionSecret: answers.session_secret,
+        secret: answers.secret,
     };
     writeFileSync("config.json", JSON.stringify(config, null, "\t"));
 };

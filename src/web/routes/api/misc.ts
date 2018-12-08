@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { ERR_NOT_LOGGED_IN } from "../../constant";
-import { Entry, EntryType } from "../../schemas/entry";
-import { EntryMap } from "../../schemas/entrymap";
+import { ERR_NOT_LOGGED_IN } from "../../../constant";
+import { Entry, EntryType } from "../../../schemas/entry";
+import { EntryMap } from "../../../schemas/entrymap";
 import { isLoggedin, PaginationWrap, RESTWrap } from "../util";
 
 export const MiscRouter = Router();

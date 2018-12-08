@@ -14,8 +14,10 @@ import { createWriteStream, existsSync, moveSync } from "fs-extra";
 import { lookup } from "mime-types";
 import { join } from "path";
 import { file as createTmpFile } from "tmp";
-import { ERR_ACCESS_DENIED, ERR_ALREADY_EXISTS, ERR_INVALID_REQUEST, ERR_NOT_FOUND, MANAGED_FILE_PATH } from "../../constant";
-import { File } from "../../schemas/file";
+import { ERR_ACCESS_DENIED, ERR_ALREADY_EXISTS, ERR_INVALID_REQUEST, ERR_NOT_FOUND, MANAGED_FILE_PATH } from "../../../constant";
+import { IPCMessageType } from "../../../interfaces/message";
+import { File } from "../../../schemas/file";
+import { sendMessage } from "../../../utils";
 import { ensure, isLoggedin, PaginationWrap, RESTWrap, verifyEntryAccess } from "../util";
 
 // tslint:disable-next-line:no-var-requires
@@ -91,6 +93,7 @@ FileRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const file = await File.findOne({ owner: req.query.entry, id: req.query.id });
     ensure(file, ERR_NOT_FOUND);
     ensure(req.admin || file.creator === req.user, ERR_ACCESS_DENIED);
+    sendMessage({ type: IPCMessageType.FileGCRequest, payload: file.hash });
     await file.remove();
     return res.RESTEnd();
 }));

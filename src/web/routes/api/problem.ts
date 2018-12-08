@@ -9,9 +9,10 @@
  */
 
 import { Router } from "express";
-import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST, ERR_NOT_FOUND } from "../../constant";
-import { Problem } from "../../schemas/problem";
-import { Solution } from "../../schemas/solution";
+import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST, ERR_NOT_FOUND } from "../../../constant";
+import { Problem } from "../../../schemas/problem";
+import { Solution, SolutionResult } from "../../../schemas/solution";
+import { Task } from "../../../schemas/task";
 import { ensure, PaginationWrap, RESTWrap, verifyEntryAccess } from "../util";
 
 export const ProblemRouter = Router();
@@ -59,14 +60,60 @@ ProblemRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 ProblemRouter.post("/submit", verifyEntryAccess, RESTWrap(async (req, res) => {
     const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
     ensure(problem, ERR_NOT_FOUND);
+    ensure(problem.channel, ERR_INVALID_REQUEST);
     const solution = new Solution();
     solution.problem = problem.id;
     solution.creator = req.user;
     solution.data = req.body.data;
     solution.owner = req.query.entry;
+    await solution.save(); // Collect ID
+    try {
+        solution.status = SolutionResult.WaitingJudge;
+        const task = new Task();
+        task.problem = problem.data;
+        task.solution = solution.data;
+        task.objectID = solution._id;
+        task.priority = 0;
+        task.owner = req.query.entry;
+        task.creator = req.user;
+        await task.save();
+    } catch (e) {
+        solution.status = SolutionResult.JudgementFailed;
+        solution.score = 0;
+        solution.details = {
+            error: e.message,
+        };
+    }
     await solution.save();
-    await solution.judge();
     return res.RESTSend(solution.id);
+}));
+
+ProblemRouter.post("/rejudge", verifyEntryAccess, RESTWrap(async (req, res) => {
+    const problem = await Problem.findOne({ owner: req.query.entry, id: req.query.id });
+    ensure(problem, ERR_NOT_FOUND);
+    ensure(problem.channel, ERR_INVALID_REQUEST);
+    const solutions = await Solution.find({ owner: req.query.entry, problem: problem.id });
+    for (const solution of solutions) {
+        try {
+            solution.status = SolutionResult.WaitingJudge;
+            const task = new Task();
+            task.problem = problem.data;
+            task.solution = solution.data;
+            task.objectID = solution._id;
+            task.priority = 1;
+            task.owner = req.query.entry;
+            task.creator = req.user;
+            await task.save();
+        } catch (e) {
+            solution.status = SolutionResult.JudgementFailed;
+            solution.score = 0;
+            solution.details = {
+                error: e.message,
+            };
+        }
+        await solution.save();
+    }
+    return res.RESTEnd();
 }));
 
 ProblemRouter.get("/list", verifyEntryAccess, PaginationWrap((req) => {

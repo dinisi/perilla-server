@@ -62,7 +62,7 @@ ProblemSchema.pre("save", async function(next) {
 
 ProblemSchema.pre("remove", async function(next) {
     await Solution.remove({ problem: this.id });
-    next();
+    return next();
 });
 
 export const Problem: Model<IProblemModel> = model<IProblemModel>("Problem", ProblemSchema);

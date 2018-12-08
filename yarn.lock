@@ -45,21 +45,17 @@
   resolved "https://registry.yarnpkg.com/@types/caseless/-/caseless-0.12.1.tgz#9794c69c8385d0192acc471a540d1f8e0d16218a"
   integrity sha512-FhlMa34NHp9K5MY1Uz8yb+ZvuX0pnvn3jScRSNAb75KHGB8d3rEU6hqMs3Z2vjuytcMfRg6c5CHMc3wtYyD2/A==
 
-"@types/connect-redis@^0.0.8":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@types/connect-redis/-/connect-redis-0.0.8.tgz#5dfec54b1027cb2ec33a78e5de319fc9227528d2"
-  integrity sha512-zqMHgRiBxSqj3vpz/S7kR4GhJHo5atag/s7i/GFvZte7SsOxkU8OWK/BcysWS4M7XL7koe4+u4lGjvx7Yir9EQ==
-  dependencies:
-    "@types/express" "*"
-    "@types/express-session" "*"
-    "@types/redis" "*"
-
 "@types/connect@*":
   version "3.4.32"
   resolved "http://registry.npm.taobao.org/@types/connect/download/@types/connect-3.4.32.tgz#aa0e9616b9435ccad02bc52b5b454ffc2c70ba28"
   integrity sha1-qg6WFrlDXMrQK8UrW0VP/Cxwuig=
   dependencies:
     "@types/node" "*"
+
+"@types/debug@^0.0.31":
+  version "0.0.31"
+  resolved "https://registry.yarnpkg.com/@types/debug/-/debug-0.0.31.tgz#bac8d8aab6a823e91deb7f79083b2a35fa638f33"
+  integrity sha512-LS1MCPaQKqspg7FvexuhmDbWUhE2yIJ+4AgVIyObfc06/UKZ8REgxGNjZc82wPLWmbeOm7S+gSsLgo75TanG4A==
 
 "@types/events@*":
   version "1.2.0"
@@ -75,16 +71,7 @@
     "@types/node" "*"
     "@types/range-parser" "*"
 
-"@types/express-session@*":
-  version "1.15.11"
-  resolved "https://registry.yarnpkg.com/@types/express-session/-/express-session-1.15.11.tgz#49bca7a8fb5c00402907e8ec0d3546ee28de2c41"
-  integrity sha512-BRgOXYBhmt71CuOR/PQvKBRgcS567xJmE7dT3r/FvTmWc1ZsR5joVH32dgH+z6F4FugniF04tMyXc4UF9M8Hfg==
-  dependencies:
-    "@types/events" "*"
-    "@types/express" "*"
-    "@types/node" "*"
-
-"@types/express@*", "@types/express@^4.16.0":
+"@types/express@^4.16.0":
   version "4.16.0"
   resolved "http://registry.npm.taobao.org/@types/express/download/@types/express-4.16.0.tgz#6d8bc42ccaa6f35cf29a2b7c3333cb47b5a32a19"
   integrity sha1-bYvELMqm81zymit8MzPLR7WjKhk=
@@ -163,7 +150,7 @@
   resolved "http://registry.npm.taobao.org/@types/range-parser/download/@types/range-parser-1.2.2.tgz#fa8e1ad1d474688a757140c91de6dace6f4abc8d"
   integrity sha1-+o4a0dR0aIp1cUDJHebazm9KvI0=
 
-"@types/redis@*", "@types/redis@^2.8.8":
+"@types/redis@^2.8.8":
   version "2.8.8"
   resolved "http://registry.npm.taobao.org/@types/redis/download/@types/redis-2.8.8.tgz#70855e79a6020080cca3cb5f1f5ee7f11b49a979"
   integrity sha1-cIVeeaYCAIDMo8tfH17n8RtJqXk=
@@ -756,14 +743,6 @@ configstore@^3.0.0:
     write-file-atomic "^2.0.0"
     xdg-basedir "^3.0.0"
 
-connect-redis@^3.4.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/connect-redis/-/connect-redis-3.4.0.tgz#4040dd3755bddbf93478fb84937a74052c31b965"
-  integrity sha512-YKPSO9tLwzUr8jzhsGMdSJUxevWrDt0ggXRcTMb+mtnJ/vWGlWV7RC4VUMgqvZv3uTGDFye8Bf7d6No0oSVkOQ==
-  dependencies:
-    debug "^4.0.1"
-    redis "^2.8.0"
-
 console-control-strings@^1.0.0, console-control-strings@~1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/console-control-strings/-/console-control-strings-1.1.0.tgz#3d7cf4464db6446ea644bf4b39507f9851008e8e"
@@ -872,7 +851,7 @@ debug@^3.1.0:
   dependencies:
     ms "^2.1.1"
 
-debug@^4.0.1:
+debug@^4.0.1, debug@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.1.0.tgz#373687bffa678b38b1cd91f861b63850035ddc87"
   integrity sha512-heNPJUJIqC+xB6ayLAMHaIrmN9HKa7aQO8MGqKpvCA+uJYVcvR6l5kgdrhRuwPFHU7P5/A1w0BjByPHwpfTDKg==

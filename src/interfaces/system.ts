@@ -5,7 +5,6 @@ export const ISystemConfig = Record({
         url: String,
         options: Unknown,
     }),
-    redis: Unknown,
     http: Record({
         port: Number,
         hostname: String,

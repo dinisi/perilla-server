@@ -1,8 +1,6 @@
 import { Document, Model, model, Schema } from "mongoose";
-import { JUDGE_PREFIX } from "../constant";
-import { lpush } from "../redis";
 import { SolutionCounter } from "./counter";
-import { Problem } from "./problem";
+import { Task } from "./task";
 
 export enum SolutionResult {
     WaitingJudge,            // Wating Judge
@@ -30,7 +28,6 @@ export interface ISolutionModel extends Document {
     updated: Date;
     owner: string;
     creator: string;
-    judge(): Promise<void>;
 }
 
 export const SolutionSchema: Schema = new Schema(
@@ -67,31 +64,6 @@ export const SolutionSchema: Schema = new Schema(
     },
 );
 SolutionSchema.index({ id: 1, owner: 1 }, { unique: true });
-SolutionSchema.methods.judge = async function() {
-    const self = this as ISolutionModel;
-    try {
-        const problem = await Problem.findOne({ id: self.problem, owner: self.owner });
-        if (!problem) { throw new Error("Invalid solution"); }
-        if (!problem.channel) { throw new Error("Problem do not have a valid data config"); }
-        if (problem.owner !== self.owner) { throw new Error("Bad solution"); }
-        self.status = SolutionResult.WaitingJudge;
-        await self.save();
-        const task = {
-            problem: problem.data,
-            solution: self.data,
-            owner: self.owner,
-            objectID: self._id,
-        };
-        await lpush(problem.channel, JUDGE_PREFIX, JSON.stringify(task));
-    } catch (e) {
-        self.status = SolutionResult.JudgementFailed;
-        self.score = 0;
-        self.details = {
-            error: e.message,
-        };
-        await self.save();
-    }
-};
 
 SolutionSchema.pre("save", async function(next) {
     const self = this as ISolutionModel;
@@ -102,6 +74,12 @@ SolutionSchema.pre("save", async function(next) {
     }
     self.updated = new Date();
     next();
+});
+
+SolutionSchema.pre("remove", async function(next) {
+    const self = this as ISolutionModel;
+    await Task.remove({ objectID: self._id });
+    return next();
 });
 
 export const Solution: Model<ISolutionModel> = model<ISolutionModel>("Solution", SolutionSchema);

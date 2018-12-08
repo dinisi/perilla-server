@@ -1,4 +1,4 @@
-import * as crypto from "crypto";
+import { pbkdf2Sync, randomBytes } from "crypto";
 import { Document, model, Schema } from "mongoose";
 import { ENTRY } from "../constant";
 import { Article } from "./article";
@@ -57,8 +57,8 @@ export const EntrySchema: Schema = new Schema(
 
 EntrySchema.methods.setPassword = function(password: string) {
     if (this.type === EntryType.user) {
-        this.salt = crypto.randomBytes(16).toString("hex");
-        this.hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, "sha512").toString("hex");
+        this.salt = randomBytes(16).toString("hex");
+        this.hash = pbkdf2Sync(password, this.salt, 1000, 64, "sha512").toString("hex");
     } else {
         throw new Error("Entry not a user");
     }
@@ -66,7 +66,7 @@ EntrySchema.methods.setPassword = function(password: string) {
 
 EntrySchema.methods.validPassword = function(password: string) {
     if (this.type === EntryType.user) {
-        const hash = crypto.pbkdf2Sync(password, this.salt, 1000, 64, "sha512").toString("hex");
+        const hash = pbkdf2Sync(password, this.salt, 1000, 64, "sha512").toString("hex");
         return this.hash === hash;
     } else {
         throw new Error("Entry not a user");
@@ -94,11 +94,11 @@ EntrySchema.pre("remove", async function(next) {
     await FileCounter.remove({ _id: self._id });
     await SolutionCounter.remove({ _id: self._id });
     await ProblemCounter.remove({ _id: self._id });
-    await Article.remove({ user: self._id });
+    await Article.remove({ $or: [{ owner: self._id }, { creator: self._id }] });
     await EntryMap.remove({ $or: [{ from: self._id }, { to: self._id }] });
-    await File.remove({ owner: self._id });
-    await Problem.remove({ owner: self._id });
-    await Solution.remove({ owner: self._id });
+    await File.remove({ $or: [{ owner: self._id }, { creator: self._id }] });
+    await Problem.remove({ $or: [{ owner: self._id }, { creator: self._id }] });
+    await Solution.remove({ $or: [{ owner: self._id }, { creator: self._id }] });
     await SystemMap.remove({ user: self._id });
     next();
 });

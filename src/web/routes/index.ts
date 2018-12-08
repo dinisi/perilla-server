@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { join } from "path";
-import { PACKAGE_PATH } from "../constant";
-import { IRESTResponse } from "../interfaces/route";
+import { PACKAGE_PATH } from "../../constant";
+import { IRESTResponse } from "../../interfaces/route";
 import { APIRouter } from "./api";
 import { FrontEndRouter } from "./frontend";
 import { RESTWrap } from "./util";

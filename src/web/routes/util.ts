@@ -1,9 +1,9 @@
 import { NextFunction } from "express";
 import { Document, DocumentQuery } from "mongoose";
-import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST, MAX_PAGINATION_LIMIT } from "../constant";
-import { IRESTRequest, IRESTResponse } from "../interfaces/route";
-import { EntryMap } from "../schemas/entrymap";
-import { SystemMap } from "../schemas/systemmap";
+import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST, MAX_PAGINATION_LIMIT } from "../../constant";
+import { IRESTRequest, IRESTResponse } from "../../interfaces/route";
+import { EntryMap } from "../../schemas/entrymap";
+import { SystemMap } from "../../schemas/systemmap";
 
 type IHandleFunction = (req: IRESTRequest, res: IRESTResponse, next?: NextFunction) => Promise<void> | void;
 

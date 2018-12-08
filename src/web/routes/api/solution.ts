@@ -7,8 +7,10 @@
  */
 
 import { Router } from "express";
-import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST, ERR_NOT_FOUND } from "../../constant";
-import { Solution } from "../../schemas/solution";
+import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST, ERR_NOT_FOUND } from "../../../constant";
+import { Problem } from "../../../schemas/problem";
+import { Solution, SolutionResult } from "../../../schemas/solution";
+import { Task } from "../../../schemas/task";
 import { ensure, PaginationWrap, RESTWrap, verifyEntryAccess } from "../util";
 
 export const SolutionRouter = Router();
@@ -23,7 +25,26 @@ SolutionRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const solution = await Solution.findOne({ owner: req.query.entry, id: req.query.id });
     ensure(solution, ERR_NOT_FOUND);
     ensure(req.admin || solution.creator === req.user, ERR_ACCESS_DENIED);
-    await solution.judge();
+    const problem = await Problem.findOne({ owner: req.query.entry, id: solution.problem });
+    ensure(problem.channel, ERR_INVALID_REQUEST);
+    try {
+        solution.status = SolutionResult.WaitingJudge;
+        const task = new Task();
+        task.problem = problem.data;
+        task.solution = solution.data;
+        task.objectID = solution._id;
+        task.priority = 1;
+        task.owner = req.query.entry;
+        task.creator = req.user;
+        await task.save();
+    } catch (e) {
+        solution.status = SolutionResult.JudgementFailed;
+        solution.score = 0;
+        solution.details = {
+            error: e.message,
+        };
+    }
+    await solution.save();
     return res.RESTEnd();
 }));
 

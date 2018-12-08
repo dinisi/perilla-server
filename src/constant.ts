@@ -1,10 +1,5 @@
-import { join } from "path";
-
 import { ensureDirSync } from "fs-extra";
-
-// REDIS prefixes
-export const JUDGE_PREFIX = "judge";
-export const CRON_PREFIX = "cron";
+import { join } from "path";
 
 // File paths
 export const MANAGED_FILE_PATH = join(__dirname, "..", "files", "managed");
@@ -79,3 +74,6 @@ export const ERR_INVALID_REQUEST = "Invalid request";
 
 // System Limits
 export const MAX_PAGINATION_LIMIT = 128;
+
+// Time to wait for FileGC
+export const FILEGC_TTW = 5 * 60 * 1000;
