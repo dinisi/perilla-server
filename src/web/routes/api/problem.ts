@@ -76,6 +76,7 @@ ProblemRouter.post("/submit", verifyEntryAccess, RESTWrap(async (req, res) => {
         task.priority = 0;
         task.owner = req.query.entry;
         task.creator = req.user;
+        task.channel = problem.channel;
         await task.save();
     } catch (e) {
         solution.status = SolutionResult.JudgementFailed;
@@ -103,6 +104,7 @@ ProblemRouter.post("/rejudge", verifyEntryAccess, RESTWrap(async (req, res) => {
             task.priority = 1;
             task.owner = req.query.entry;
             task.creator = req.user;
+            task.channel = problem.channel;
             await task.save();
         } catch (e) {
             solution.status = SolutionResult.JudgementFailed;

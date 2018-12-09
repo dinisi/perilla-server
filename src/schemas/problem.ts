@@ -57,7 +57,7 @@ ProblemSchema.pre("save", async function(next) {
         self.id = counter.count;
     }
     self.updated = new Date();
-    next();
+    return next();
 });
 
 ProblemSchema.pre("remove", async function(next) {

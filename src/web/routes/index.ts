@@ -19,7 +19,7 @@ MainRouter.use((req, res: IRESTResponse, next) => {
     res.RESTEnd = () => {
         res.json({ status: "success" });
     };
-    next();
+    return next();
 });
 
 MainRouter.get("/", RESTWrap(async (req, res) => {

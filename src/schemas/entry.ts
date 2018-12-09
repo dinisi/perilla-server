@@ -85,7 +85,7 @@ EntrySchema.pre("save", async function(next) {
             await map.save();
         }
     }
-    next();
+    return next();
 });
 
 EntrySchema.pre("remove", async function(next) {
@@ -100,7 +100,7 @@ EntrySchema.pre("remove", async function(next) {
     await Problem.remove({ $or: [{ owner: self._id }, { creator: self._id }] });
     await Solution.remove({ $or: [{ owner: self._id }, { creator: self._id }] });
     await SystemMap.remove({ user: self._id });
-    next();
+    return next();
 });
 
 export const Entry = model<IEntryModel>("Entry", EntrySchema);

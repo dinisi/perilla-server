@@ -73,7 +73,7 @@ SolutionSchema.pre("save", async function(next) {
         self.status = SolutionResult.WaitingJudge;
     }
     self.updated = new Date();
-    next();
+    return next();
 });
 
 SolutionSchema.pre("remove", async function(next) {
