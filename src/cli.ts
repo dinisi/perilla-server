@@ -1,6 +1,6 @@
 import { default as c } from "chalk";
 import commander = require("commander");
-import { createWriteStream, existsSync, readFileSync, removeSync, unlinkSync, writeFileSync } from "fs-extra";
+import { existsSync, readFileSync, removeSync, unlinkSync, writeFileSync } from "fs-extra";
 import mongoose = require("mongoose");
 import prompts = require("prompts");
 import { generate } from "randomstring";
@@ -160,7 +160,7 @@ const createEntry = async (id: string) => {
 
 const removeEntry = async (id: string) => {
     await require("./database").connectDB();
-    const { Entry, EntryType } = require("./schemas/entry");
+    const { Entry } = require("./schemas/entry");
     const entry = await Entry.findById(id);
     if (!entry) { throw new Error("Entry not found"); }
     await entry.remove();
@@ -214,7 +214,6 @@ commander
     });
 
 const fetchLatestFrontendTag = async () => {
-    const url = "https://github.com/ZhangZisu/perilla-frontend/releases/latest";
     return new Promise<string>((resolve, reject) => {
         get("https://github.com/ZhangZisu/perilla-frontend/releases/latest", (err, res) => {
             if (err) { return reject(err); }

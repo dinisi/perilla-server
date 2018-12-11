@@ -1,4 +1,4 @@
-import { isMaster, workers } from "cluster";
+import { isMaster } from "cluster";
 import { stat } from "fs-extra";
 import { IPCMessage } from "./interfaces/message";
 import { log } from "./log";
