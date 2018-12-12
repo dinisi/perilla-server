@@ -6,7 +6,7 @@ import prompts = require("prompts");
 import { generate } from "randomstring";
 import { get } from "request";
 import { Extract } from "unzipper";
-import { FRONTEND_PATH, PACKAGE_PATH } from "./constant";
+import { PACKAGE_PATH } from "./constant";
 import { ISystemConfig } from "./interfaces/system";
 
 const version = JSON.parse(readFileSync(PACKAGE_PATH).toString()).version;
@@ -225,31 +225,5 @@ const fetchLatestFrontendTag = async () => {
         });
     });
 };
-
-const downloadFrontendRelease = async (tag: string) => {
-    const url = `https://github.com/ZhangZisu/perilla-frontend/releases/download/${tag}/dist.zip`;
-    removeSync(FRONTEND_PATH);
-    console.log("Downloading...");
-    return new Promise<void>((resolve, reject) => {
-        get(url).pipe(Extract({ path: FRONTEND_PATH })).on("close", resolve).on("error", reject);
-    });
-};
-
-commander
-    .command("frontend")
-    .description("Frontend utils")
-    .option("-d, --download", "Download frontend file")
-    .action(async (cmd) => {
-        try {
-            if (cmd.download) {
-                const latest = await fetchLatestFrontendTag();
-                await downloadFrontendRelease(latest);
-            }
-        } catch (e) {
-            console.log(e.message);
-        }
-        const { gracefulExit } = require("./utils");
-        gracefulExit("cli finished");
-    });
 
 commander.parse(process.argv);

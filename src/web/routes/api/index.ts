@@ -16,7 +16,7 @@ import { SystemMapRouter } from "./systemmap";
 export const APIRouter = Router();
 
 APIRouter.use(RESTWrap(async (req, res, next) => {
-    const token = req.headers["x-access-token"];
+    const token = req.headers["x-access-token"] || (req.body && req.body.access_token) || (req.query && req.query.access_token);
     if (typeof token === "string" && token) {
         const decoded = verify(token, config.secret) as any;
         req.user = decoded._id as string;

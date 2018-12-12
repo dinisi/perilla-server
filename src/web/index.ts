@@ -1,10 +1,9 @@
 import { json, urlencoded } from "body-parser";
 import express = require("express");
-import { appendFileSync, readFileSync } from "fs-extra";
+import { readFileSync } from "fs-extra";
 import http = require("http");
 import https = require("https");
 import { config } from "../config";
-import { APPLOG_PATH } from "../constant";
 import { connectDB } from "../database";
 import { log } from "../log";
 import { MainRouter } from "./routes";
@@ -16,6 +15,18 @@ export const startWebService = async () => {
 
     app.use(json());
     app.use(urlencoded({ extended: false }));
+
+    app.use((req, res, next) => {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
+        res.header("Access-Control-Allow-Headers", "Content-Type, x-access-token");
+        res.header("Access-Control-Allow-Credentials", "true");
+        if (req.method === "OPTIONS") {
+            return res.sendStatus(200);
+        } else {
+            return next();
+        }
+    });
 
     app.use(MainRouter);
 
