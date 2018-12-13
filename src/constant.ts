@@ -26,7 +26,7 @@ export const ENTRY = {
     _id: {
         minlength: 1,
         maxlength: 50,
-        validate: (v: string) => /^[A-Za-z0-9]*$/.test(v),
+        validate: (v: string) => /^[^ ]+$/.test(v),
     },
     email: {
         minlength: 1,
