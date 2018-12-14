@@ -17,6 +17,10 @@ export const RESTWrap = (handle: IHandleFunction) => {
     };
 };
 
+export const ensure = (value: any, message: string) => {
+    if (!value) { throw new Error(message); }
+};
+
 type IPaginationHandleFunction = (req: IRESTRequest) => DocumentQuery<Document[], Document>;
 
 export const PaginationWrap = (handle: IPaginationHandleFunction) => {
@@ -36,34 +40,30 @@ export const PaginationWrap = (handle: IPaginationHandleFunction) => {
 };
 
 export const verifyEntryAccess = RESTWrap(async (req, res, next) => {
-    if (!req.user) { throw new Error(ERR_ACCESS_DENIED); }
-    if (!req.query.entry) { throw new Error(ERR_INVALID_REQUEST); }
+    ensure(req.user, ERR_ACCESS_DENIED);
+    ensure(req.query.entry, ERR_INVALID_REQUEST);
     if (req.query.forced) {
         // Match system admin table
         const map = await SystemMap.findOne({ user: req.user });
-        if (!map) { throw new Error(ERR_ACCESS_DENIED); }
+        ensure(map, ERR_ACCESS_DENIED);
         req.admin = true;
         return next();
     } else {
         const map = await EntryMap.findOne({ from: req.user, to: req.query.entry });
-        if (!map) { throw new Error(ERR_ACCESS_DENIED); }
+        ensure(map, ERR_ACCESS_DENIED);
         if (map.admin) { req.admin = true; }
         return next();
     }
 });
 
 export const isSystemAdmin = async (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
-    if (!req.user) { throw new Error(ERR_ACCESS_DENIED); }
+    ensure(req.user, ERR_ACCESS_DENIED);
     const map = await SystemMap.findOne({ user: req.user });
-    if (!map) { return res.RESTFail(ERR_ACCESS_DENIED); }
+    ensure(map, ERR_ACCESS_DENIED);
     return next();
 };
 
-export const ensure = (value: any, message: string) => {
-    if (!value) { throw new Error(message); }
-};
-
 export const isLoggedin = async (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
-    if (!req.user) { return res.RESTFail(ERR_ACCESS_DENIED); }
+    ensure(req.user, ERR_ACCESS_DENIED);
     return next();
 };

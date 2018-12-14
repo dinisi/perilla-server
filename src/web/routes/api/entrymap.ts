@@ -16,20 +16,25 @@ export const EntrymapRouter = Router();
 
 EntrymapRouter.get("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     const map = await EntryMap.findOne({ to: req.query.entry, from: req.query.from });
-    if (!map) { throw new Error(ERR_NOT_FOUND); }
+    ensure(map, ERR_NOT_FOUND);
     return res.RESTSend(map);
 }));
 
 EntrymapRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     ensure(req.admin, ERR_ACCESS_DENIED);
-    let map = await EntryMap.findOne({ to: req.query.entry, from: req.query.from });
-    if (!map) {
-        const entry = await Entry.findOne({ _id: req.query.from, type: EntryType.user });
-        ensure(entry, ERR_NOT_FOUND);
-        map = new EntryMap();
-        map.from = req.query.from;
-        map.to = req.query.entry;
-    }
+    const entry = await Entry.findOne({ _id: req.query.from, type: EntryType.user });
+    ensure(entry, ERR_NOT_FOUND);
+    const map = new EntryMap();
+    map.from = req.query.from;
+    map.to = req.query.entry;
+    map.admin = req.body.admin;
+    await map.save();
+    return res.RESTEnd();
+}));
+
+EntrymapRouter.put("/", verifyEntryAccess, RESTWrap(async (req, res) => {
+    ensure(req.admin, ERR_ACCESS_DENIED);
+    const map = await EntryMap.findOne({ to: req.query.entry, from: req.query.from });
     map.admin = req.body.admin;
     await map.save();
     return res.RESTEnd();
@@ -38,7 +43,7 @@ EntrymapRouter.post("/", verifyEntryAccess, RESTWrap(async (req, res) => {
 EntrymapRouter.delete("/", verifyEntryAccess, RESTWrap(async (req, res) => {
     ensure(req.admin, ERR_ACCESS_DENIED);
     const map = await EntryMap.findOne({ to: req.query.entry, from: req.query.from });
-    if (!map) { throw new Error(ERR_NOT_FOUND); }
+    ensure(map, ERR_NOT_FOUND);
     await map.remove();
     return res.RESTEnd();
 }));
