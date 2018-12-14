@@ -25,7 +25,6 @@ const uninstall = async () => {
         try {
             removeSync("files");
             unlinkSync("config.json");
-            unlinkSync("app.log");
         } catch (e) {
             console.log("[ERROR] " + e.message);
             if (!await readbool("continue?")) { process.exit(0); }
@@ -65,7 +64,7 @@ const generateConfig = async () => {
             type: "text",
             name: "secret",
             message: "secret",
-            initial: generate(25),
+            initial: generate(50),
         },
     ];
     const answers = await prompts(questions);
@@ -182,8 +181,22 @@ const modifyEntry = async (id: string) => {
     console.log(cp(entry, "created"));
     console.log(cp(entry, "type"));
     if (entry.type === EntryType.user) {
+        const { SystemMap } = require("./schemas/systemmap");
+        let map = await SystemMap.findOne({ user: id });
+        console.log(map ? "This user is a system administrator" : "This user is not a system administrator");
         if (await readbool("Change password")) {
             entry.setPassword(await readpass());
+        }
+        if (map) {
+            if (await readbool("Remove administrator privilege?")) {
+                await map.remove();
+            }
+        } else {
+            if (await readbool("Grant administrator privilege?")) {
+                map = new SystemMap();
+                map.user = id;
+                await map.save();
+            }
         }
     }
     await entry.save();
@@ -212,18 +225,5 @@ commander
         const { gracefulExit } = require("./utils");
         gracefulExit("cli finished");
     });
-
-const fetchLatestFrontendTag = async () => {
-    return new Promise<string>((resolve, reject) => {
-        get("https://github.com/ZhangZisu/perilla-frontend/releases/latest", (err, res) => {
-            if (err) { return reject(err); }
-            const span = /<span class="css-truncate-target" style="max-width: 125px">[a-zA-Z0-9.]+<\/span>/.exec(res.body)[0];
-            if (!span) { return reject("Fetch latest frontend version failed"); }
-            const latest = span.substr(59, span.length - 66);
-            console.log(`Version ${latest} found.`);
-            resolve(latest);
-        });
-    });
-};
 
 commander.parse(process.argv);

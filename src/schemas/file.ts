@@ -1,4 +1,3 @@
-import { ensureDirSync, existsSync, move, unlink } from "fs-extra";
 import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
 import { FILE, MANAGED_FILE_PATH } from "../constant";
