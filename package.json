@@ -12,7 +12,8 @@
     "cli": "node dist/cli.js",
     "build": "tsc",
     "dev": "concurrently \"tsc --watch\" \"nodemon .\"",
-    "postinstall": "tsc"
+    "postinstall": "tsc",
+    "test": "tslint --project ."
   },
   "dependencies": {
     "body-parser": "^1.18.3",

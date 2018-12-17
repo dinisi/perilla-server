@@ -1,0 +1,26 @@
+branches:
+  only:
+    - master
+  except:
+    - gh-pages
+
+image: Visual Studio 2017
+
+platform:
+  - x64
+
+cache:
+  - node_modules
+  - '%LOCALAPPDATA%\Yarn'
+
+init:
+  - git config --global core.autocrlf input
+
+install:
+  - ps: Install-Product node '' x64
+  - yarn
+
+test_script:
+  - yarn test
+
+build: off
