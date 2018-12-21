@@ -8,4 +8,4 @@ Light-weight Online Judge Platform
 - MEVN Full javascript stack
 - RESTFul API Design
 
-Please see [The docs](https://perilla.js.org) for more information.
+See the project wiki for more information
