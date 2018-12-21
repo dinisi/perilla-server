@@ -1,6 +1,4 @@
 branches:
-  only:
-    - master
   except:
     - gh-pages
 
