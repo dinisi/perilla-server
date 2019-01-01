@@ -12,13 +12,13 @@ export const AuthRouter = Router();
 if (config.mail.enable) {
     AuthRouter.post("/register", RESTWrap(async (req, res) => {
         const token = sign({ username: req.body.username, email: req.body.email, password: req.body.password }, config.secret, { expiresIn: "1h" });
-        const verifyURL = `config.mail.baseURL/auth/register?token=${token}`;
+        const verifyURL = `${config.mail.baseURL}/auth/register?token=${token}`;
         sendMessage({
             type: IPCMessageType.SendMailRequest,
             payload: {
                 to: req.body.email,
                 subject: "Confirm registration",
-                html: `Please follow <a href=${verifyURL}>this link</a> to confirm your registration`,
+                html: `Please open <a href="${verifyURL}">${verifyURL}</a> to confirm your registration`,
             },
         });
         res.RESTSend("Please check your inbox");
