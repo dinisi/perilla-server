@@ -9,3 +9,8 @@ Light-weight Online Judge Platform
 - RESTFul API Design
 
 See the project wiki for more information
+
+## Demo
+
+Visit [Frontend](https://perilla.js.org/#/) and enter `https://perilla.zhangzisu.cn/` as baseURL
+
