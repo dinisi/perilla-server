@@ -4,13 +4,12 @@
 
 Light-weight Online Judge Platform
 
-- Linux-styled Access control
-- MEVN Full javascript stack
+- Simple Access control
+- Full javascript stack
 - RESTFul API Design
 
 See the project wiki for more information
 
 ## Demo
 
-Visit [Frontend](https://perilla.js.org/#/) and enter `https://perilla.zhangzisu.cn/` as baseURL
-
+[https://perilla.zhangzisu.cn/](https://perilla.zhangzisu.cn/)
