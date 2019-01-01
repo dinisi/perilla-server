@@ -1,6 +1,6 @@
 import { Document, Model, model, Schema } from "mongoose";
 import { join, resolve } from "path";
-import { FILE, MANAGED_FILE_PATH } from "../constant";
+import { FILE, STORE_PATH } from "../constant";
 import { getFileSize } from "../utils";
 import { FileCounter } from "./counter";
 
@@ -62,7 +62,7 @@ FileSchema.index({ id: 1, owner: 1 }, { unique: true });
 
 FileSchema.methods.getPath = function() {
     const self = this as IFileModel;
-    return resolve(join(MANAGED_FILE_PATH, self.hash));
+    return resolve(join(STORE_PATH, self.hash));
 };
 
 FileSchema.methods.setFile = async function(hash: string) {

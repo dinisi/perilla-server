@@ -2,8 +2,10 @@ import { ensureDirSync } from "fs-extra";
 import { join } from "path";
 
 // File paths
-export const MANAGED_FILE_PATH = join(__dirname, "..", "files", "managed");
-ensureDirSync(MANAGED_FILE_PATH);
+export const STORE_PATH = join(__dirname, "..", "files", "managed");
+ensureDirSync(STORE_PATH);
+export const FRONTEND_PATH = join(__dirname, "..", "frontend");
+ensureDirSync(FRONTEND_PATH);
 export const CONFIG_PATH = join(__dirname, "..", "config.json");
 export const PACKAGE_PATH = join(__dirname, "..", "package.json");
 

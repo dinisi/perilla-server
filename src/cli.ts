@@ -1,12 +1,15 @@
+// tslint:disable:no-console
 import { default as c } from "chalk";
 import commander = require("commander");
-import { existsSync, readFileSync, removeSync, unlinkSync, writeFileSync } from "fs-extra";
+import { existsSync, move, readFileSync, remove, removeSync, rmdir, unlinkSync, writeFileSync } from "fs-extra";
 import mongoose = require("mongoose");
+import { join } from "path";
 import prompts = require("prompts");
 import { generate } from "randomstring";
 import { get } from "request";
+import { dirSync } from "tmp";
 import { Extract } from "unzipper";
-import { PACKAGE_PATH } from "./constant";
+import { FRONTEND_PATH, PACKAGE_PATH } from "./constant";
 import { ISystemConfig } from "./interfaces/system";
 
 const version = JSON.parse(readFileSync(PACKAGE_PATH).toString()).version;
@@ -80,6 +83,9 @@ const generateConfig = async () => {
             port: answers.http_port,
             hostname: answers.http_hostname,
             https: false,
+        },
+        mail: {
+            enable: false,
         },
         secret: answers.secret,
     };
@@ -218,6 +224,42 @@ commander
             }
             if (cmd.modify) {
                 await modifyEntry(id);
+            }
+        } catch (e) {
+            console.log(e.message);
+        }
+        const { gracefulExit } = require("./utils");
+        gracefulExit("cli finished");
+    });
+
+const removeFrontend = () => {
+    removeSync(FRONTEND_PATH);
+};
+
+const updateFrontend = async () => {
+    removeFrontend();
+    const url = "https://github.com/ZhangZisu/perilla/archive/gh-pages.zip";
+    console.log("Downloading latest frontend file from GitHub...");
+    const tmp = dirSync();
+    await new Promise<void>((resolve, reject) => {
+        get(url).pipe(Extract({ path: tmp.name })).on("close", resolve).on("error", reject);
+    });
+    await move(join(tmp.name, "perilla-gh-pages"), FRONTEND_PATH);
+    console.log("🎉 OK");
+};
+
+commander
+    .command("frontend")
+    .description("Frontend utils")
+    .option("-u, --update", "Update frontend files")
+    .option("-r, --remove", "Remove frontend files")
+    .action(async (cmd) => {
+        try {
+            if (cmd.update) {
+                await updateFrontend();
+            }
+            if (cmd.remove) {
+                await removeFrontend();
             }
         } catch (e) {
             console.log(e.message);

@@ -14,7 +14,7 @@ import { createWriteStream, existsSync, moveSync } from "fs-extra";
 import { lookup } from "mime-types";
 import { join } from "path";
 import { file as createTmpFile } from "tmp";
-import { ERR_ACCESS_DENIED, ERR_ALREADY_EXISTS, ERR_INVALID_REQUEST, ERR_NOT_FOUND, MANAGED_FILE_PATH } from "../../../constant";
+import { ERR_ACCESS_DENIED, ERR_ALREADY_EXISTS, ERR_INVALID_REQUEST, ERR_NOT_FOUND, STORE_PATH } from "../../../constant";
 import { IPCMessageType } from "../../../interfaces/message";
 import { File } from "../../../schemas/file";
 import { sendMessage } from "../../../utils";
@@ -26,7 +26,7 @@ const createKeccakHash = require("keccak");
 export const FileRouter = Router();
 
 FileRouter.get("/provide", isLoggedin, RESTWrap(async (req, res) => {
-    const dist = join(MANAGED_FILE_PATH, req.query.hash);
+    const dist = join(STORE_PATH, req.query.hash);
     if (existsSync(dist)) { throw new Error(ERR_ALREADY_EXISTS); }
     res.RESTEnd();
 }));
@@ -47,8 +47,8 @@ FileRouter.post("/provide", isLoggedin, RESTWrap((req, res) => {
                 stream.on("end", () => {
                     const sha3 = keccak256.digest("hex");
                     ws.end(() => {
-                        if (!existsSync(join(MANAGED_FILE_PATH, sha3))) {
-                            moveSync(path, join(MANAGED_FILE_PATH, sha3));
+                        if (!existsSync(join(STORE_PATH, sha3))) {
+                            moveSync(path, join(STORE_PATH, sha3));
                         }
                         return resolve(sha3);
                     });

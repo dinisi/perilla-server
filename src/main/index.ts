@@ -4,11 +4,14 @@ import { connectDB } from "../database";
 import { IPCMessage, IPCMessageType } from "../interfaces/message";
 import { log } from "../log";
 import { HandleFileGC } from "./filegc";
+import { HandleSendMail } from "./mail";
 
 const handleMessage = (worker: Worker, message: IPCMessage) => {
     switch (message.type) {
         case IPCMessageType.FileGCRequest:
             return HandleFileGC(message.payload);
+        case IPCMessageType.SendMailRequest:
+            return HandleSendMail(message.payload);
     }
 };
 

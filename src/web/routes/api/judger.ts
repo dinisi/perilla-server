@@ -4,7 +4,7 @@
 
 import { Router } from "express";
 import { join, resolve } from "path";
-import { ERR_INVALID_REQUEST, ERR_NOT_FOUND, MANAGED_FILE_PATH } from "../../../constant";
+import { ERR_INVALID_REQUEST, ERR_NOT_FOUND, STORE_PATH } from "../../../constant";
 import { File } from "../../../schemas/file";
 import { Solution } from "../../../schemas/solution";
 import { Task } from "../../../schemas/task";
@@ -36,6 +36,6 @@ JudgerRouter.get("/resolve", isSystemAdmin, RESTWrap(async (req, res) => {
 }));
 
 JudgerRouter.get("/download", isSystemAdmin, RESTWrap(async (req, res) => {
-    const path = resolve(join(MANAGED_FILE_PATH, req.query.hash));
+    const path = resolve(join(STORE_PATH, req.query.hash));
     res.sendFile(path);
 }));
