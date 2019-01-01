@@ -21,11 +21,11 @@ MainRouter.use((req, res: IRESTResponse, next) => {
     return next();
 });
 
-MainRouter.get("/", RESTWrap(async (req, res) => {
+MainRouter.get("/version", RESTWrap(async (req, res) => {
     const { version } = require(PACKAGE_PATH);
     res.RESTSend({ version });
 }));
 
 MainRouter.use("/api", APIRouter);
 MainRouter.use("/auth", AuthRouter);
-MainRouter.use("/frontend", FrontendRouter);
+MainRouter.use("/", FrontendRouter);
