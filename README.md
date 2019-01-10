@@ -16,3 +16,9 @@ See the project wiki for more information
 ## Demo
 
 [https://perilla.zhangzisu.cn/](https://perilla.zhangzisu.cn/)
+
+## Related projects
+
+- [Perilla Frontend](https://github.com/ZhangZisu/perilla-frontend)
+- [Perilla for VSCode](https://github.com/ZhangZisu/perilla-vscode)
+- [Perilla Judger](https://github.com/dinisi/perilla-judger)
