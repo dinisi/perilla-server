@@ -4,8 +4,9 @@ import { config } from "../../../config";
 import { ERR_ACCESS_DENIED, ERR_INVALID_REQUEST, ERR_NOT_FOUND } from "../../../constant";
 import { IPCMessageType } from "../../../interfaces/message";
 import { Entry, EntryType } from "../../../schemas/entry";
+import { EntryMap } from "../../../schemas/entrymap";
 import { sendMessage } from "../../../utils";
-import { ensure, RESTWrap } from "../util";
+import { ensure, isLoggedin, RESTWrap } from "../util";
 
 export const AuthRouter = Router();
 
@@ -25,8 +26,7 @@ if (config.mail.enable) {
     }));
 
     AuthRouter.get("/register", RESTWrap(async (req, res) => {
-        const token = req.query.token;
-        const decoded = verify(token, config.secret) as any;
+        const decoded = verify(req.query.token, config.secret) as any;
         const entry = new Entry();
         entry._id = decoded.username;
         entry.email = decoded.email;
@@ -34,6 +34,35 @@ if (config.mail.enable) {
         entry.setPassword(decoded.password);
         await entry.save();
         res.RESTSend("Registration Completed. Please login");
+    }));
+
+    AuthRouter.post("/creategroup", isLoggedin, RESTWrap(async (req, res) => {
+        const token = sign({ name: req.body.name, email: req.body.email, user: req.user }, config.secret, {expiresIn: "1h"});
+        const verifyURL = `${config.mail.baseURL}/auth/creategroup?token=${token}`;
+        sendMessage({
+            type: IPCMessageType.SendMailRequest,
+            payload: {
+                to: req.body.email,
+                subject: "Confirm group creation",
+                html: `Please open <a href="${verifyURL}">${verifyURL}</a> to confirm your group creation`,
+            },
+        });
+        res.RESTSend("Please check your inbox");
+    }));
+
+    AuthRouter.get("/creategroup", RESTWrap(async (req, res) => {
+        const decoded = verify(req.query.token, config.secret) as any;
+        const entry = new Entry();
+        entry._id = decoded.name;
+        entry.email = decoded.email;
+        entry.type = EntryType.group;
+        await entry.save();
+        const entrymap = new EntryMap();
+        entrymap.from = decoded.user;
+        entrymap.to = entry._id;
+        entrymap.admin = true;
+        await entrymap.save();
+        res.RESTSend("Completed.");
     }));
 } else {
     AuthRouter.post("/register", RESTWrap(async (req, res) => {
@@ -44,6 +73,20 @@ if (config.mail.enable) {
         entry.setPassword(req.body.password);
         await entry.save();
         res.RESTSend("Registration Completed. Please login");
+    }));
+
+    AuthRouter.post("/creategroup", isLoggedin, RESTWrap(async (req, res) => {
+        const entry = new Entry();
+        entry._id = req.body.name;
+        entry.email = req.body.email;
+        entry.type = EntryType.group;
+        await entry.save();
+        const entrymap = new EntryMap();
+        entrymap.from = req.user;
+        entrymap.to = entry._id;
+        entrymap.admin = true;
+        await entrymap.save();
+        res.RESTSend("Completed.");
     }));
 }
 
