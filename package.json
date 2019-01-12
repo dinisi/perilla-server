@@ -1,6 +1,6 @@
 {
   "name": "perilla",
-  "version": "1.8.1",
+  "version": "1.9.0",
   "description": "Light-weight Online Judge Platform",
   "main": "dist/index.js",
   "repository": "https://github.com/ZhangZisu/perilla",
