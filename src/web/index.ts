@@ -29,16 +29,18 @@ export const startWebService = async () => {
 
     app.use(MainRouter);
 
-    if (config.http.https) {
-        const privateKey = readFileSync(config.http.privatekey);
-        const certificate = readFileSync(config.http.certificate);
+    if (config.https.enable) {
+        const privateKey = readFileSync(config.https.privatekey);
+        const certificate = readFileSync(config.https.certificate);
         const credentials = { key: privateKey, cert: certificate };
 
         const server = https.createServer(credentials, app);
-        server.listen(config.http.port, config.http.hostname, () => {
+        server.listen(config.https.port, config.https.hostname, () => {
             log(`HTTPS server started`);
         });
-    } else {
+    }
+
+    if (config.http.enable) {
         const server = http.createServer(app);
         server.listen(config.http.port, config.http.hostname, () => {
             log(`HTTP server started`);

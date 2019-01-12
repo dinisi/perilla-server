@@ -7,13 +7,17 @@ export const ISystemConfig = Record({
         options: Unknown,
     })),
     http: Record({
+        enable: Boolean,
         port: Number,
         hostname: String,
-        https: Boolean,
-    }).And(Partial({
+    }),
+    https: Record({
+        enable: Boolean,
+        port: Number,
+        hostname: String,
         certificate: String,
         privatekey: String,
-    })),
+    }),
     mail: Record({
         enable: Boolean,
     }).And(Partial({

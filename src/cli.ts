@@ -80,9 +80,16 @@ const generateConfig = async () => {
             },
         },
         http: {
+            enable: true,
             port: answers.http_port,
             hostname: answers.http_hostname,
-            https: false,
+        },
+        https: {
+            enable: false,
+            port: 443,
+            hostname: "localhost",
+            certificate: "",
+            privatekey: "",
         },
         mail: {
             enable: false,
