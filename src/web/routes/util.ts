@@ -56,14 +56,14 @@ export const verifyEntryAccess = RESTWrap(async (req, res, next) => {
     }
 });
 
-export const isSystemAdmin = async (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
+export const isSystemAdmin = RESTWrap(async (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
     ensure(req.user, ERR_ACCESS_DENIED);
     const map = await SystemMap.findOne({ user: req.user });
     ensure(map, ERR_ACCESS_DENIED);
     return next();
-};
+});
 
-export const isLoggedin = async (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
+export const isLoggedin = RESTWrap(async (req: IRESTRequest, res: IRESTResponse, next: NextFunction) => {
     ensure(req.user, ERR_ACCESS_DENIED);
     return next();
-};
+});
