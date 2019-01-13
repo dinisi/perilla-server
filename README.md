@@ -11,7 +11,12 @@ Light-weight Online Judge Platform
 - Full javascript stack
 - RESTFul API Design
 
-See the project wiki for more information
+See the [project wiki](https://github.com/ZhangZisu/perilla/wiki) for more information
+
+## Goal
+Speed, performance and reliability
+
+User rights first. Simple access control. Simple and friendly.
 
 ## Demo
 
