@@ -10,6 +10,7 @@ Light-weight Online Judge Platform
 - Simple Access control
 - Full javascript stack
 - RESTFul API Design
+- Unlimited expandability
 
 See the [project wiki](https://github.com/ZhangZisu/perilla/wiki) for more information
 
