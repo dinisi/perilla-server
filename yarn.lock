@@ -183,10 +183,10 @@
     "@types/express-serve-static-core" "*"
     "@types/mime" "*"
 
-"@types/tmp@^0.0.33":
-  version "0.0.33"
-  resolved "https://registry.yarnpkg.com/@types/tmp/-/tmp-0.0.33.tgz#1073c4bc824754ae3d10cfab88ab0237ba964e4d"
-  integrity sha1-EHPEvIJHVK49EM+riKsCN7qWTk0=
+"@types/tmp@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@types/tmp/-/tmp-0.1.0.tgz#19cf73a7bcf641965485119726397a096f0049bd"
+  integrity sha512-6IwZ9HzWbCq6XoQWhxLpDjuADodH/MKXRUIDFudvgjcVdjFknvmR+DNsoUeer4XPrEnrZs04Jj+kfV9pFsrhmA==
 
 "@types/tough-cookie@*":
   version "2.3.4"
