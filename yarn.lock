@@ -140,12 +140,11 @@
   resolved "http://registry.npm.taobao.org/@types/node/download/@types/node-10.11.7.tgz#0e75ca9357d646ca754016ca1d68a127ad7e7300"
   integrity sha1-DnXKk1fWRsp1QBbKHWihJ61+cwA=
 
-"@types/nodemailer@^4.6.5":
-  version "4.6.5"
-  resolved "https://registry.yarnpkg.com/@types/nodemailer/-/nodemailer-4.6.5.tgz#8bb799202f8cfcc8200a1c1627f6a8a74fe71da6"
-  integrity sha512-cbs2HFLj33TBqzcCqTrs+6/mgTX3xl0odbApv3vTdF2+JERLxh5rDZCasXhvy+YqaiUNBr2I1RjNCdbKGs1Bnw==
+"@types/nodemailer@^6.1.0":
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/@types/nodemailer/-/nodemailer-6.1.0.tgz#3c2e3cef676ccf4149831d178f90f71b182f48c8"
+  integrity sha512-WysSJ4sGW2Aum1Cs6HFosZdlR3WUzX0XoSLsI53q77gLd4wDfE84OXffZu5/nLIjeKh4SwfTsdrKsgBL9WowMA==
   dependencies:
-    "@types/events" "*"
     "@types/node" "*"
 
 "@types/randomstring@^1.1.6":
