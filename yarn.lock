@@ -1372,10 +1372,10 @@ fresh@0.5.2:
   resolved "http://registry.npm.taobao.org/fresh/download/fresh-0.5.2.tgz#3d8cadd90d976569fa835ab1f8e4b23a105605a7"
   integrity sha1-PYyt2Q2XZWn6g1qx+OSyOhBWBac=
 
-fs-extra@^7.0.1:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-7.0.1.tgz#4f189c44aa123b895f722804f55ea23eadc348e9"
-  integrity sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw==
+fs-extra@^8.0.0:
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-8.0.1.tgz#90294081f978b1f182f347a440a209154344285b"
+  integrity sha512-W+XLrggcDzlle47X/XnS7FXrXu9sDo+Ze9zpndeBxdgv88FHLm1HtmkhEwavruS6koanBjp098rUpHs65EmG7A==
   dependencies:
     graceful-fs "^4.1.2"
     jsonfile "^4.0.0"
@@ -2941,10 +2941,10 @@ redis@^2.8.0:
     redis-commands "^1.2.0"
     redis-parser "^2.6.0"
 
-reflect-metadata@^0.1.12:
-  version "0.1.12"
-  resolved "https://registry.yarnpkg.com/reflect-metadata/-/reflect-metadata-0.1.12.tgz#311bf0c6b63cd782f228a81abe146a2bfa9c56f2"
-  integrity sha512-n+IyV+nGz3+0q3/Yf1ra12KpCyi001bi4XFxSjbiWWjfqb52iTTtpGXmCCAOWWIAn9KEuFZKGqBERHmrtScZ3A==
+reflect-metadata@^0.1.13:
+  version "0.1.13"
+  resolved "https://registry.yarnpkg.com/reflect-metadata/-/reflect-metadata-0.1.13.tgz#67ae3ca57c972a2aa1642b10fe363fe32d49dc08"
+  integrity sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==
 
 regex-not@^1.0.0, regex-not@^1.0.2:
   version "1.0.2"
@@ -3094,12 +3094,12 @@ run-async@^2.2.0:
   dependencies:
     is-promise "^2.1.0"
 
-runtypes@^3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/runtypes/-/runtypes-3.1.2.tgz#81e186500b6882e0d5badeb5c6deef72e3fcc068"
-  integrity sha512-oxAaykMNPeuxBTHFPHb4N/WiOMln/Sg73CRfEywpdO5FQyi+lVvGvehGny/QtP2hHvfm7/4E8KLcchfZBnMK6Q==
+runtypes@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/runtypes/-/runtypes-4.0.0.tgz#fd08332ea69ac70d6ea2c518f0875b0afa4a94a5"
+  integrity sha512-fMWXQ3jofaiQn5UZtHOm+BQyApa1c5m4W1r7DOfRST80sGQDN6b2XDwoQgGedE/B74W/QPSNPjVaSAkuU1ueqw==
   dependencies:
-    reflect-metadata "^0.1.12"
+    reflect-metadata "^0.1.13"
 
 rxjs@^6.1.0, rxjs@^6.3.3:
   version "6.3.3"
